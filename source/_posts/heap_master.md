@@ -1,9 +1,9 @@
 ---
-title: *CTF heap_master
+title: Star CTF heap_master
 categories:
 - StartCTF 2019
 ---
-# *CTF heap_master
+# Star CTF heap_master
 ## 前言
 
 需要做下大型比赛的题目，包括0CTF/*CTF/Balsn CTF等比赛的题，这里先从2019年的*CTF开始。这道题主要参考[xiaoxiaorenwu](https://xiaoxiaorenwu.top/2019/07/05/5%E7%A7%8D%E6%96%B9%E6%B3%95%E8%A7%A3heap_master/)的博客，堆的利用确实精彩，这是期末考试前的最后一篇博客(再不复习就要挂了)
