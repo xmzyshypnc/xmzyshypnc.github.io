@@ -191,12 +191,17 @@ links:
     P4nda: http://p4nda.top/
     Sunichi: https://sunichi.github.io/
     HWHXY: https://hwhxy.github.io/
+    Helica: https://www.cnblogs.com/helica
     E3pem: https://e3pem.github.io/
     Litch1: http://litch1.club/
     xiaoxiaorenwu: http://xiaoxiaorenwu.top/
     v1cky: https://v1ckydxp.github.io/
     swordfaith: https://swordfaith.github.io/
     harmoc: http://harmoc.com/
+    P1umer: https://p1umer.github.io/
+    blessing: https://ble55ing.github.io/
+    t3ls: https://t3ls.club/
+
 
 # Sidebar Avatar
 avatar:
@@ -514,7 +519,7 @@ valine:
   appkey: 1fjf9mQl90nKdRPfq1zhDyIE
   notify: true # mail notifier , https://github.com/xCss/Valine/wiki
   verify: true # Verification code
-  placeholder: Dubhe Pwner # comment box placeholder
+  placeholder: # comment box placeholder
   avatar: mm # gravatar style
   guest_info: nick,mail,link # custom comment header
   pageSize: 10 # pagination size
