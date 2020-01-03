@@ -1173,6 +1173,166 @@ mmio_mem @ 0xf7762000
 # happy_new_year_2020!
 ```
 
+## 数字经济线下RealWorld-Qemu-Escape
+
+### 前言
+
+俩月前的比赛，当时自闭了两天，docker逃逸在[这里](https://ama2in9.top/2019/12/12/docker_escape/),browser的题在[p1umer](https://p1umer.github.io/2019/10/14/%E6%95%B0%E5%AD%97%E7%BB%8F%E6%B5%8E%E7%BA%BF%E4%B8%8B-Realworld-Browser-writeup/)和[e3pem](https://e3pem.github.io/2019/11/20/browser/%E6%95%B0%E5%AD%97%E7%BB%8F%E6%B5%8E%E7%BA%BF%E4%B8%8B-Browser/)
+
+### 程序分析
+
+在当时我对qemu一无所知的时候看到了`-device rfid`，但是去IDA搜相关函数没搜到就放弃了，实际上二进制文件去掉了符号表，增大了分析难度，之所以要增加这个难度，就是因为这个题太简单了，直接给了个后门。
+
+下面一步步开始分析。
+
+首先没有符号表，我们搜下`rfid`的字符串,根据之前的分析可以知道入口函数`rfid_class_init`里会有字符串`rfid_class_init`，所以根据引用可以找到`rfid_class_init`，里面那一堆是各种`id`，这个不必要再做区分，等会qemu里直接看设备基本就能对应上(或者找一个有符号表的qemu题按照偏移对照一下)
+
+![rfid](./5.png)
+
+```c
+__int64 __fastcall rfid_class_init(__int64 a1)
+{
+  __int64 result; // rax
+
+  result = sub_70031D(a1, "pci-device", "/home/wang/qemu/hw/misc/myrfid.c", 0x171LL, "rfid_class_init");
+  *(_QWORD *)(result + 176) = pci_rfid_realize;
+  *(_QWORD *)(result + 184) = 0LL;
+  *(_WORD *)(result + 208) = 0x420;
+  *(_WORD *)(result + 210) = 0x1337;
+  *(_BYTE *)(result + 212) = 0x69;
+  *(_WORD *)(result + 214) = 0xFF;
+  return result;
+}
+```
+
+在class_init里，一定要给个`realize`函数，所以这里唯一一个函数指针可以推断出是`pci_rfid_realize`
+
+```c
+unsigned __int64 __fastcall pci_rfid_realize(__int64 pdev, __int64 errp)
+{
+  unsigned __int64 v3; // [rsp+38h] [rbp-8h]
+
+  v3 = __readfsqword(0x28u);
+  sub_570742(*(_QWORD *)(pdev + 120), 1LL);
+  if ( !(unsigned int)sub_5C950D(pdev, 0LL, 1LL, 1LL, 0LL, errp) )
+  {
+    sub_570635(pdev + 2688, 1LL, sub_570A2E, pdev);
+    sub_843CE1(pdev + 2520);
+    sub_843FBD(pdev + 2576);
+    sub_8449B4(pdev + 2512, "rfid", what, pdev, 0LL);
+    sub_31B892(pdev + 2272, pdev, rfid_mmio_ops, pdev, "rfid-mmio", &off_1000000);
+    sub_5C1EF2((_QWORD *)pdev, 0, 0, pdev + 2272);
+  }
+  return __readfsqword(0x28u) ^ v3;
+}
+```
+
+这时候再找个以前做过的qemu题，看看里面函数的参数，可以发现`sub_31B892`这个函数有6个参数且有字符串`rfid-mmio`，这就很显然这个函数是`memory_region_init_io`，而里面的第三个参数就是`rfid_mmio_ops`了。点进去看下，第一个函数指针是`rfid_mmio_read`，第二个是`rfid_mmio_write`。如此一来就找到了关键的`read/write`函数。
+
+```c
+.data.rel.ro:0000000000FE9720 rfid_mmio_ops   dq offset rfid_mmio_read
+.data.rel.ro:0000000000FE9720                                         ; DATA XREF: pci_rfid_realize+111↑o
+.data.rel.ro:0000000000FE9728                 dq offset rfid_mmio_write
+```
+
+先看`rfid_mmio_read`，第二个参数为我们输入的地址，判断`((addr >> 20) & 0xF) != 15`，后面比较两个字符串，后者为`wwssadadBABA`，前者根据引用发现赋值来自`rfid_mmio_write`，比较成功之后执行`command`，看引用也来自`rfid_mmio_write`，下面分析write函数。
+
+```c
+signed __int64 __fastcall rfid_mmio_read(__int64 a1, unsigned __int64 addr)
+{
+  size_t v2; // rax
+
+  if ( ((addr >> 20) & 0xF) != 15 )
+  {
+    v2 = strlen(off_10CC100);
+    if ( !memcmp(input, off_10CC100, v2) )
+      system(command);
+  }
+  return 270438LL;
+}
+```
+
+`rfid_mmio_write`函数的逻辑实际上就是个小菜单，`(addr >> 20) & 0xF`作为`result`。  
+如果`result`为`[0,5]`，就给`input[idx]`赋不同的固定值，`idx`为`(addr >> 16) & 0xF`;如果`result`为`6`，就往`command`里拷贝数据，`src`为`&n[4]`，而在程序开始我们`*(_QWORD *)&n[4] = value;`将value赋值给了它，因此这里的`memcpy`实际上等同于`command[(unsigned __int16)arg11] = value`。
+
+```c
+_BYTE *__fastcall rfid_mmio_write(__int64 a1, unsigned __int64 addr, __int64 value, unsigned int size)
+{
+  _BYTE *result; // rax
+  char n[12]; // [rsp+4h] [rbp-3Ch]
+  unsigned __int64 arg11; // [rsp+10h] [rbp-30h]
+  __int64 v7; // [rsp+18h] [rbp-28h]
+  int v8; // [rsp+2Ch] [rbp-14h]
+  int idx; // [rsp+30h] [rbp-10h]
+  int v10; // [rsp+34h] [rbp-Ch]
+  __int64 v11; // [rsp+38h] [rbp-8h]
+
+  v7 = a1;
+  arg11 = addr;
+  *(_QWORD *)&n[4] = value;
+  v11 = a1;
+  v8 = (addr >> 20) & 0xF;
+  idx = (addr >> 16) & 0xF;
+  result = (_BYTE *)((addr >> 20) & 0xF);
+  switch ( (unsigned __int64)result )
+  {
+    case 0uLL:
+      if ( idx >= 0 && idx <= 15 )
+      {
+        result = input;
+        input[idx] = 'w';
+      }
+      break;
+    case 1uLL:
+      if ( idx >= 0 && idx <= 15 )
+      {
+        result = input;
+        input[idx] = 's';
+      }
+      break;
+    case 2uLL:
+      if ( idx >= 0 && idx <= 15 )
+      {
+        result = input;
+        input[idx] = 'a';
+      }
+      break;
+    case 3uLL:
+      if ( idx >= 0 && idx <= 15 )
+      {
+        result = input;
+        input[idx] = 'd';
+      }
+      break;
+    case 4uLL:
+      if ( idx >= 0 && idx <= 15 )
+      {
+        result = input;
+        input[idx] = 'A';
+      }
+      break;
+    case 5uLL:
+      if ( idx >= 0 && idx <= 15 )
+      {
+        result = input;
+        input[idx] = 'B';
+      }
+      break;
+    case 6uLL:
+      v10 = (unsigned __int16)arg11;
+      result = memcpy(&command[(unsigned __int16)arg11], &n[4], size);
+      break;
+    default:
+      return result;
+  }
+  return result;
+}
+```
+
+综上所述，我们那两轮`rfid_mmio_write`设置`input`为`wwssadadBABA`，设置`command`为`gnome-calculator`，最后调用`rfid_mmio_read`触发`system("gnome-calculator")`，弹出计算器
+
+![res](./6.png)
+
 ## 小结
 
-这两道题应该是逃逸类题目里最简单的类型，像是glibc pwn的数组越界，只要理解利用的原理就不难做，希望新的一年自己能学更多东西，努力追赶少年时的梦想。
+这三道题应该是逃逸类题目里最简单的类型，像是glibc pwn的数组越界，只要理解利用的原理就不难做，希望新的一年自己能学更多东西，努力追赶少年时的梦想。

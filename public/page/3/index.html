@@ -304,7 +304,7 @@
   
   
   <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2019/12/12/KCTFQ3/">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2019/12/12/N1CTF2019/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="name" content="ama2in9">
@@ -323,8 +323,8 @@
         
           <h1 class="post-title" itemprop="name headline">
                 
-                <a class="post-title-link" href="/2019/12/12/KCTFQ3/" itemprop="url">
-                  KCTF 2019 Q3
+                <a class="post-title-link" href="/2019/12/12/N1CTF2019/" itemprop="url">
+                  N1CTF2019 部分pwn题解
                 </a>
               
             
@@ -368,7 +368,7 @@
                 <span class="post-meta-item-text">In</span>
               
               
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/KCTF2019/" itemprop="url" rel="index"><span itemprop="name">KCTF2019</span></a></span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/N1CTF2019/" itemprop="url" rel="index"><span itemprop="name">N1CTF2019</span></a></span>
 
                 
                 
@@ -383,9 +383,9 @@
                 <span class="post-meta-item-icon">
                   <i class="fa fa-comment-o"></i>
                 </span>
-                <a href="/2019/12/12/KCTFQ3/#comments" itemprop="discussionUrl">
+                <a href="/2019/12/12/N1CTF2019/#comments" itemprop="discussionUrl">
                 
-                  <span class="post-comments-count disqus-comment-count" data-disqus-identifier="2019/12/12/KCTFQ3/" itemprop="commentCount"></span>
+                  <span class="post-comments-count disqus-comment-count" data-disqus-identifier="2019/12/12/N1CTF2019/" itemprop="commentCount"></span>
                 </a>
               </span>
             
@@ -393,7 +393,7 @@
 
           
           
-             <span id="/2019/12/12/KCTFQ3/" class="leancloud_visitors" data-flag-title="KCTF 2019 Q3">
+             <span id="/2019/12/12/N1CTF2019/" class="leancloud_visitors" data-flag-title="N1CTF2019 部分pwn题解">
                <span class="post-meta-divider">|</span>
                <span class="post-meta-item-icon">
                  <i class="fa fa-eye"></i>
@@ -426,12 +426,378 @@
       
         
           
-          KCTF2019 Q3前言看雪的比赛，第三赛季，后面俩pwn好像是kernel的，打扰了，做了第一个pwn就忙项目去了，第二个等今天放wp之后看着大佬的学了一下
-pwn1漏洞利用程序有off-by-one，libc是2.23，出题人自己写了个malloc_hook，每次malloc的时候都会重写ma
+          n1ctf2019部分pwn题解warmup漏洞利用程序free的时候会把chunk_addr放到bss里，free(ptr)完毕清空list但是不清空ptr，因此会有double free，但只是针对当前块。edit是从chk_lis取地址进ptr，因此没有UAF。先double free，部分写
           ...
           <!--noindex-->
           <div class="post-button text-center">
-            <a class="btn" href="/2019/12/12/KCTFQ3/#more" rel="contents">
+            <a class="btn" href="/2019/12/12/N1CTF2019/#more" rel="contents">
+              Read more &raquo;
+            </a>
+          </div>
+          <!--/noindex-->
+        
+      
+    </div>
+
+    
+
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2019/12/12/OGEEK/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="ama2in9">
+      <meta itemprop="description" content="Seeing how far I have been.">
+      <meta itemprop="image" content="/images/head.png">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Ama2in9">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2019/12/12/OGEEK/" itemprop="url">
+                  OGEEK CTF
+                </a>
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+
+            
+            
+            
+
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+
+              
+                
+              
+
+              <time title="Created: 2019-12-12 11:48:23" itemprop="dateCreated datePublished" datetime="2019-12-12T11:48:23+08:00">2019-12-12</time>
+            
+
+            
+          </span>
+
+          
+            <span class="post-category">
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">In</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/OGEEK-CTF/" itemprop="url" rel="index"><span itemprop="name">OGEEK CTF</span></a></span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2019/12/12/OGEEK/#comments" itemprop="discussionUrl">
+                
+                  <span class="post-comments-count disqus-comment-count" data-disqus-identifier="2019/12/12/OGEEK/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+             <span id="/2019/12/12/OGEEK/" class="leancloud_visitors" data-flag-title="OGEEK CTF">
+               <span class="post-meta-divider">|</span>
+               <span class="post-meta-item-icon">
+                 <i class="fa fa-eye"></i>
+               </span>
+               
+                 <span class="post-meta-item-text">Views: </span>
+               
+                 <span class="leancloud-visitors-count"></span>
+             </span>
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+          OGEEK CTF前言前几天的OGEEK CTF，中间有事就没打了，hub是常规题但是由于自己理解不到位没做出来，0 day manager很像之前TSCTF打AWD的那种逻辑很复杂的题目，也是没找到漏洞最后看17学长wp才知道的。。读代码真的是又慢又没耐心又不仔细的我
+babyropexp.py1
+          ...
+          <!--noindex-->
+          <div class="post-button text-center">
+            <a class="btn" href="/2019/12/12/OGEEK/#more" rel="contents">
+              Read more &raquo;
+            </a>
+          </div>
+          <!--/noindex-->
+        
+      
+    </div>
+
+    
+
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2019/12/12/SUCTF2019/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="ama2in9">
+      <meta itemprop="description" content="Seeing how far I have been.">
+      <meta itemprop="image" content="/images/head.png">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Ama2in9">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2019/12/12/SUCTF2019/" itemprop="url">
+                  SUCTF 2019
+                </a>
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+
+            
+            
+            
+
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+
+              
+                
+              
+
+              <time title="Created: 2019-12-12 11:48:23" itemprop="dateCreated datePublished" datetime="2019-12-12T11:48:23+08:00">2019-12-12</time>
+            
+
+            
+          </span>
+
+          
+            <span class="post-category">
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">In</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/SUCTF2019/" itemprop="url" rel="index"><span itemprop="name">SUCTF2019</span></a></span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2019/12/12/SUCTF2019/#comments" itemprop="discussionUrl">
+                
+                  <span class="post-comments-count disqus-comment-count" data-disqus-identifier="2019/12/12/SUCTF2019/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+             <span id="/2019/12/12/SUCTF2019/" class="leancloud_visitors" data-flag-title="SUCTF 2019">
+               <span class="post-meta-divider">|</span>
+               <span class="post-meta-item-icon">
+                 <i class="fa fa-eye"></i>
+               </span>
+               
+                 <span class="post-meta-item-text">Views: </span>
+               
+                 <span class="leancloud-visitors-count"></span>
+             </span>
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+          SUCTF 2019 PWN writeup前言前几天SuCT的复盘
+BabyStack程序逻辑main函数给出程序加载地址和栈地址，输入一个栈地址(emm自己试了很久)可以触发异常进入magic函数
+1234567891011121314151617181920212223242526272829
+          ...
+          <!--noindex-->
+          <div class="post-button text-center">
+            <a class="btn" href="/2019/12/12/SUCTF2019/#more" rel="contents">
               Read more &raquo;
             </a>
           </div>
@@ -856,7 +1222,7 @@ IDA反编译之后F5一键转成C代码，根据命名找到secretFunc，发现�
   
   
   <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2019/12/12/OGEEK/">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2019/12/12/babystack/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="name" content="ama2in9">
@@ -875,8 +1241,8 @@ IDA反编译之后F5一键转成C代码，根据命名找到secretFunc，发现�
         
           <h1 class="post-title" itemprop="name headline">
                 
-                <a class="post-title-link" href="/2019/12/12/OGEEK/" itemprop="url">
-                  OGEEK CTF
+                <a class="post-title-link" href="/2019/12/12/babystack/" itemprop="url">
+                  pwnable.tw->babystack
                 </a>
               
             
@@ -920,7 +1286,7 @@ IDA反编译之后F5一键转成C代码，根据命名找到secretFunc，发现�
                 <span class="post-meta-item-text">In</span>
               
               
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/OGEEK-CTF/" itemprop="url" rel="index"><span itemprop="name">OGEEK CTF</span></a></span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/pwnable-tw/" itemprop="url" rel="index"><span itemprop="name">pwnable.tw</span></a></span>
 
                 
                 
@@ -935,9 +1301,9 @@ IDA反编译之后F5一键转成C代码，根据命名找到secretFunc，发现�
                 <span class="post-meta-item-icon">
                   <i class="fa fa-comment-o"></i>
                 </span>
-                <a href="/2019/12/12/OGEEK/#comments" itemprop="discussionUrl">
+                <a href="/2019/12/12/babystack/#comments" itemprop="discussionUrl">
                 
-                  <span class="post-comments-count disqus-comment-count" data-disqus-identifier="2019/12/12/OGEEK/" itemprop="commentCount"></span>
+                  <span class="post-comments-count disqus-comment-count" data-disqus-identifier="2019/12/12/babystack/" itemprop="commentCount"></span>
                 </a>
               </span>
             
@@ -945,7 +1311,7 @@ IDA反编译之后F5一键转成C代码，根据命名找到secretFunc，发现�
 
           
           
-             <span id="/2019/12/12/OGEEK/" class="leancloud_visitors" data-flag-title="OGEEK CTF">
+             <span id="/2019/12/12/babystack/" class="leancloud_visitors" data-flag-title="pwnable.tw->babystack">
                <span class="post-meta-divider">|</span>
                <span class="post-meta-item-icon">
                  <i class="fa fa-eye"></i>
@@ -978,12 +1344,12 @@ IDA反编译之后F5一键转成C代码，根据命名找到secretFunc，发现�
       
         
           
-          OGEEK CTF前言前几天的OGEEK CTF，中间有事就没打了，hub是常规题但是由于自己理解不到位没做出来，0 day manager很像之前TSCTF打AWD的那种逻辑很复杂的题目，也是没找到漏洞最后看17学长wp才知道的。。读代码真的是又慢又没耐心又不仔细的我
-babyropexp.py1
+          pwnable.tw-&gt;babystack前言重新开始刷pwnable.tw，发现一年下来自己好像并没有什么长进。。做这里的题依然是举步维艰，记录一下这道折腾了三天的题QAQ。
+程序逻辑程序只有Login和Magic两个功能，只有Login过了check才能将0x202014置为1，进而可以使
           ...
           <!--noindex-->
           <div class="post-button text-center">
-            <a class="btn" href="/2019/12/12/OGEEK/#more" rel="contents">
+            <a class="btn" href="/2019/12/12/babystack/#more" rel="contents">
               Read more &raquo;
             </a>
           </div>
@@ -1224,7 +1590,7 @@ babyropexp.py1
   
   
   <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2019/12/12/SUCTF2019/">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2019/12/12/believeMe/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="name" content="ama2in9">
@@ -1243,8 +1609,8 @@ babyropexp.py1
         
           <h1 class="post-title" itemprop="name headline">
                 
-                <a class="post-title-link" href="/2019/12/12/SUCTF2019/" itemprop="url">
-                  SUCTF 2019
+                <a class="post-title-link" href="/2019/12/12/believeMe/" itemprop="url">
+                  believeMe
                 </a>
               
             
@@ -1288,7 +1654,7 @@ babyropexp.py1
                 <span class="post-meta-item-text">In</span>
               
               
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/SUCTF2019/" itemprop="url" rel="index"><span itemprop="name">SUCTF2019</span></a></span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/noxCTF/" itemprop="url" rel="index"><span itemprop="name">noxCTF</span></a></span>
 
                 
                 
@@ -1303,9 +1669,9 @@ babyropexp.py1
                 <span class="post-meta-item-icon">
                   <i class="fa fa-comment-o"></i>
                 </span>
-                <a href="/2019/12/12/SUCTF2019/#comments" itemprop="discussionUrl">
+                <a href="/2019/12/12/believeMe/#comments" itemprop="discussionUrl">
                 
-                  <span class="post-comments-count disqus-comment-count" data-disqus-identifier="2019/12/12/SUCTF2019/" itemprop="commentCount"></span>
+                  <span class="post-comments-count disqus-comment-count" data-disqus-identifier="2019/12/12/believeMe/" itemprop="commentCount"></span>
                 </a>
               </span>
             
@@ -1313,7 +1679,7 @@ babyropexp.py1
 
           
           
-             <span id="/2019/12/12/SUCTF2019/" class="leancloud_visitors" data-flag-title="SUCTF 2019">
+             <span id="/2019/12/12/believeMe/" class="leancloud_visitors" data-flag-title="believeMe">
                <span class="post-meta-divider">|</span>
                <span class="post-meta-item-icon">
                  <i class="fa fa-eye"></i>
@@ -1346,13 +1712,13 @@ babyropexp.py1
       
         
           
-          SUCTF 2019 PWN writeup前言前几天SuCT的复盘
-BabyStack程序逻辑main函数给出程序加载地址和栈地址，输入一个栈地址(emm自己试了很久)可以触发异常进入magic函数
-1234567891011121314151617181920212223242526272829
+          #noxCTF–believeMe
+##漏洞分析
+文件放在IDA里一键F5，找到main函数，提示输出之后一个fgets最多可以输入39个字节，在输入字符串的末尾补\x0，用户的输入直接作为printf的参数，这里是格式化字符串漏洞，可以造成地址任意写。后面的canary保护导致不能随便溢出，在这里
           ...
           <!--noindex-->
           <div class="post-button text-center">
-            <a class="btn" href="/2019/12/12/SUCTF2019/#more" rel="contents">
+            <a class="btn" href="/2019/12/12/believeMe/#more" rel="contents">
               Read more &raquo;
             </a>
           </div>
@@ -1408,7 +1774,7 @@ BabyStack程序逻辑main函数给出程序加载地址和栈地址，输入一�
   
   
   <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2019/12/12/babystack/">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2019/12/12/bamboobox/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="name" content="ama2in9">
@@ -1427,8 +1793,8 @@ BabyStack程序逻辑main函数给出程序加载地址和栈地址，输入一�
         
           <h1 class="post-title" itemprop="name headline">
                 
-                <a class="post-title-link" href="/2019/12/12/babystack/" itemprop="url">
-                  pwnable.tw->babystack
+                <a class="post-title-link" href="/2019/12/12/bamboobox/" itemprop="url">
+                  bamboobox
                 </a>
               
             
@@ -1472,7 +1838,7 @@ BabyStack程序逻辑main函数给出程序加载地址和栈地址，输入一�
                 <span class="post-meta-item-text">In</span>
               
               
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/pwnable-tw/" itemprop="url" rel="index"><span itemprop="name">pwnable.tw</span></a></span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/Hitcon-Training/" itemprop="url" rel="index"><span itemprop="name">Hitcon-Training</span></a></span>
 
                 
                 
@@ -1487,9 +1853,9 @@ BabyStack程序逻辑main函数给出程序加载地址和栈地址，输入一�
                 <span class="post-meta-item-icon">
                   <i class="fa fa-comment-o"></i>
                 </span>
-                <a href="/2019/12/12/babystack/#comments" itemprop="discussionUrl">
+                <a href="/2019/12/12/bamboobox/#comments" itemprop="discussionUrl">
                 
-                  <span class="post-comments-count disqus-comment-count" data-disqus-identifier="2019/12/12/babystack/" itemprop="commentCount"></span>
+                  <span class="post-comments-count disqus-comment-count" data-disqus-identifier="2019/12/12/bamboobox/" itemprop="commentCount"></span>
                 </a>
               </span>
             
@@ -1497,7 +1863,7 @@ BabyStack程序逻辑main函数给出程序加载地址和栈地址，输入一�
 
           
           
-             <span id="/2019/12/12/babystack/" class="leancloud_visitors" data-flag-title="pwnable.tw->babystack">
+             <span id="/2019/12/12/bamboobox/" class="leancloud_visitors" data-flag-title="bamboobox">
                <span class="post-meta-divider">|</span>
                <span class="post-meta-item-icon">
                  <i class="fa fa-eye"></i>
@@ -1530,12 +1896,12 @@ BabyStack程序逻辑main函数给出程序加载地址和栈地址，输入一�
       
         
           
-          pwnable.tw-&gt;babystack前言重新开始刷pwnable.tw，发现一年下来自己好像并没有什么长进。。做这里的题依然是举步维艰，记录一下这道折腾了三天的题QAQ。
-程序逻辑程序只有Login和Magic两个功能，只有Login过了check才能将0x202014置为1，进而可以使
+          bamboobox前言渗透测试真是恼人，WEB好难，被360吊打，还是回来继续学PWN，争取五一刷完Hitcon-Training，这个题不是很难，但是有两种方法可以解，自己做的时候只想到一种，这里记录一下，因为第二种简单太多了。
+程序逻辑程序主要有5个功能，Show、Add、Change、Remo
           ...
           <!--noindex-->
           <div class="post-button text-center">
-            <a class="btn" href="/2019/12/12/babystack/#more" rel="contents">
+            <a class="btn" href="/2019/12/12/bamboobox/#more" rel="contents">
               Read more &raquo;
             </a>
           </div>
@@ -1722,373 +2088,6 @@ BabyStack程序逻辑main函数给出程序加载地址和栈地址，输入一�
           <!--noindex-->
           <div class="post-button text-center">
             <a class="btn" href="/2019/12/12/babytcache/#more" rel="contents">
-              Read more &raquo;
-            </a>
-          </div>
-          <!--/noindex-->
-        
-      
-    </div>
-
-    
-
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
-      
-
-  
-
-  
-  
-  
-
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2019/12/12/death_note/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="ama2in9">
-      <meta itemprop="description" content="Seeing how far I have been.">
-      <meta itemprop="image" content="/images/head.png">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Ama2in9">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2019/12/12/death_note/" itemprop="url">
-                  Death Note
-                </a>
-              
-            
-          </h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-
-            
-            
-            
-
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">Posted on</span>
-              
-
-              
-                
-              
-
-              <time title="Created: 2019-12-12 11:48:23" itemprop="dateCreated datePublished" datetime="2019-12-12T11:48:23+08:00">2019-12-12</time>
-            
-
-            
-          </span>
-
-          
-            <span class="post-category">
-            
-              <span class="post-meta-divider">|</span>
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">In</span>
-              
-              
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/pwnable-tw/" itemprop="url" rel="index"><span itemprop="name">pwnable.tw</span></a></span>
-
-                
-                
-              
-            </span>
-          
-
-          
-            
-              <span class="post-comments-count">
-                <span class="post-meta-divider">|</span>
-                <span class="post-meta-item-icon">
-                  <i class="fa fa-comment-o"></i>
-                </span>
-                <a href="/2019/12/12/death_note/#comments" itemprop="discussionUrl">
-                
-                  <span class="post-comments-count disqus-comment-count" data-disqus-identifier="2019/12/12/death_note/" itemprop="commentCount"></span>
-                </a>
-              </span>
-            
-          
-
-          
-          
-             <span id="/2019/12/12/death_note/" class="leancloud_visitors" data-flag-title="Death Note">
-               <span class="post-meta-divider">|</span>
-               <span class="post-meta-item-icon">
-                 <i class="fa fa-eye"></i>
-               </span>
-               
-                 <span class="post-meta-item-text">Views: </span>
-               
-                 <span class="leancloud-visitors-count"></span>
-             </span>
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-          pwnable.tw-&gt;Death Note前言又是花了两天+做出来的题，所幸这次没看别人的writeup，师姐提示了一下，昨晚肝出来的时候有种打了两天加时最后绝杀的感觉。这基本是纯考alphanumeric shellcode的题，动手看和写很重要
-程序逻辑程序有三个功能，Add、Show和
-          ...
-          <!--noindex-->
-          <div class="post-button text-center">
-            <a class="btn" href="/2019/12/12/death_note/#more" rel="contents">
-              Read more &raquo;
-            </a>
-          </div>
-          <!--/noindex-->
-        
-      
-    </div>
-
-    
-
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
-      
-
-  
-
-  
-  
-  
-
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2019/12/12/believeMe/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="ama2in9">
-      <meta itemprop="description" content="Seeing how far I have been.">
-      <meta itemprop="image" content="/images/head.png">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Ama2in9">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2019/12/12/believeMe/" itemprop="url">
-                  believeMe
-                </a>
-              
-            
-          </h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-
-            
-            
-            
-
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">Posted on</span>
-              
-
-              
-                
-              
-
-              <time title="Created: 2019-12-12 11:48:23" itemprop="dateCreated datePublished" datetime="2019-12-12T11:48:23+08:00">2019-12-12</time>
-            
-
-            
-          </span>
-
-          
-            <span class="post-category">
-            
-              <span class="post-meta-divider">|</span>
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">In</span>
-              
-              
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/noxCTF/" itemprop="url" rel="index"><span itemprop="name">noxCTF</span></a></span>
-
-                
-                
-              
-            </span>
-          
-
-          
-            
-              <span class="post-comments-count">
-                <span class="post-meta-divider">|</span>
-                <span class="post-meta-item-icon">
-                  <i class="fa fa-comment-o"></i>
-                </span>
-                <a href="/2019/12/12/believeMe/#comments" itemprop="discussionUrl">
-                
-                  <span class="post-comments-count disqus-comment-count" data-disqus-identifier="2019/12/12/believeMe/" itemprop="commentCount"></span>
-                </a>
-              </span>
-            
-          
-
-          
-          
-             <span id="/2019/12/12/believeMe/" class="leancloud_visitors" data-flag-title="believeMe">
-               <span class="post-meta-divider">|</span>
-               <span class="post-meta-item-icon">
-                 <i class="fa fa-eye"></i>
-               </span>
-               
-                 <span class="post-meta-item-text">Views: </span>
-               
-                 <span class="leancloud-visitors-count"></span>
-             </span>
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-          #noxCTF–believeMe
-##漏洞分析
-文件放在IDA里一键F5，找到main函数，提示输出之后一个fgets最多可以输入39个字节，在输入字符串的末尾补\x0，用户的输入直接作为printf的参数，这里是格式化字符串漏洞，可以造成地址任意写。后面的canary保护导致不能随便溢出，在这里
-          ...
-          <!--noindex-->
-          <div class="post-button text-center">
-            <a class="btn" href="/2019/12/12/believeMe/#more" rel="contents">
               Read more &raquo;
             </a>
           </div>
