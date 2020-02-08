@@ -366,11 +366,11 @@ while True:
 
 ### ciscn_2019_sw_5/ciscn_2019_nw_2
 
-### 程序逻辑
+#### 程序逻辑
 
 libc-2.27，固定分配`0x70`(chunk大小为`0x80`)只能free`3`次，但malloc之后会输出一次数据，输入技巧题。
 
-### 漏洞利用
+#### 漏洞利用
 
 先double free，分配到`tcache_struct`里`0x80`对应的位置(需要爆破`1/16`)，构造一个tcache chain出来，比如我这里是往里写一个`*2b0`而`*2b0`后面跟着`*2e0`，进而得到一个`*2b0->*2e0`的链，之后分配到`*2b0`修改`*2e0`的size为`0x421`(注意后面要有一个fake_chunk的prev_in_use=1)，Free掉这个块即可得到Ub(注意此时因为fd=`main_arena+96`又出了新的链`*2e0->main_arena+96`)，再Malloc可以根据末位一定是`\xa0`分配到`*2d0`泄露libc，再分配到`main_arena+96`修改`top_chunk`到`__malloc_hook`前面，最后把刚才那个`0x420`大小的ub分配完再走`top_chunk`，最终分配到`__malloc_hook`改为`gadgets[1]`即可。
 
@@ -378,7 +378,7 @@ libc-2.27，固定分配`0x70`(chunk大小为`0x80`)只能free`3`次，但malloc
 
 远程数据发送过快可能会粘包，所以这里加了`raw_input()`多试试就好。
 
-### exp.py
+#### exp.py
 
 ```py
 #coding=utf-8
