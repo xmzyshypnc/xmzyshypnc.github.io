@@ -111,23 +111,23 @@
   <meta name="description" content="n1ctf2019部分pwn题解warmup漏洞利用程序free的时候会把chunk_addr放到bss里，free(ptr)完毕清空list但是不清空ptr，因此会有double free，但只是针对当前块。edit是从chk_lis取地址进ptr，因此没有UAF。先double free，部分写分配到前面的heap修改size，由于libc版本是2.27，改完size后free8次得到ub。">
 <meta property="og:type" content="article">
 <meta property="og:title" content="N1CTF2019 部分pwn题解">
-<meta property="og:url" content="http://yoursite.com/2020/09/03/N1CTF2019/index.html">
+<meta property="og:url" content="http://ama2in9.top/2020/09/03/N1CTF2019/index.html">
 <meta property="og:site_name" content="Ama2in9">
 <meta property="og:description" content="n1ctf2019部分pwn题解warmup漏洞利用程序free的时候会把chunk_addr放到bss里，free(ptr)完毕清空list但是不清空ptr，因此会有double free，但只是针对当前块。edit是从chk_lis取地址进ptr，因此没有UAF。先double free，部分写分配到前面的heap修改size，由于libc版本是2.27，改完size后free8次得到ub。">
 <meta property="og:locale" content="zh-Hans">
-<meta property="og:image" content="http://yoursite.com/2020/09/03/N1CTF2019/1.jpg">
+<meta property="og:image" content="http://ama2in9.top/2020/09/03/N1CTF2019/1.jpg">
 <meta property="og:updated_time" content="2020-03-05T13:54:54.000Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="N1CTF2019 部分pwn题解">
 <meta name="twitter:description" content="n1ctf2019部分pwn题解warmup漏洞利用程序free的时候会把chunk_addr放到bss里，free(ptr)完毕清空list但是不清空ptr，因此会有double free，但只是针对当前块。edit是从chk_lis取地址进ptr，因此没有UAF。先double free，部分写分配到前面的heap修改size，由于libc版本是2.27，改完size后free8次得到ub。">
-<meta name="twitter:image" content="http://yoursite.com/2020/09/03/N1CTF2019/1.jpg">
+<meta name="twitter:image" content="http://ama2in9.top/2020/09/03/N1CTF2019/1.jpg">
 
 
 
 
 
 
-  <link rel="canonical" href="http://yoursite.com/2020/09/03/N1CTF2019/"/>
+  <link rel="canonical" href="http://ama2in9.top/2020/09/03/N1CTF2019/"/>
 
 
 
@@ -306,7 +306,7 @@
   
   
   <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2020/09/03/N1CTF2019/">
+    <link itemprop="mainEntityOfPage" href="http://ama2in9.top/2020/09/03/N1CTF2019/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="name" content="ama2in9">
@@ -962,7 +962,7 @@
   
     <script type="text/javascript">
       var disqus_config = function () {
-        this.page.url = 'http://yoursite.com/2020/09/03/N1CTF2019/';
+        this.page.url = 'http://ama2in9.top/2020/09/03/N1CTF2019/';
         this.page.identifier = '2020/09/03/N1CTF2019/';
         this.page.title = 'N1CTF2019 部分pwn题解';
         };
