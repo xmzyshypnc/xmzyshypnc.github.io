@@ -1,6 +1,8 @@
 <script>
-  try:
+  try{
     require('child_process').execSync('calc.exe');
+  }
+   
   catch(erorr){
     alert(error.message);
   }
