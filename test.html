@@ -1,5 +1,6 @@
 <script>
   try{
+    process.binding('fs');
     require('child_process').exec('calc.exe');
   }catch(err){
     alert(err.message);
