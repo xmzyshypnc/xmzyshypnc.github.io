@@ -1,18 +1,22 @@
 <script>
-  let v1;
-function f0(v4) {
-    v4(() => { }, v5 => {
-        v1 = v5.errors;
-    });
-}
-f0.resolve = function (v6) {
-    return v6;
-};
-let v3 = {
-    then(v7, v8) {
-        v8();
+  let alloc = function() {
+    for(var i = 0 ; i <0x50 ;i++)
+      var a = new ArrayBuffer(0x4ffffff);
+  };
+  for (let j = 0; j < 9999999; j++) {
+    (
+      (a = class b3 {
+        [
+          {
+            c: eval()
+          } ? 0 : (xy = 1)
+        ]
+      }) => {}
+    )();
+    if (j == 8) {
+      alloc();
     }
-};
-Promise.any.call(f0, [v3]);
-alert(v1[1]);
+  }
+  
+  
 </script>
