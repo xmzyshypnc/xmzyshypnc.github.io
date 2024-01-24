@@ -1,0 +1,79 @@
+<body>
+<script>
+/*
+ * $ cat min.wat
+ * (module
+ *   (import "mod" "thrower" (func $thrower))
+ *   (import "mod" "mem" (memory 1))
+ *   (func (export "bad") (result i32)
+ *     i32.const 0
+ *     i32.const 43
+ *     i32.store
+ *     try
+ *       call $thrower
+ *     catch_all
+ *       i32.const 0
+ *       i32.const 42
+ *       i32.store
+ *     end
+ *     i32.const 0
+ *     i32.load
+ *   )
+ * )
+ * $ wabt-1.0.30/bin/wat2wasm --enable-exceptions min.wat
+ */
+wire = new Uint8Array([
+  0, 97, 115, 109, 1, 0, 0, 0, 1, 8, 2, 96, 0, 0, 96, 0, 1, 127, 2, 26, 2, 3, 109,
+  111, 100, 7, 116, 104, 114, 111, 119, 101, 114, 0, 0, 3, 109, 111, 100, 3, 109,
+  101, 109, 2, 0, 1, 3, 2, 1, 1, 7, 7, 1, 3, 98, 97, 100, 0, 1, 10, 29, 1, 27, 0,
+  65, 0, 65, 43, 54, 2, 0, 6, 64, 16, 0, 25, 65, 0, 65, 42, 54, 2, 0, 11, 65, 0,
+  40, 2, 0, 11
+]);
+
+function mkinst(thrower) {
+  mem = new WebAssembly.Memory({initial: 1, maximum: 65536})
+  inst = new WebAssembly.Instance(mod, {mod: {thrower: thrower, mem: mem}});
+}
+
+function mkmod() {
+  mod = new WebAssembly.Module(wire);
+  mkinst(function() {});
+  for (let i = 0; i < 100000; i++)
+    inst.exports.bad();
+}
+
+sprays = []
+function spray() {
+  sprays.push(new WebAssembly.Memory({initial: 1, maximum: 65536}));
+}
+
+function thrower() {
+  let sz = 65535;
+  while (1) {
+    try {
+      mem.grow(sz);
+      break;
+    } catch {
+      sz >>= 1;
+    }
+  }
+  throw 'bleh';
+}
+
+function run() {
+  mkmod();
+  while (true) {
+    mkinst(thrower);
+    if (inst.exports.bad() != 42) {
+      let d = document;
+      d.body.appendChild(d.createTextNode('bad ret'));
+      break;
+    }
+    spray();
+  }
+}
+
+run();
+
+</script>
+</body>
