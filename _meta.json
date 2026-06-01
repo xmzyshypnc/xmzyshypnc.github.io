@@ -1,0 +1,8 @@
+{
+  "schema_version": "v1",
+  "name": "api-health-checker",
+  "display_name": "API Health Checker",
+  "description": "Quick health check for API endpoints — measures latency, checks SSL certs, and reports connectivity status. Triggers: check API health, test endpoint, is my API up, health check.",
+  "version": "1.0.0",
+  "author": "devops-tools"
+}
